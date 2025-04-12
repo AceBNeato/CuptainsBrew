@@ -1,0 +1,526 @@
+*{
+    margin: 0 ;
+}
+
+body {
+    background-color: #FFFAEE;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    padding: 10px;
+    background-color: #FFFAEE;
+    box-shadow: 0px 1px 10px #D7BFA5;
+    z-index: 10;
+
+}
+
+#logo {
+    display: flex;
+    justify-self: center;
+    width: 15vw;
+    margin-right: 5vw;
+    margin-left: 5vw;
+}
+
+#nav-menu{
+    display: none;
+}
+
+
+.button-container{
+    display: flex;
+    gap: 5vw;
+    margin-left: 3vw;
+    flex-direction: row;
+    align-items: center;
+    transition: .4s;
+}
+
+
+.nav-button {
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: black;
+    text-decoration: none;
+    padding: 10px 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button.active {
+    background-color: #D7BFA5;
+    color: black;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+
+ .image-container #getstarted{
+    position: relative;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    filter: brightness(40%);
+    
+    box-shadow:  1px 1px 10px #4a3b2b;
+    }
+ 
+ img#login-overlay{
+    position: relative;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    filter: brightness(30%);
+        
+    }
+
+  .centered-home{
+    position: relative;
+    text-align: center;
+    justify-content: center;
+    bottom: 40vw;
+    color: #FFFAEE;
+    top: 35%;
+    font-size: 3vw;
+    }
+
+  .centered-home p{
+    font-size: 1vw;
+    text-align: center;
+    font-style: italic;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 400;
+    padding: .5vw;
+    padding-bottom: 2vw;
+  }
+
+
+.centered-home h1{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 400;
+    position: relative;
+    text-align: center;
+    justify-content: center;
+    
+}
+
+.glow{
+    animation: glow 10s ease-in-out infinite alternate;
+}
+
+@-webkit-keyframes glow {
+    from {
+      text-shadow: 0 0 10px #fff, 0 0 1px #fff, 0 0 10px #C0834C, 0 0 20px ;
+    }
+    
+    to {
+      text-shadow: 0 0 20px #fff, 0 0 10px #FFFAEE, 0 0 30px #FFFAEE, 0 0 30px ;
+    }
+  }
+
+  .centered-button {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    position: relative;
+    justify-content: center;
+    top: 1vw;
+    color: #ffffff;
+    background-color: #ffb74a;
+    font-size: 2vw;
+    border-radius: 1vw;
+    text-decoration: none;
+    padding: 1vw;
+
+}
+    .centered-button:hover{
+    background-color: #ffffff;
+    color: #ffb74a;
+    box-shadow: 1px 1px 10px #ffffff;
+    transition: .2s;
+    }
+
+ #gsmenu{
+    position: relative;
+    width: 100%;
+    display: flex;
+    bottom: 10vw;
+    justify-content: center;
+    color: rgb(22, 22, 22);
+    filter: brightness(40%);
+}
+
+.centered-menu{
+    position: relative;
+    bottom: 25vw;
+    text-align: center;
+    color: #FFFAEE;
+    font-size: 3vw;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+.centered-menu p{
+    font-size: 1vw;
+    text-align: center;
+    font-style: italic;
+    padding: .5vw;
+
+}
+
+
+
+
+.user-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-icons img {
+    width: 30px;
+    height: 30px;
+}
+
+
+
+.hidden {
+    display: none;
+}
+
+
+/* END NAV-HOME CSS */
+
+
+
+
+
+
+/* LOGIN PAGE */
+
+
+.login-header{
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #FFFAEE;
+    box-shadow: 0px 1px 10px #C0834C;
+    z-index: 10;
+
+}
+
+.login-container, .register-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3vw;
+    margin-bottom: 5vw;
+    background-color: #FFFAEE;
+
+
+}
+
+.login-container h2, .register-container h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif ;
+    font-size: 3vw;
+    font-weight: 400;
+    margin-bottom: 25px;
+    color: #4a3b2b;
+    text-align: center;
+}
+
+#show-password{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: block;
+    text-align: left;
+    color: #4a3b2b;
+    margin-left: 5px;
+}
+
+.login-container #label, .register-container #label{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: block;
+    text-align: left;
+    color: #4a3b2b;
+    margin-bottom: 10px;
+}
+
+
+.login-form{
+    width: 50%;
+}   
+
+
+
+
+.login-container input[type="email"], .login-container input[type="password"],
+.register-container input[type="email"], .register-container input[type="password"], .register-container input[type="text"]  , #password {
+    padding: 1vw;
+    border: 2px solid #C0834C;
+    background-color: #FFFAEE;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    width: 25vw;
+}
+
+
+.login-container .options, .register-container .options {
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-bottom: 50px;
+  font-size: 0.9rem;
+}
+
+.options-container{
+    display: flex;
+    justify-content: space-between;
+}
+
+.register-container-button{
+    text-align: center;
+   
+}
+
+
+
+.register-container-button button{
+    align-items: center;
+    width: 50%;
+    background-color: #ffb74a;
+    color: white;
+    border: none;
+    border-radius: 1vw;
+    padding: 1vw;
+
+    cursor: pointer;
+}
+
+
+.register-container-button button:hover {
+  background-color: white;
+  color: #ffb74a;
+}
+
+
+
+.login-container a,
+.register-container a {
+  text-decoration: none;
+  color: #4a3b2b;
+  font-size: 0.9rem;
+}
+
+
+.submit{
+    text-align: center;
+
+}
+
+#submit{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1vw;
+    font-weight: 500;
+    color: #4a3b2b;
+    background-color: transparent;
+    border: none;
+    padding: 1vw 4vw 1vw 4vw;
+    cursor: pointer;
+}
+
+
+
+.create-account{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.5vw;
+    margin: 1vw 0vw 0vw 0vw;
+}
+.create-account a{
+    font-weight: 500;
+    font-size: 1vw;
+    padding: 1vw 4vw 1vw 4vw;
+}
+
+
+
+
+
+
+
+/* START ------------------------------  @media screen and CSS */
+
+
+@media screen and (max-width: 768px) {
+
+    #logo {
+        align-items: center;
+        width: 25vw;
+    }
+
+    .header{
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        background-color: #FFFAEE;
+        box-shadow: 0px 1px 10px #FFFAEE;
+        z-index: 10;
+    }
+
+    .login-header {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        background-color: #FFFAEE;
+        box-shadow: 0px 1px 10px #FFFAEE;
+        z-index: 10;
+    }
+
+
+    #nav-menu.button-container {
+        margin: auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 5vw;
+        transition: .4s;
+    }
+
+    .nav-button {
+        display: block;
+        font-size: 2vw;
+        text-align: center;
+        padding: 12px;
+        border-radius: 1vw;
+    }
+
+    .centered-home{
+        top: 35%;
+        font-size: 3vw;
+    }
+
+    .centered-button{
+        top: 1vw;
+        font-size: 2vw;
+        text-decoration: none;
+        padding: 1vw;
+        border-radius: 1vw;
+        width: .5vw;
+    }
+
+
+    
+}
+
+
+
+
+
+
+
+@media screen and (max-width: 480px) {
+
+    #logo {
+        width: 40vw;
+        align-items: center;
+        width: 25vw;
+    
+    }
+
+
+    .image-container, #getstarted{
+        width: 100vw;
+    }
+
+
+    .nav-button {
+        font-size: 3vw;
+        padding: 2vw;
+        border-radius: 1vw;
+    }
+
+    .centered-home{
+        top: 25%;
+        font-size: 5vw;
+    }
+
+    .centered-home p{
+        font-size: 2vw;
+    }
+
+    .centered-button{
+        top: 70%;
+        font-size: 3vw;
+        padding: 2vw;
+        border-radius: 1vw;
+    }
+
+}
+
+
+/* LOGIN MEDIA */
+@media screen and (max-width: 768px) {
+    .login-header {
+      flex-direction: column;
+      text-align: center;   
+    }
+
+    .button-container {
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .login-container {
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    img#login-overlay {
+      max-height: 150px;
+      filter: brightness(30%);
+    }
+  }
+
+
+
+
+
+
+  /* Overlay covering the entire page */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Spinner - circular rotating animation */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
