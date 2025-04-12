@@ -55,12 +55,12 @@
     <div class="edit-container">
     <div class="edit-section">
       <p class="edit-placeholder">Choose Item to Edit</p>
-      <form action="/actions/add-item.php" method="POST">
+  
 
 
+      <button class="add-button"onclick="openAddItemModal()">Add Item</button>
 
-        <button class="add-button" type="submit">Add Item</button>
-      </form>
+       
     </div>
     </div>
   </main>

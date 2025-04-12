@@ -304,3 +304,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 });
+
+
+function openAddItemModal() {
+    document.getElementById('addItemModal').style.display = 'block';
+  }
+
+  function closeAddItemModal() {
+    document.getElementById('addItemModal').style.display = 'none';
+  }
+
+  // Optional: Close modal if clicking outside of it
+  window.onclick = function(event) {
+    const modal = document.getElementById('addItemModal');
+    if (event.target === modal) {
+      closeAddItemModal();
+    }
+  }

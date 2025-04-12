@@ -1,9 +1,9 @@
 <?php
 // MySQL Connection
 $host = 'localhost';
-$db = 'cafe_db'; // your actual database name
-$user = 'root'; // your DB username
-$pass = ''; // your DB password
+$db = 'cafe_db'; 
+$user = 'root'; 
+$pass = ''; 
 
 $conn = new mysqli($host, $user, $pass, $db);
 

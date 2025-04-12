@@ -302,34 +302,67 @@ img#login-overlay {
 }
 
 
-/* MODALS */ 
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 10;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.5);
-}
+/* MODALS */
+  .modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); 
+  }
 
-.modal-content {
-  background-color: white;
-  margin: 5% auto;
-  padding: 2rem;
-  border-radius: 8px;
-  width: 50%;
-}
+  .modal-content {
+    background-color: #fff;
+    margin: 5% auto; 
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+  }
 
-.close-btn {
-  float: right;
-  font-size: 28px;
-  cursor: pointer;
-}
+  .close-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+  }
 
+  .close-btn:hover {
+    color: #000;
+  }
 
+  .add-button {
+    background-color: #3c8dbc;
+    color: rgb(0, 0, 0);
+    padding: 10px 20px;
+    border: none;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .add-button:hover {
+    background-color: #367fa9;
+    color: white;
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
 
 
 
