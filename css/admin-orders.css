@@ -72,7 +72,6 @@ th, td {
     border: 1px solid #ddd;
     background-color: #f4f4f4;
     padding: 10px;
-    justify-content: center;
 }
 th {
     background-color: white;
@@ -103,7 +102,9 @@ button:disabled {
     cursor: not-allowed;
 }
 
-
+.td #text{
+    padding: 10px;
+}
 
 
 
@@ -155,76 +156,3 @@ button:disabled {
     cursor: pointer;
 }
 
-
-
-
-
-/* Sidebar Styles */
-.sidebar {
-    width: 250px;
-    background: #ffffff;
-    color: white;
-    margin-top: 40px;
-}
-
-
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-
-
-.sidebar ul li a {
-    color: black;
-    width: auto;
-    background-color: white;
-    text-decoration: none;
-    font-size: 16px;
-    padding: 1vw;
-    display: block;
-}
-
-.sidebar ul li a:hover {
-    background: #D7BFA5;
-}
-
-
-.menu-bar.active{
-      background: #D7BFA5;
-}
-
-/* Main Content Styles */
-
-
-
-
-.content{
-    flex-grow: 1;
-    padding: 20px;
-}
-
-h2 {
-    text-align: center;
-}
-
-/* Table Styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-.td {
-    border: 1px solid #ddd;
-    padding: 10px;
-}
-
-th {
-    background-color: #ffffff;
-}
-
-td img {
-    width: 45px;
-    height: auto;
-}

@@ -31,7 +31,7 @@
 
   <!-- Category Bar -->
   <div class="menu-bar">
-    <div class="menu-item" data-page="/views/menu-items/coffee.php">Coffee</div>
+    <div class="menu-item active" data-page="/views/menu-items/coffee.php">Coffee</div>
     <div class="menu-item" data-page="/views/menu-items/non-coffee.php">Non-Coffee</div>
     <div class="menu-item" data-page="/views/menu-items/frappe.php">Frappe</div>
     <div class="menu-item" data-page="/views/menu-items/milktea.php">MilkTea</div>
@@ -63,9 +63,41 @@
       </form>
     </div>
     </div>
-    
-    
   </main>
+
+
+<!-- Add Item Modal -->
+<div id="addItemModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeAddItemModal()">&times;</span>
+    <h2>Add New Item</h2>
+    <form action="/actions/add-item.php" method="POST" enctype="multipart/form-data">
+      <label for="item-name">Item Name</label>
+      <input type="text" id="item-name" name="item_name" required />
+
+      <label for="item-description">Description</label>
+      <textarea id="item-description" name="item_description" required></textarea>
+
+      <label for="item-price">Price</label>
+      <input type="number" id="item-price" name="item_price" step="0.01" required />
+
+      <label for="item-category">Category</label>
+      <select id="item-category" name="item_category" required>
+        <option value="coffee">Coffee</option>
+        <option value="non-coffee">Non-Coffee</option>
+        <option value="frappe">Frappe</option>
+        <option value="milktea">MilkTea</option>
+        <option value="soda">Soda</option>
+      </select>
+
+      <label for="item-image">Image</label>
+      <input type="file" id="item-image" name="item_image" accept="image/*" required />
+
+      <button class="add-button" type="submit">Add Item</button>
+    </form>
+    
+  </div>
+</div>
 
   
 
