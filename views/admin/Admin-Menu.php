@@ -71,7 +71,7 @@
   <div class="modal-content">
     <span class="close-btn" onclick="closeAddItemModal()">&times;</span>
     <h2>Add New Item</h2>
-    <form action="/actions/add-item.php" method="POST" enctype="multipart/form-data">
+    <form action="/controllers/add-item.php" method="POST" enctype="multipart/form-data">
       <label for="item-name">Item Name</label>
       <input type="text" id="item-name" name="item_name" required />
 
