@@ -47,7 +47,7 @@ $conn->close();
 
 <header class="header">
   <div class="logo-section">
-    <img src="/images/LOGO.png" id="logo" alt="Cuptain's Brew Logo" />
+    <img src="/public/images/LOGO.png" id="logo" alt="Cuptain's Brew Logo" />
   </div>
 
   <nav class="button-container" id="nav-menu">

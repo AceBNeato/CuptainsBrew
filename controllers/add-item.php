@@ -1,36 +1,41 @@
 <?php
-// Include the database connection
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/database.php'; // Make sure $conn is properly connected
+require_once __DIR__ . '/../models/Products.php'; // Optional if you're using model methods
 
-// Get the form data
+// Retrieve form data
 $item_name = $_POST['item_name'];
 $item_description = $_POST['item_description'];
 $item_price = $_POST['item_price'];
-
-// Handle the image upload
+$item_category = $_POST['item_category']; // <-- this decides the table
 $item_image = 'images/uploads/' . basename($_FILES["item_image"]["name"]);
+
+// Define allowed categories/tables to prevent SQL injection
+$allowed_categories = ['coffee', 'non_coffee', 'frappe', 'milktea', 'soda'];
+
+// Check if selected category is allowed
+if (!in_array($item_category, $allowed_categories)) {
+    die("Invalid category selected.");
+}
+
+// Upload image
 $targetDirectory = realpath(__DIR__ . '/../public/images/uploads') . '/';
 $targetFile = $targetDirectory . basename($_FILES["item_image"]["name"]);
 
-// Validate if the image is uploaded successfully
 if (move_uploaded_file($_FILES["item_image"]["tmp_name"], $targetFile)) {
-    // Prepare the SQL query to insert the data
-    $stmt = $conn->prepare("INSERT INTO coffee (item_name, item_description, item_price, item_image) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $item_name, $item_description, $item_price, $item_image);  // "ssss" indicates string parameters
+    // Use dynamic table name based on selected category
+    $table = $conn->real_escape_string($item_category);
 
-    // Execute the query and check if it was successful
+    // Insert into the corresponding table
+    $stmt = $conn->prepare("INSERT INTO `$table` (item_name, item_description, item_price, item_image) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssds", $item_name, $item_description, $item_price, $item_image);
+
     if ($stmt->execute()) {
-        echo "New item added to coffee menu!";
+        echo "New item added to the $table menu!";
     } else {
-        echo "Error: " . $stmt->error;
+        echo "Database error: " . $stmt->error;
     }
-
-    // Close the prepared statement
     $stmt->close();
 } else {
     echo "Image upload failed.";
 }
-
-// Close the database connection
-$conn->close();
 ?>

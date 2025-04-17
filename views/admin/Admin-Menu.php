@@ -13,7 +13,7 @@
   <!-- Header -->
   <header class="header">
     <div class="logo-section">
-      <img src="/images/LOGO.png" id="logo" alt="cuptainsbrewlogo" />
+      <img src="/public/images/LOGO.png" id="logo" alt="cuptainsbrewlogo" />
     </div>
 
     <nav class="button-container" id="nav-menu">
@@ -81,14 +81,14 @@
       <label for="item-price">Price</label>
       <input type="number" id="item-price" name="item_price" step="0.01" required />
 
-      <label for="item-category">Category</label>
-      <select id="item-category" name="item_category" required>
-        <option value="coffee">Coffee</option>
-        <option value="non-coffee">Non-Coffee</option>
-        <option value="frappe">Frappe</option>
-        <option value="milktea">MilkTea</option>
-        <option value="soda">Soda</option>
-      </select>
+        <label for="item-category">Category</label>
+        <select id="item-category" name="item_category" required>
+          <option value="coffee">Coffee</option>
+          <option value="non_coffee">Non-Coffee</option>
+          <option value="frappe">Frappe</option>
+          <option value="milktea">MilkTea</option>
+          <option value="soda">Soda</option>
+        </select>
 
       <label for="item-image">Image</label>
       <input type="file" id="item-image" name="item_image" accept="image/*" required />

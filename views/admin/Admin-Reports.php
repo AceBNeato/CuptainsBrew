@@ -14,7 +14,7 @@
 
 <header class="header">
     <div class="logo-section">
-        <img src="/images/LOGO.png" id="logo" alt="cuptainsbrewlogo" />
+        <img src="/public/images/LOGO.png" id="logo" alt="cuptainsbrewlogo" />
     </div>
 
     <nav class="button-container" id="nav-menu">
