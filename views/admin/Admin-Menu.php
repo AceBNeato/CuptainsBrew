@@ -52,17 +52,42 @@
         // include('../../includes/fetch-menu-items.php');
       ?>
     </section></div>
+
     <div class="edit-container">
-    <div class="edit-section">
-      <p class="edit-placeholder">Choose Item to Edit</p>
-  
+    <!-- Edit Section Modal -->
+    <div class="edit-section" id="edit-section">
+        <p class="edit-placeholder" id="edit-placeholder"></p>
 
+        <!-- The modal content (hidden by default) -->
+        <div id="edit-form-container" style="display: none;">
+            <img id="edit-image" src="" alt="Item Image" style="width: 150px; height: auto; margin-bottom: 1vw;">
 
-      <button class="add-button"onclick="openAddItemModal()">Add Item</button>
+            <!-- Edit Form -->
+            <form action="/controllers/update-item.php" method="POST" id="edit-item-form">
+                <input type="hidden" name="id" id="edit-id">
+                
+                <label>Name:</label>
+                <input type="text" name="item_name" id="edit-name"><br>
 
-       
+                <label>Price:</label>
+                <input type="number" name="item_price" id="edit-price"><br>
+
+                <label>Description:</label>
+                <textarea name="item_description" id="edit-description"></textarea><br>
+
+                <button type="submit">Update Item</button>
+            </form>
+
+            <!-- Delete Button -->
+            <button id="delete-button" onclick="deleteItem()">Delete Item</button>
+        </div>
+
+        <!-- Button to open the modal for adding an item -->
+        <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
     </div>
-    </div>
+</div>
+
+
   </main>
 
 

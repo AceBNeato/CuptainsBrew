@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../config/database.php'; // Make sure $conn is properly connected
-require_once __DIR__ . '/../models/Products.php'; // Optional if you're using model methods
 
 // Retrieve form data
 $item_name = $_POST['item_name'];

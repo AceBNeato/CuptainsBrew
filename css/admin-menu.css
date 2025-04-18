@@ -64,6 +64,7 @@ body {
 
 
 .edit-container{
+    
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
@@ -85,7 +86,9 @@ body {
     width: 70%;
 }
 
-
+#edit-name, #edit-price, #edit-description{
+    width: 85%;
+}
 
 
 
@@ -229,7 +232,25 @@ img#login-overlay {
 .products-container {
     background-color: white;
     height: auto;
+    padding: 2vw;
     width: 60%;
+}
+
+/* Menu Card */
+.menu-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 20px;
+    padding: 1.5vw;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2vw;
+    transition: transform 0.3s ease;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
 }
 
 /* Item Menu */
@@ -316,7 +337,7 @@ img#login-overlay {
   .modal-content {
     background-color: #fff;
     margin: 5% auto; 
-    padding: 20px;
+    padding: 5vw;
     border-radius: 10px;
     width: 400px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -337,7 +358,6 @@ img#login-overlay {
   }
 
   .add-button {
-    background-color: #3c8dbc;
     color: rgb(0, 0, 0);
     padding: 10px 20px;
     border: none;
@@ -368,98 +388,5 @@ img#login-overlay {
 
 
 
-
-
-
-
-
-/* Menu Cards */
-.menu-card {
-    display: flex;
-    width: 55vw;
-    justify-content: space-between;
-    background: white;
-    border-radius: 10px;
-    padding: 2vw;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    margin: 50px 50px 0px 30px;
-}
-
-.menu-card.selected {
-    background-color: #D7BFA5;
-    transition: background-color 0.2s ease-in-out;
-}
-
-#menu-img {
-    width: 10vw;
-    height: 10vw;
-    box-shadow: 1px 1px 5px#333;
-}
-
-/* Add Item Button */
-.add-button-container {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin: 10px;
-}
-
-.add-button {
-    align-items: center;
-    width: 50px;
-    height: 50px;
-    background-color: white;
-    box-shadow: 0px 1px 5px #333;
-    border: none;
-    border-radius: 100px;
-    cursor: pointer;
-}
-
-.add-button img {
-    flex-wrap: wrap;
-    width: 20px;
-    height: 20px;
-}
-
-/* Menu Details */
-.menu-details {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: start;
-    font-size: 2vw;
-    font-weight: 700;
-    margin: 10px 150px 10px 20px;
-}
-
-.price {
-    font-size: 1.5vw;
-    font-weight: 400;
-}
-
-.description {
-    font-size: 1vw;
-    font-weight: 400;
-    color: #333;
-}
-
-/* Item Editor */
-.item-editor {
-    position: sticky;
-    top: 200px;
-    width: 400px;
-    height: 450px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Jost', sans-serif;
-    margin: 50px 100px 30px 30px;
-}
-
-.item-editor img {
-    width: 400px;
-    height: 100px;
-    object-fit: cover;
-    object-position: center;
-}
 
 
