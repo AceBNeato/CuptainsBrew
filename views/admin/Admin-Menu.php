@@ -60,12 +60,23 @@
 
         <!-- The modal content (hidden by default) -->
         <div id="edit-form-container" style="display: none;">
-            <img id="edit-image" src="" alt="Item Image" style="width: 150px; height: auto; margin-bottom: 1vw;">
+            <!-- View-Only Mode -->
+            <div id="view-mode">
+                <img id="view-image" src="" alt="Item Image" style="width: 150px; height: auto;">
+                <h3 id="view-name"></h3>
+                <p id="view-price"></p>
+                <p id="view-description"></p>
+                <input type="hidden" name="existing_image" id="edit-existing-image">
 
-            <!-- Edit Form -->
-            <form action="/controllers/update-item.php" method="POST" id="edit-item-form">
+                <button onclick="closeModal()">X</button>
+                <button onclick="enableEditMode()">Edit</button>
+                <button onclick="deleteItem()">Delete</button>
+            </div>
+
+            <!-- Editable Form -->
+            <form action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data" style="display: none;">
                 <input type="hidden" name="id" id="edit-id">
-                
+
                 <label>Name:</label>
                 <input type="text" name="item_name" id="edit-name"><br>
 
@@ -75,11 +86,19 @@
                 <label>Description:</label>
                 <textarea name="item_description" id="edit-description"></textarea><br>
 
+                <label>Current Image:</label><br>
+                <img id="edit-image-preview" src="" alt="Current Image" style="width: 150px; height: auto; margin-bottom: 1vw;"><br>
+
+                <label>Change Image:</label>
+                <input type="file" name="item_image" accept="image/*"><br><br>
+                
+                <input type="hidden" name="category" id="edit-category" value=""> <!-- Will be set dynamically -->
+ 
+                
                 <button type="submit">Update Item</button>
+                <button type="button" onclick="cancelEditMode()">Cancel</button>
             </form>
 
-            <!-- Delete Button -->
-            <button id="delete-button" onclick="deleteItem()">Delete Item</button>
         </div>
 
         <!-- Button to open the modal for adding an item -->
@@ -87,8 +106,6 @@
     </div>
 </div>
 
-
-  </main>
 
 
 <!-- Add Item Modal -->

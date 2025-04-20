@@ -1,26 +1,33 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "cafe_db");
+$conn = require_once __DIR__ . '/../config/database.php';
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
-$data = json_decode(file_get_contents('php://input'), true);  // Get the POST data
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['item_id']) && isset($_POST['item_category'])) {
+    $id = intval($_POST['item_id']);
+    $item_category = $_POST['item_category'];
 
-$id = $data['id'];  // Extract the item ID
+    // Whitelist table names
+    $allowed_categories = ['coffee', 'non_coffee', 'frappe', 'milktea', 'soda'];
+    if (!in_array($item_category, $allowed_categories)) {
+        die("Invalid category.");
+    }
 
-// Prepare SQL to delete the item
-$sql = "DELETE FROM coffee WHERE id = ?";  // Replace 'coffee' with your dynamic table logic if needed
+    $table = $conn->real_escape_string($item_category);
+    $sql = "DELETE FROM `$table` WHERE id = ?";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
 
-if ($stmt->execute()) {
-    echo json_encode(["success" => true]);
+    if ($stmt->execute()) {
+        header("Location: /views/admin/Admin-Menu.php");
+        exit();
+    } else {
+        echo "Error deleting item: " . $conn->error;
+    }
+
+    $stmt->close();
+    $conn->close();
 } else {
-    echo json_encode(["success" => false, "error" => $conn->error]);
+    echo "Invalid request.";
 }
-
-$stmt->close();
-$conn->close();
 ?>

@@ -64,7 +64,6 @@ body {
 
 
 .edit-container{
-    
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
@@ -91,6 +90,13 @@ body {
 }
 
 
+#view-mode h3 {
+    margin: 10px 0 5px;
+}
+
+#view-mode p {
+    margin: 3px 0;
+}
 
 
 

@@ -92,49 +92,98 @@ function openAddItemModal() {
 
 
 
-//MODAL FOR EDIT ITEM
+// MODAL FOR EDIT ITEM
+function openManageModal(name, price, description, image, id, category) {
+    // Show container
+    document.getElementById('edit-form-container').style.display = 'block';
 
-  function openEditItemModal(id, name, price, description, imageUrl) {
-    // Populate the modal with the item data
+    // Set View Mode
+    document.getElementById('view-mode').style.display = 'block';
+    document.getElementById('edit-item-form').style.display = 'none';
+
+    // Populate View Mode Info
+    document.getElementById('view-image').src = '/public/' + image;
+    document.getElementById('view-name').textContent = name;
+    document.getElementById('view-price').textContent = '₱' + price;
+    document.getElementById('view-description').textContent = description;
+
+    // Pre-fill Edit Form
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-price').value = price;
     document.getElementById('edit-description').value = description;
-    document.getElementById('edit-image').src = imageUrl;
+    document.getElementById('edit-image-preview').src = '/public/' + image;
+    document.querySelector('#edit-item-form input[name="category"]').value = category;
+    document.getElementById('edit-existing-image').value = image;
 
-    // Show the edit modal
-    document.getElementById('edit-form-container').style.display = 'block';
-    document.getElementById('edit-placeholder').style.display = 'none';
+
+    // Store current ID for deletion
+    window.currentItemIdToDelete = id;
+
+    // Hide the Add Item button during view/edit
+    document.getElementById('add-button').style.display = 'none';
 }
+
+function enableEditMode() {
+    document.getElementById('view-mode').style.display = 'none';
+    document.getElementById('edit-item-form').style.display = 'block';
+}
+
+function cancelEditMode() {
+    document.getElementById('edit-item-form').style.display = 'none';
+    document.getElementById('view-mode').style.display = 'block';
+}
+
+function closeManageModal() {
+    // Hide the whole edit section (if you want to close it completely)
+    document.getElementById('edit-form-container').style.display = 'none';
+
+    // Reset view/edit states
+    document.getElementById('view-mode').style.display = 'none';
+    document.getElementById('edit-item-form').style.display = 'none';
+
+    // Show the Add Item button again
+    document.getElementById('add-button').style.display = 'inline-block';
+}
+
+
+function closeModal() {
+    // Hide the modal container
+    document.getElementById('edit-form-container').style.display = 'none';
+
+    // Optionally reset any content or state that needs to be reverted
+    document.getElementById('view-mode').style.display = 'none';
+    document.getElementById('edit-item-form').style.display = 'none';
+
+    // If needed, show the "Add Item" button again
+    document.getElementById('add-button').style.display = 'block';
+
+    // You can also clear the form or reset values
+    document.getElementById('edit-item-form').reset();
+
+    // Optionally, clear the image preview or other data
+    document.getElementById('edit-image-preview').src = '';
+}
+
 
 function deleteItem() {
-    // Get the item ID from the hidden input field
-    const itemId = document.getElementById('edit-id').value;
-
     if (confirm("Are you sure you want to delete this item?")) {
-        // Send a request to the backend to delete the item
-        fetch('/controllers/delete-item.php', {
-            method: 'POST',
-            body: JSON.stringify({ id: itemId }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Item deleted successfully!');
-                window.location.reload();  // Reload the page to reflect changes
-            } else {
-                alert('Failed to delete the item');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting item');
-        });
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/controllers/delete-item.php";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "item_id";
+        input.value = window.currentItemIdToDelete;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
     }
 }
+
+
 
 
 //END OF MODAL EDIT ITEM
