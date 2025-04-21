@@ -24,9 +24,7 @@
       <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
     </nav>
 
-    <div class="profile-section">
-      <span class="vertical-text">Do</span>
-    </div>
+    
   </header>
 
   <!-- Category Bar -->
@@ -46,10 +44,7 @@
   <main class="main-content">
     <div class="products-container"> 
       <section id="menu-list">
-      <!-- PHP can loop through items here later -->
       <?php
-        // Example: Include dynamic items from database
-        // include('../../includes/fetch-menu-items.php');
       ?>
     </section></div>
 
@@ -58,7 +53,7 @@
     <div class="edit-section" id="edit-section">
         <p class="edit-placeholder" id="edit-placeholder"></p>
 
-        <!-- The modal content (hidden by default) -->
+        <!--hidden by default-->
         <div id="edit-form-container" style="display: none;">
             <!-- View-Only Mode -->
             <div id="view-mode">
@@ -100,7 +95,6 @@
             </form>
 
         </div>
-
         <!-- Button to open the modal for adding an item -->
         <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
     </div>
