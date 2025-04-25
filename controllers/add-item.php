@@ -1,5 +1,5 @@
 <?php
-include '/../config/database.php'; 
+include '/config.php'; 
 
 $item_name = $_POST['item_name'];
 $item_description = $_POST['item_description'];
