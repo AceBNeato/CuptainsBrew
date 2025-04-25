@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Admin Menu - Cuptain's Brew</title>
   <link rel="icon" href="/images/LOGO.png" sizes="any" />
-  <link rel="stylesheet" href="/css/admin-menu.css" />
+  <link rel="stylesheet" href="/public/css/admin-menu.css" />
 </head>
 <body>
 
@@ -34,6 +34,7 @@
     <div class="menu-item" data-page="/views/menu-items/frappe.php">Frappe</div>
     <div class="menu-item" data-page="/views/menu-items/milktea.php">MilkTea</div>
     <div class="menu-item" data-page="/views/menu-items/soda.php">Soda</div>
+    
 
     <div class="search-box">
       <input type="text" class="search-input" placeholder="🔍 Search item" />
@@ -89,7 +90,6 @@
                 
                 <input type="hidden" name="category" id="edit-category" value=""> <!-- Will be set dynamically -->
  
-                
                 <button type="submit">Update Item</button>
                 <button type="button" onclick="cancelEditMode()">Cancel</button>
             </form>
@@ -139,8 +139,8 @@
 
     
 
-  <script src="/js/admin-menu.js"></script>
-  <script src="/js/auth.js"></script>
+  <script src="/public/js/admin-menu.js"></script>
+  <script src="/public/js/auth.js"></script>
 </body>
 </html>
 

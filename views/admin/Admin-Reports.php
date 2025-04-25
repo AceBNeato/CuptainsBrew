@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Admin Orders - Cuptain's Brew</title>
     <link rel="icon" href="/images/LOGO.png" sizes="any" />
-    <link rel="stylesheet" href="/css/admin-menu.css" />
-    <link rel="stylesheet" href="/css/orders.css" />
+    <link rel="stylesheet" href="/public/css/admin-menu.css" />
+    <link rel="stylesheet" href="/public/css/orders.css" />
 </head>
 <body>
 
@@ -25,9 +25,7 @@
         <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
     </nav>
 
-    <div class="profile-section">
-        <span class="vertical-text">Do</span>
-    </div>
+  
 </header>
 
 <div class="orders-container">
@@ -76,10 +74,10 @@
     </div>
 </div>
 
-<script src="/js/admin-menu.js"></script>
-<script src="/js/admin-orders.js"></script>
-<script src="/js/script.js"></script>
-<script src="/js/auth.js"></script>
+<script src="/public/js/admin-menu.js"></script>
+<script src="/public/js/admin-orders.js"></script>
+<script src="/public/js/script.js"></script>
+<script src="/public/js/auth.js"></script>
 </body>
 </html>
 
