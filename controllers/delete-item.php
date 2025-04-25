@@ -6,7 +6,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['item_id']) && isset($
     $id = intval($_POST['item_id']);
     $item_category = $_POST['item_category'];
 
-    // Whitelist table names
     $allowed_categories = ['coffee', 'non_coffee', 'frappe', 'milktea', 'soda'];
     if (!in_array($item_category, $allowed_categories)) {
         die("Invalid category.");

@@ -94,20 +94,19 @@ function openAddItemModal() {
 
 // MODAL FOR EDIT ITEM
 function openManageModal(name, price, description, image, id, category) {
-    // Show container
     document.getElementById('edit-form-container').style.display = 'block';
 
-    // Set View Mode
+    // View Mode
     document.getElementById('view-mode').style.display = 'block';
     document.getElementById('edit-item-form').style.display = 'none';
 
-    // Populate View Mode Info
+    // View Mode Info
     document.getElementById('view-image').src = '/public/' + image;
     document.getElementById('view-name').textContent = name;
     document.getElementById('view-price').textContent = '₱' + price;
     document.getElementById('view-description').textContent = description;
 
-    // Pre-fill Edit Form
+    // Edit Form
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-name').value = name;
     document.getElementById('edit-price').value = price;
@@ -135,7 +134,7 @@ function cancelEditMode() {
 }
 
 function closeManageModal() {
-    // Hide the whole edit section (if you want to close it completely)
+    // Hide the whole edit section 
     document.getElementById('edit-form-container').style.display = 'none';
 
     // Reset view/edit states

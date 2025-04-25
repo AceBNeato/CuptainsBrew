@@ -1,5 +1,5 @@
 <?php
-require_once '../config/database.php'; // Adjust path as needed
+include '../config/database.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
@@ -8,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = $_POST['item_description'];
     $category = $_POST['category'];
 
-    // Match form category to table name
     $allowed_categories = [
         'coffee' => 'coffee',
         'frappe' => 'frappe',
@@ -23,10 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $table = $allowed_categories[$category];
 
-    // Set default image to existing image
     $imageToSave = $_POST['existing_image'] ?? '';
 
-    // Handle new image upload
     if (!empty($_FILES['item_image']['name'])) {
         $imageName = time() . '_' . basename($_FILES['item_image']['name']);
         $uploadDir = __DIR__ . '/../public/images/uploads/';
@@ -34,18 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($_FILES['item_image']['tmp_name'], $target)) {
             $imageToSave = "images/uploads/" . $imageName;
-
-            // Delete old image if it exists
             $oldImageRelative = $_POST['existing_image'] ?? '';
             $oldImageFullPath = __DIR__ . '/../public/' . $oldImageRelative;
 
             if ($oldImageRelative && file_exists($oldImageFullPath) && is_file($oldImageFullPath)) {
-                unlink($oldImageFullPath); // No echo needed in production
+                unlink($oldImageFullPath); 
             }
         }
     }
 
-    // Update database
+
     $sql = "UPDATE `$table` SET item_name=?, item_price=?, item_description=?, item_image=? WHERE id=?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sdssi", $name, $price, $description, $imageToSave, $id);
