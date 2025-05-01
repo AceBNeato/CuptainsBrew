@@ -74,9 +74,9 @@ body {
 .edit-section{
     border-radius: 10px;
     display: grid;
-    position: sticky;
     box-shadow: 1px 1px 10px #4a3b2b;
     margin: 0px;
+    top: 200px;
     position:sticky;
     height: 450px;
     grid-template-rows: 100px 100px 100px 100px;
