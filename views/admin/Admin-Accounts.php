@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,8 +21,8 @@
     <nav class="button-container" id="nav-menu">
       <button class="nav-button" onclick="gotoMenu()">Menu</button>
       <button class="nav-button" onclick="gotoOrders()">Orders</button>
-      <button class="nav-button active" onclick="gotoReports()">Reports</button>
-      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
+      <button class="nav-button" onclick="gotoReports()">Reports</button>
+      <button class="nav-button active" onclick="gotoAccounts()">Accounts</button>
       <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
     </nav>
 

@@ -51,11 +51,11 @@ $conn->close();
   </div>
 
   <nav class="button-container" id="nav-menu">
-    <a href="/views/admin/admin-menu.php" class="nav-button">Menu</a>
-    <a href="/views/admin/admin-orders.php" class="nav-button active">Orders</a>
-    <a href="/views/admin/admin-reports.php" class="nav-button">Reports</a>
-    <a href="/views/admin/admin-accounts.php" class="nav-button">Accounts</a>
-    <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
+      <button class="nav-button" onclick="gotoMenu()">Menu</button>
+      <button class="nav-button active" onclick="gotoOrders()">Orders</button>
+      <button class="nav-button" onclick="gotoReports()">Reports</button>
+      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
+      <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
   </nav>
 
   <div class="profile-section">

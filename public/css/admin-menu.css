@@ -39,7 +39,9 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 15px;
     color: black;
-    width: 5vw;
+    border-color: transparent;
+    background-color: transparent;
+    width: 6vw;
     text-decoration: none;
     text-align: center;
     padding: 10px;
@@ -63,6 +65,11 @@ body {
 }
 
 
+.edit-form{
+    display: block;
+    margin: -100px 0px 0px 0px;
+}
+
 .edit-container{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
@@ -82,7 +89,7 @@ body {
     grid-template-rows: 100px 100px 100px 100px;
     text-align: center;
     padding: 10px;
-    width: 70%;
+    width: 80%;
 }
 
 #edit-name, #edit-price, #edit-description{
@@ -247,6 +254,7 @@ img#login-overlay {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: white;
     border-radius: 20px;
     padding: 1.5vw;
@@ -258,6 +266,26 @@ img#login-overlay {
 .menu-card:hover {
     transform: translateY(-5px);
 }
+
+.menu-card.active {
+    background-color: #f0e6d2; /* Light cream background */
+    box-shadow: 0 0 10px rgba(74, 59, 43, 0.3); /* Soft shadow */
+}
+
+
+
+
+.menu-card.active .menu-content .menu-title,
+.menu-card.active .menu-content .menu-price,
+.menu-card.active .menu-content .menu-desc {
+    color: #4a3b2b; 
+}
+
+.menu-card.active .menu-manage {
+    background-color: #4a3b2b; /* Dark brown button */
+    color: white;
+}
+
 
 /* Item Menu */
 .item-menu-container {
@@ -287,12 +315,18 @@ img#login-overlay {
     padding: 1vw 2vw 1vw 2vw;
     font-weight: 400;
     cursor: pointer;
+    transition: border-bottom 0.3s ease, color 0.3s ease;
+    border-bottom: 0 solid transparent; /* Start with no visible border */
     transition: .5s;
 }
 
 .menu-item:hover {
-    color: #4a3b2b;
     background-color: #D7BFA5;
+    color: #4a3b2b;
+    border-bottom-width: 5px; /* Animate to full border width */
+    border-bottom-width: 5px;
+    border-bottom-color: #4a3b2b;
+    color: #4a3b2b;
 }
 
 .menu-item.active {
@@ -378,7 +412,6 @@ img#login-overlay {
   }
 
   label {
-    display: block;
     margin-top: 10px;
   }
 

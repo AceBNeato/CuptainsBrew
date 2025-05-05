@@ -1,58 +1,99 @@
 <?php
-include '/config.php'; 
+include __DIR__ . '/../config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'];
-    $name = $_POST['item_name'];
-    $price = $_POST['item_price'];
-    $description = $_POST['item_description'];
-    $category = $_POST['category'];
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-    $allowed_categories = [
-        'coffee' => 'coffee',
-        'frappe' => 'frappe',
-        'milktea' => 'milktea',
-        'non-coffee' => 'non_coffee',
-        'soda' => 'soda'
-    ];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Error: Form not submitted");
+}
 
-    if (!array_key_exists($category, $allowed_categories)) {
-        die("Invalid category.");
+if (empty($_POST['id']) || empty($_POST['item_name']) || empty($_POST['item_price'])) {
+    die("Error: Missing required fields");
+}
+
+$id = filter_var($_POST['id'], FILTER_VALIDATE_INT);
+if ($id === false || $id <= 0) {
+    die("Error: Invalid item ID");
+}
+
+$item_name = trim($conn->real_escape_string($_POST['item_name']));
+$item_description = trim($conn->real_escape_string($_POST['item_description'] ?? ''));
+$item_price = filter_var($_POST['item_price'], FILTER_VALIDATE_FLOAT);
+
+if ($item_price === false || $item_price <= 0) {
+    die("Error: Invalid price value");
+}
+
+// 6. Handle file upload if provided
+$imagePath = $_POST['existing_image'] ?? null;
+
+if (!empty($_FILES['item_image']['name'])) {
+    $uploadDir = realpath(__DIR__ . '/../public/assets/uploads') . '/';
+    
+    // Generate unique filename
+    $fileExt = pathinfo($_FILES['item_image']['name'], PATHINFO_EXTENSION);
+    $imageName = uniqid() . '.' . strtolower($fileExt);
+    $targetFile = $uploadDir . $imageName;
+    $imagePath = 'assets/uploads/' . $imageName;
+
+    // Validate image file
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $fileType = mime_content_type($_FILES["item_image"]["tmp_name"]);
+
+    if (!in_array($fileType, $allowedTypes)) {
+        die("Error: Only JPG, PNG, and GIF images are allowed");
     }
 
-    $table = $allowed_categories[$category];
+    if ($_FILES['item_image']['size'] > 2000000) {
+        die("Error: Image size must be less than 2MB");
+    }
 
-    $imageToSave = $_POST['existing_image'] ?? '';
+    if (!move_uploaded_file($_FILES["item_image"]["tmp_name"], $targetFile)) {
+        die("Error: File upload failed");
+    }
 
-    if (!empty($_FILES['item_image']['name'])) {
-        $imageName = time() . '_' . basename($_FILES['item_image']['name']);
-        $uploadDir = __DIR__ . '/../public/images/uploads/';
-        $target = $uploadDir . $imageName;
-
-        if (move_uploaded_file($_FILES['item_image']['tmp_name'], $target)) {
-            $imageToSave = "images/uploads/" . $imageName;
-            $oldImageRelative = $_POST['existing_image'] ?? '';
-            $oldImageFullPath = __DIR__ . '/../public/' . $oldImageRelative;
-
-            if ($oldImageRelative && file_exists($oldImageFullPath) && is_file($oldImageFullPath)) {
-                unlink($oldImageFullPath); 
-            }
+    // Delete old image if it exists and is different from new one
+    if (!empty($_POST['existing_image']) && $_POST['existing_image'] !== $imagePath) {
+        $oldImagePath = realpath(__DIR__ . '/../public/' . $_POST['existing_image']);
+        if ($oldImagePath && file_exists($oldImagePath)) {
+            unlink($oldImagePath);
         }
     }
-
-
-    $sql = "UPDATE `$table` SET item_name=?, item_price=?, item_description=?, item_image=? WHERE id=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sdssi", $name, $price, $description, $imageToSave, $id);
-
-    if ($stmt->execute()) {
-        header("Location: /views/admin/Admin-Menu.php?success=1");
-        exit();
-    } else {
-        echo "Error updating item: " . $stmt->error;
-    }
-
-    $stmt->close();
-    $conn->close();
 }
+
+// 7. Update database
+$stmt = $conn->prepare("UPDATE products 
+                      SET item_name = ?, 
+                          item_price = ?, 
+                          item_description = ?, 
+                          item_image = ?
+                      WHERE id = ?");
+
+if (!$stmt) {
+    die("Error preparing statement: " . $conn->error);
+}
+
+$stmt->bind_param("sdssi", 
+    $item_name,
+    $item_price,
+    $item_description,
+    $imagePath,
+    $id
+);
+
+if ($stmt->execute()) {
+    header('Location: /views/admin/Admin-Menu.php?success=1&updated_id=' . $id);
+    exit;
+} else {
+    // Clean up if file was uploaded but DB failed
+    if (isset($targetFile) && file_exists($targetFile)) {
+        unlink($targetFile);
+    }
+    die("Error updating item: " . $stmt->error);
+}
+
+$stmt->close();
+$conn->close();
 ?>

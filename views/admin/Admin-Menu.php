@@ -17,62 +17,83 @@
     </div>
 
     <nav class="button-container" id="nav-menu">
-      <a href="/views/admin/admin-menu.php" class="nav-button active">Menu</a>
-      <a href="/views/admin/admin-orders.php" class="nav-button">Orders</a>
-      <a href="/views/admin/admin-reports.php" class="nav-button">Reports</a>
-      <a href="/views/admin/admin-accounts.php" class="nav-button">Accounts</a>
+      <button class="nav-button active" onclick="gotoMenu()">Menu</button>
+      <button class="nav-button" onclick="gotoOrders()">Orders</button>
+      <button class="nav-button" onclick="gotoReports()">Reports</button>
+      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
       <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
     </nav>
-
-    
   </header>
 
-  <!-- Category Bar -->
-  <div class="menu-bar">
-    <div class="menu-item active" data-page="/views/menu-items/coffee.php">Coffee</div>
-    <div class="menu-item" data-page="/views/menu-items/non-coffee.php">Non-Coffee</div>
-    <div class="menu-item" data-page="/views/menu-items/frappe.php">Frappe</div>
-    <div class="menu-item" data-page="/views/menu-items/milktea.php">MilkTea</div>
-    <div class="menu-item" data-page="/views/menu-items/soda.php">Soda</div>
-    
+<!-- Category Bar -->
+<div class="menu-bar">
+    <?php
+    $currentCategory = $_GET['category'] ?? 'coffee';
+    $categories = [
+        'coffee' => 'Coffee',
+        'non-coffee' => 'Non-Coffee',
+        'frappe' => 'Frappe',
+        'milktea' => 'MilkTea',
+        'soda' => 'Soda'
+    ];
+    foreach ($categories as $key => $name): ?>
+        <div class="menu-item <?= $currentCategory === $key ? 'active' : '' ?>" 
+             onclick="loadCategory('<?= $key ?>')">
+            <?= htmlspecialchars($name) ?>
+        </div>
+    <?php endforeach; ?>
 
     <div class="search-box">
-      <input type="text" class="search-input" placeholder="🔍 Search item" />
+        <input type="text" class="search-input" placeholder="🔍 Search item" 
+               id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+               onkeyup="handleSearch(event)"/>
     </div>
-  </div>
+</div>
+
+
 
   <!-- Main Content -->
   <main class="main-content">
     <div class="products-container"> 
-      <section id="menu-list">
-      <?php
-      ?>
-    </section></div>
+        <section id="menu-list">
+          <?php
+          $menuItemsPath = __DIR__ . '/partials/menu-items.php';
+          if (file_exists($menuItemsPath)) {
+              include $menuItemsPath;
+          } else {
+              echo '<div class="error">Menu component not available</div>';
+              error_log("Missing menu items file at: " . $menuItemsPath);
+          }
+          ?>
+        </section>
+  </div>
 
     <div class="edit-container">
-    <!-- Edit Section Modal -->
     <div class="edit-section" id="edit-section">
         <p class="edit-placeholder" id="edit-placeholder"></p>
 
-        <!--hidden by default-->
         <div id="edit-form-container" style="display: none;">
-            <!-- View-Only Mode -->
+           
             <div id="view-mode">
                 <img id="view-image" src="" alt="Item Image" style="width: 150px; height: auto;">
+                <input type="hidden" name="existing_image" id="edit-existing-image">
                 <h3 id="view-name"></h3>
                 <p id="view-price"></p>
                 <p id="view-description"></p>
-                <input type="hidden" name="existing_image" id="edit-existing-image">
 
                 <button onclick="closeModal()">X</button>
                 <button onclick="enableEditMode()">Edit</button>
                 <button onclick="deleteItem()">Delete</button>
             </div>
 
-            <!-- Editable Form -->
-            <form action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data" style="display: none;">
+            <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
                 <input type="hidden" name="id" id="edit-id">
 
+                <img id="edit-image-preview" src="" alt="Current Image" style="width: 150px; height: auto; margin-bottom: 1vw;"><br>
+
+                <label>Change Image:</label>
+                <input type="file" name="item_image" accept="image/*">
+                
                 <label>Name:</label>
                 <input type="text" name="item_name" id="edit-name"><br>
 
@@ -80,22 +101,17 @@
                 <input type="number" name="item_price" id="edit-price"><br>
 
                 <label>Description:</label>
-                <textarea name="item_description" id="edit-description"></textarea><br>
+                <textarea name="item_description" id="edit-description"></textarea>
 
-                <label>Current Image:</label><br>
-                <img id="edit-image-preview" src="" alt="Current Image" style="width: 150px; height: auto; margin-bottom: 1vw;"><br>
-
-                <label>Change Image:</label>
-                <input type="file" name="item_image" accept="image/*"><br><br>
+                <input type="hidden" name="category" id="edit-category" value=""> 
                 
-                <input type="hidden" name="category" id="edit-category" value=""> <!-- Will be set dynamically -->
- 
                 <button type="submit">Update Item</button>
                 <button type="button" onclick="cancelEditMode()">Cancel</button>
             </form>
 
         </div>
-        <!-- Button to open the modal for adding an item -->
+
+        
         <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
     </div>
 </div>
@@ -127,7 +143,7 @@
         </select>
 
       <label for="item-image">Image</label>
-      <input type="file" id="item-image" name="item_image" accept="image/*" required />
+      <input type="file" id="item-image" name="item_image" accept="image/*" />
 
       <button class="add-button" type="submit">Add Item</button>
     </form>
@@ -137,6 +153,31 @@
 
   
 
+ <script>
+
+    function loadCategory(category) {
+    // Fix the URL path - ensure it's correct
+    const url = new URL(window.location.href);
+    url.pathname = '/views/admin/admin-menu.php'; // Set correct base path
+    url.searchParams.set('category', category);
+    window.location.href = url.toString();
+}
+
+    function handleSearch(event) {
+        if (event.key === 'Enter') {
+            const searchTerm = event.target.value.trim();
+            const url = new URL(window.location.href);
+            
+            if (searchTerm) {
+                url.searchParams.set('search', searchTerm);
+            } else {
+                url.searchParams.delete('search');
+            }
+            
+            window.location.href = url.toString();
+        }
+    }
+  </script>
     
 
   <script src="/public/js/admin-menu.js"></script>
