@@ -106,7 +106,7 @@
       <button class="nav-button" onclick="gotoOrders()">Orders</button>
       <button class="nav-button" onclick="gotoReports()">Reports</button>
       <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
-      <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
+      <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
     </nav>
   </header>
 

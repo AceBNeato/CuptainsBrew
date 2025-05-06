@@ -537,19 +537,6 @@ img#login-overlay {
     color: #000;
   }
 
-  .add-button {
-    color: rgb(0, 0, 0);
-    padding: 10px 20px;
-    border: none;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-
-  .add-button:hover {
-    background-color: #367fa9;
-    color: white;
-  }
 
   label {
     margin-top: 10px;

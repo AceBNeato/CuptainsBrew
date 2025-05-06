@@ -3,14 +3,11 @@ document.addEventListener("keydown", function (event) {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "q") {
         console.log("Admin shortcut detected!");
         
-        // Store admin login status
         localStorage.setItem("userRole", "admin");
 
-        // Show confirmation
         alert("Admin logged in via secret shortcut!");
 
-        // Redirect to Admin Dashboard (Change the URL if needed)
-        window.location.href = "/views/auth/admin-login.html";
+        window.location.href = "/views/auth/admin-login.php";
     } 
 });
 
@@ -18,14 +15,11 @@ document.addEventListener("keydown", function (event) {
 if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "s") {
     console.log("User shortcut detected!");
     
-    // Store admin login status
     localStorage.setItem("userRole", "user");
 
-    // Show confirmation
     alert("Going back to users");
 
-    // Redirect to Admin Dashboard (Change the URL if needed)
-    window.location.href = "/views/auth/login.html";
+    window.location.href = "/views/auth/login.php";
 }
 });
 
@@ -41,30 +35,27 @@ document.addEventListener("DOMContentLoaded", function () {
             const password = document.getElementById("password").value;
             const loadingOverlay = document.getElementById("loading-overlay");
 
-            // Show loading overlay
             loadingOverlay.style.display = "flex";
 
-            // Simulate a delay for demonstration purposes
             setTimeout(() => {
-                if (email === "admin@123" && password === "admin123") {
+                if (email === "admin@123.com" && password === "admin123") {
                    
                     sessionStorage.setItem("userRole", "admin");
                     localStorage.setItem("userLoggedIn", "true");
 
                     
-                    window.location.href = "../../../views/admin/admin-menu.html";
+                    window.location.href = "/views/admin/Admin-Menu.php";
                 } else {
                    
                         Swal.fire({
                             icon: "error",
                             title: "Oops...",
                             text: "Invalid email or password! Please Try Again!",
-                            footer: '<a href="#">Why do I have this issue?</a>'
                         }); 
 
                     loadingOverlay.style.display = "none"; // Hide loading overlay on failed login
                 }
-            }, 2000); // Adjust the delay as needed
+            }, 1000); // Adjust the delay as needed
         });
     }
 });
@@ -240,9 +231,9 @@ function logout() {
     localStorage.removeItem("userLoggedIn");
 
     if (userRole === "admin") {
-        window.location.href = "/views/home.html"; 
+        window.location.href = "/views/index.php"; 
     } else {
-        window.location.href = "/views/home.html"; 
+        window.location.href = "/views/index.php"; 
     }
 }
 

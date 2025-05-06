@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Cuptain's Brew | Login</title>
-    <link rel="stylesheet" href="/css/admin.css">
-    <link rel="icon" href="/images/LOGO.png" sizes="any">
+    <link rel="stylesheet" href="/public/css/admin.css">
+    <link rel="icon" href="/public/images/LOGO.png" sizes="any">
 
 </head>
 <body>
     <header class="header">
-    <img src="/images/LOGO.png" id="logo" alt="cuptainsbrewlogo">
+    <img src="/public/images/LOGO.png" id="logo" alt="cuptainsbrewlogo">
 
-    <!-- "nav-menu" is for mobile
-    <button id="menu-toggle" class="menu-toggle"> ☰  </button> -->
 
    
     </nav>
