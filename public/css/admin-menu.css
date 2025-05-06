@@ -60,50 +60,190 @@ body {
 .main-content{
     display: flex;
     justify-content: space-around;
-    background-color: #ff0000;
+    background-color: #ffffff;
     height: 100%;
 }
 
-
-.edit-form{
+/* Main container styles */
+.edit-container {
+    font-family: 'Arial', sans-serif;
+    position: sticky;
+    top: 150px;
+    width: 30vw;
+    height: 30vw;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    overflow: hidden;
+    margin: 20px auto;
+  }
+  
+  /* Edit section styles */
+  .edit-section {
+    position: relative;
+    padding: 0 0 20px 0;
+  }
+  
+  /* View mode styling */
+  #view-mode {
+    position: relative;
+    padding: 0 0 15px 0;
+  }
+  
+  #view-image {
+    width: 100vw;
+    height: 200px;
+    object-fit: cover;
     display: block;
-    margin: -100px 0px 0px 0px;
-}
-
-.edit-container{
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  #view-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 15px 20px 5px;
+    text-transform: uppercase;
+  }
+  
+  #view-price {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 20px 10px;
+  }
+  
+  #view-description {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 20px 15px;
+    color: #666;
+  }
+  
+  /* Buttons in view mode */
+  #view-mode button {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  #view-mode button:hover {
+    background-color: #eee;
+  }
+  
+  /* Close button positioning */
+  #view-mode button:first-of-type {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    background-color: rgb(255, 255, 255);
-    padding: 2vw;
-    width: 40%;
-}
-.edit-section{
-    border-radius: 10px;
-    display: grid;
-    box-shadow: 1px 1px 10px #4a3b2b;
-    margin: 0px;
-    top: 200px;
-    position:sticky;
-    height: 450px;
-    grid-template-rows: 100px 100px 100px 100px;
-    text-align: center;
+    padding: 0;
+    font-size: 16px;
+    border: none;
+  }
+  
+  /* Action buttons container */
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  
+  /* Edit form styling */
+  .edit-form {
+    padding: 20px;
+  }
+
+
+
+  
+  
+  .edit-form label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .edit-form input[type="text"],
+  .edit-form input[type="number"],
+  .edit-form textarea {
+    width: 100%;
     padding: 10px;
-    width: 80%;
-}
-
-#edit-name, #edit-price, #edit-description{
-    width: 85%;
-}
-
-
-#view-mode h3 {
-    margin: 10px 0 5px;
-}
-
-#view-mode p {
-    margin: 3px 0;
-}
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+  
+  .edit-form textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .edit-form button {
+    background-color: #4a4a4a;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 10px;
+    transition: background-color 0.2s;
+  }
+  
+  .edit-form button:hover {
+    background-color: #333;
+  }
+  
+  .edit-form button[type="button"] {
+    background-color: #f8f8f8;
+    color: #333;
+    border: 1px solid #ddd;
+  }
+  
+  .edit-form button[type="button"]:hover {
+    background-color: #eee;
+  }
+  
+  /* Add button styling */
+  .add-button {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 20px auto;
+    padding: 12px 0;
+    background-color: #4a4a4a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .add-button:hover {
+    background-color: #333;
+  }
+  
+  /* Update and Remove buttons at bottom */
+  .edit-section::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+  
+  #edit-form-container {
+    position: relative;
+  }
 
 
 

@@ -1,26 +1,24 @@
 <?php
-// Debug: Show all received data
+
 echo "<pre>POST data: ";
 print_r($_POST);
 echo "FILES data: ";
 print_r($_FILES);
 echo "</pre>";
 
-// 1. Config file inclusion
 $configPath = __DIR__ . '/../config.php';
 require_once $configPath;
 
-// 2. Verify database connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 3. Check if form was submitted
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Error: Form not submitted");
 }
 
-// 4. Validate all required inputs
+
 $required = ['item_name', 'item_price', 'item_category'];
 foreach ($required as $field) {
     if (empty($_POST[$field])) {
@@ -28,12 +26,12 @@ foreach ($required as $field) {
     }
 }
 
-// 5. Sanitize and validate inputs
+
 $item_name = trim($conn->real_escape_string($_POST['item_name']));
 $item_description = trim($conn->real_escape_string($_POST['item_description'] ?? ''));
 $item_price = filter_var($_POST['item_price'], FILTER_VALIDATE_FLOAT);
 
-// 6. Validate category and get category ID
+
 $allowed_categories = ['coffee' => 1, 'non_coffee' => 2, 'frappe' => 3, 'milktea' => 4, 'soda' => 5];
 if (!array_key_exists($_POST['item_category'], $allowed_categories)) {
     die("Error: Invalid category selected");
@@ -44,7 +42,7 @@ if ($item_price === false || $item_price <= 0) {
     die("Error: Invalid price value");
 }
 
-// 7. Handle file upload if provided
+
 $imagePath = null;
 if (!empty($_FILES['item_image']['name'])) {
     $uploadDir = realpath(__DIR__ . '/../public/assets/uploads') . '/';
@@ -54,13 +52,14 @@ if (!empty($_FILES['item_image']['name'])) {
         }
     }
 
-    // Generate unique filename
+
     $fileExt = pathinfo($_FILES['item_image']['name'], PATHINFO_EXTENSION);
     $imageName = uniqid() . '.' . strtolower($fileExt);
     $targetFile = $uploadDir . $imageName;
     $imagePath = 'assets/uploads/' . $imageName;
 
-    // Validate image file
+
+    
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     $fileType = mime_content_type($_FILES["item_image"]["tmp_name"]);
 
@@ -77,7 +76,7 @@ if (!empty($_FILES['item_image']['name'])) {
     }
 }
 
-// 8. Database operation - CORRECTED VERSION
+
 $conn->begin_transaction();
 
 try {

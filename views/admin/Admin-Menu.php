@@ -8,6 +8,91 @@
   <link rel="icon" href="/images/LOGO.png" sizes="any" />
   <link rel="stylesheet" href="/public/css/admin-menu.css" />
 </head>
+<style>
+/* Compact Overlay Styles */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+/* Compact Form Container */
+.form-container {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 1.2rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  width: 85%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+
+
+.edit-form label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: -0.3rem;
+}
+
+.edit-form input[type="text"],
+.edit-form input[type="number"],
+.edit-form textarea,
+.edit-form input[type="file"] {
+  padding: 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.edit-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.edit-form button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.edit-form button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  align-self: center;
+}
+
+.edit-form button[type="button"] {
+  background-color: #f44336;
+  color: white;
+  
+  align-self: center;
+  margin-top: -0.3rem;
+}
+
+#edit-image-preview {
+  width: 120px;
+  height: auto;
+  margin: 0 auto 0.8rem;
+  display: block;
+}
+</style>
 <body>
 
   <!-- Header -->
@@ -25,7 +110,6 @@
     </nav>
   </header>
 
-<!-- Category Bar -->
 <div class="menu-bar">
     <?php
     $currentCategory = $_GET['category'] ?? 'coffee';
@@ -57,14 +141,8 @@
     <div class="products-container"> 
         <section id="menu-list">
           <?php
-          $menuItemsPath = __DIR__ . '/partials/menu-items.php';
-          if (file_exists($menuItemsPath)) {
-              include $menuItemsPath;
-          } else {
-              echo '<div class="error">Menu component not available</div>';
-              error_log("Missing menu items file at: " . $menuItemsPath);
-          }
-          ?>
+           include 'partials/menu-items.php';
+           ?>
         </section>
   </div>
 
@@ -75,7 +153,7 @@
         <div id="edit-form-container" style="display: none;">
            
             <div id="view-mode">
-                <img id="view-image" src="" alt="Item Image" style="width: 150px; height: auto;">
+                <img id="view-image" src="" alt="Item Image" style="width: 500px; height: 100px;">
                 <input type="hidden" name="existing_image" id="edit-existing-image">
                 <h3 id="view-name"></h3>
                 <p id="view-price"></p>
@@ -86,36 +164,42 @@
                 <button onclick="deleteItem()">Delete</button>
             </div>
 
-            <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
-                <input type="hidden" name="id" id="edit-id">
-
-                <img id="edit-image-preview" src="" alt="Current Image" style="width: 150px; height: auto; margin-bottom: 1vw;"><br>
-
-                <label>Change Image:</label>
-                <input type="file" name="item_image" accept="image/*">
-                
-                <label>Name:</label>
-                <input type="text" name="item_name" id="edit-name"><br>
-
-                <label>Price:</label>
-                <input type="number" name="item_price" id="edit-price"><br>
-
-                <label>Description:</label>
-                <textarea name="item_description" id="edit-description"></textarea>
-
-                <input type="hidden" name="category" id="edit-category" value=""> 
-                
-                <button type="submit">Update Item</button>
-                <button type="button" onclick="cancelEditMode()">Cancel</button>
-            </form>
-
         </div>
-
         
+            
         <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
     </div>
 </div>
 
+
+<div id="overlay"></div>
+
+<div class="form-container">
+  <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
+  <input type="hidden" name="id" id="edit-id">
+
+    <img id="edit-image-preview" src="" alt="Current Image" style="width: 150px; height: auto; margin-bottom: 1vw;"><br>
+
+    <label>Change Image:</label>
+    <input type="file" name="item_image" accept="image/*">
+
+    <label>Name:</label>
+    <input type="text" name="item_name" id="edit-name"><br>
+
+    <label>Price:</label>
+    <input type="number" name="item_price" id="edit-price"><br>
+
+    <label>Description:</label>
+    <textarea name="item_description" id="edit-description"></textarea>
+
+    <input type="hidden" name="category" id="edit-category" value=""> 
+
+<button type="submit">Update Item</button>
+<button type="button" onclick="cancelEditMode()">Cancel</button>
+    </div>
+
+  </form>
+</div>
 
 
 <!-- Add Item Modal -->
@@ -156,9 +240,8 @@
  <script>
 
     function loadCategory(category) {
-    // Fix the URL path - ensure it's correct
     const url = new URL(window.location.href);
-    url.pathname = '/views/admin/admin-menu.php'; // Set correct base path
+    url.pathname = '/views/admin/admin-menu.php';
     url.searchParams.set('category', category);
     window.location.href = url.toString();
 }

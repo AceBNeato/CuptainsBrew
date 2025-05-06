@@ -13,36 +13,34 @@ const elements = {
   addButton: document.getElementById('add-button')
 };
 
-// Initialize the page
 function initializePage() {
   setupEventListeners();
   checkForErrors();
   loadDefaultMenuItem();
 }
 
-// Set up all event listeners
 function setupEventListeners() {
-  // Menu items
+ 
   elements.menuItems.forEach(item => {
     item.addEventListener("click", handleMenuItemClick);
   });
 
-  // Nav buttons
+
   elements.navButtons.forEach(button => {
     button.addEventListener("click", handleNavButtonClick);
   });
 
-  // Modal close on outside click
+
   window.addEventListener("click", handleOutsideClick);
 
-  // Menu scroll button
+
   const menuNavButton = document.querySelector(".nav-button[href='#menu']");
   if (menuNavButton) {
     menuNavButton.addEventListener("click", handleMenuScroll);
   }
 }
 
-// Error handling
+
 function checkForErrors() {
   const url = new URL(window.location.href);
   if (url.pathname.includes('null') || url.pathname.includes('videsr') || url.pathname.includes('adria')) {
@@ -53,7 +51,7 @@ function checkForErrors() {
   }
 }
 
-// Menu item loading
+
 function loadDefaultMenuItem() {
   const defaultMenu = document.querySelector(".menu-item.active")?.getAttribute("data-page");
   if (defaultMenu) {
@@ -99,6 +97,8 @@ async function loadMenuItem(page) {
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 // Event handlers
 function handleMenuItemClick() {
   elements.menuItems.forEach(el => el.classList.remove("active"));
@@ -123,6 +123,8 @@ function handleOutsideClick(event) {
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 // Modal functions
 function openAddItemModal() {
   elements.addItemModal.style.display = 'block';
@@ -132,10 +134,13 @@ function closeAddItemModal() {
   elements.addItemModal.style.display = 'none';
 }
 
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 function openManageModal(name, price, description, image, id, category) {
   // Set view mode
   elements.viewMode.style.display = 'block';
-  elements.editItemForm.style.display = 'none';
   elements.editFormContainer.style.display = 'block';
   elements.addButton.style.display = 'none';
 
@@ -157,11 +162,6 @@ function openManageModal(name, price, description, image, id, category) {
   // Store current ID
   window.currentItemIdToDelete = id;
 
-
-
-
-  
-
 document.querySelectorAll('.menu-card').forEach(card => {
     card.classList.remove('active');
 });
@@ -172,6 +172,9 @@ if (card) {
 }
 
 }
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 
 function closeModal() {
   elements.editFormContainer.style.display = 'none';
@@ -189,18 +192,22 @@ function closeModal() {
 }
 
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 
 function enableEditMode() {
-  elements.viewMode.style.display = 'none';
-  elements.editItemForm.style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
+  document.querySelector('.form-container').style.display = 'block';
 }
 
 function cancelEditMode() {
-  elements.editItemForm.style.display = 'none';
-  elements.viewMode.style.display = 'block';
+  document.getElementById('overlay').style.display = 'none';
+  document.querySelector('.form-container').style.display = 'none';
 }
 
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 
 function deleteItem() {
@@ -219,5 +226,14 @@ function deleteItem() {
     form.submit();
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
 
 document.addEventListener("DOMContentLoaded", initializePage);
