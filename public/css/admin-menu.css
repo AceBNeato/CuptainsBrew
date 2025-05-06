@@ -409,7 +409,7 @@ img#login-overlay {
 
 .menu-card.active {
     background-color: #f0e6d2; /* Light cream background */
-    box-shadow: 0 0 10px rgba(74, 59, 43, 0.3); /* Soft shadow */
+    box-shadow: 0 0 10px rgba(74, 59, 43, 0.3);
 }
 
 
@@ -422,7 +422,7 @@ img#login-overlay {
 }
 
 .menu-card.active .menu-manage {
-    background-color: #4a3b2b; /* Dark brown button */
+    background-color: #4a3b2b; 
     color: white;
 }
 
@@ -456,14 +456,14 @@ img#login-overlay {
     font-weight: 400;
     cursor: pointer;
     transition: border-bottom 0.3s ease, color 0.3s ease;
-    border-bottom: 0 solid transparent; /* Start with no visible border */
+    border-bottom: 0 solid transparent; 
     transition: .5s;
 }
 
 .menu-item:hover {
     background-color: #D7BFA5;
     color: #4a3b2b;
-    border-bottom-width: 5px; /* Animate to full border width */
+    border-bottom-width: 5px; 
     border-bottom-width: 5px;
     border-bottom-color: #4a3b2b;
     color: #4a3b2b;
