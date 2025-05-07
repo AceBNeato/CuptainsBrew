@@ -71,6 +71,8 @@
       position: sticky;
       top: 70px;
       z-index: 999;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
     }
 
     .menu-item {
@@ -95,7 +97,7 @@
     .search-box {
       display: flex;
       align-items: center;
-      background: #A9D6E5;
+      background:#ffe9d2;
       border-radius: 20px;
       padding: 0.3rem 1rem;
     }
@@ -233,14 +235,13 @@
     }
 
     #view-mode button:hover {
-      background: #235A73;
+      background:rgb(2, 31, 45);
     }
 
     #view-mode button:first-of-type {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(44, 110, 138, 0.5);
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -370,7 +371,7 @@
     }
 
     .modal-content {
-      background: #A9D6E5;
+      background: white;
       margin: 5% auto;
       padding: 2rem;
       border-radius: 10px;
@@ -391,7 +392,8 @@
     }
 
     .close-btn:hover {
-      color: #235A73;
+      color:rgb(1, 24, 35);
+      
     }
 
     .modal-content h2 {
@@ -413,9 +415,9 @@
       width: 100%;
       padding: 0.5rem;
       margin-top: 0.3rem;
-      border: none;
+      border-color: #A9D6E5;
       border-radius: 5px;
-      background: #87BFD1;
+      background: white;
       color: #4a3b2b;
       font-size: 0.9rem;
     }
@@ -424,6 +426,119 @@
       min-height: 100px;
       resize: vertical;
     }
+
+
+    .footer-bottom {
+    background-color: #FFFAEE;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+}
+
+
+
+
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 2vw;
+    text-align: center;
+  }
+
+  .logo-section img {
+    width: 40vw;
+    margin: 0 0 2vw 0;
+  }
+
+  .nav-menu {
+    flex-direction: column;
+    gap: 1vw;
+    width: 100%;
+  }
+
+  .nav-button {
+    padding: 1vw;
+    width: 100%;
+    font-size: 3vw;
+  }
+
+  .menu-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1vw;
+    top: 25vw;
+  }
+
+  .menu-item {
+    padding: 1vw;
+    font-size: 2.5vw;
+    margin: 0.5vw;
+  }
+
+  .search-box {
+    margin-top: 1vw;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 2.5vw;
+  }
+
+  .main-content {
+    flex-direction: column;
+    padding: 2vw;
+  }
+
+  .edit-container {
+    position: static;
+    margin-top: 2vw;
+  }
+
+  .form-container {
+    width: 95%;
+    padding: 2vw;
+  }
+
+  .modal-content {
+    width: 90%;
+    margin: 15% auto;
+    padding: 3vw;
+  }
+  
+  /* Adjust font sizes for mobile */
+  .menu-title {
+    font-size: 3.5vw;
+  }
+  
+  .menu-price {
+    font-size: 3vw;
+  }
+  
+  .menu-desc {
+    font-size: 2.5vw;
+  }
+  
+  #view-name {
+    font-size: 4vw;
+  }
+  
+  #view-price {
+    font-size: 3.5vw;
+  }
+  
+  #view-description {
+    font-size: 3vw;
+  }
+  
+  .add-button {
+    font-size: 3vw;
+  }
+}
   </style>
 </head>
 <body>
@@ -465,36 +580,38 @@
     <img src="public/images/icons/coffee.png" alt="">
   </div>
 
-  <main class="main-content">
-    <div class="products-container"> 
-        <section id="menu-list">
-          <?php
-           include 'partials/menu-items.php';
-           ?>
-        </section>
-    </div>
+<main class="main-content">
+  <div class="products-container"> 
+    <section id="menu-list">
+      <?php include 'partials/menu-items.php'; ?>
+    </section>
+  </div>
 
-    <div class="edit-container">
-      <div class="edit-section" id="edit-section">
-        <div id="edit-form-container" style="display: none;">
-          <div id="view-mode">
-            <img id="view-image" src="" alt="Item Image">
-            <input type="hidden" name="existing_image" id="edit-existing-image">
-            <h3 id="view-name"></h3>
-            <p id="view-price"></p>
-            <p id="view-description"></p>
-            <form action="">
-              <input type="checkbox">
-            </form>
-            <button onclick="closeModal()">X</button>
-            <button onclick="enableEditMode()">Edit</button>
-            <button onclick="deleteItem()">Delete</button>
-          </div>
+  <div class="edit-container">
+    <div class="edit-section" id="edit-section">
+      <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
+      
+      <div id="no-item-selected" style="margin-top: 20px; text-align: center;">
+        <p>Select an item to edit or add a new one</p>
+      </div>
+      
+      <!-- This will be shown when an item is selected -->
+      <div id="edit-form-container" style="display: none;">
+        <div id="view-mode">
+          <button onclick="closeModal()" class="close-btn">X</button>
+        
+          <img id="view-image" src="" alt="Item Image">
+          <input type="hidden" name="existing_image" id="edit-existing-image">
+          <h3 id="view-name"></h3>
+          <p id="view-price"></p>
+          <p id="view-description"></p>
+          <button onclick="enableEditMode()">Edit</button>
+          <button onclick="deleteItem()">Delete</button>
         </div>
-        <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 
   <div id="overlay"></div>
 
@@ -523,10 +640,13 @@
       <form action="/controllers/add-item.php" method="POST" enctype="multipart/form-data">
         <label for="item-name">Item Name</label>
         <input type="text" id="item-name" name="item_name" required />
-        <label for="item-description">Description</label>
-        <textarea id="item-description" name="item_description" required></textarea>
+
         <label for="item-price">Price</label>
         <input type="number" id="item-price" name="item_price" step="0.01" required />
+        
+        <label for="item-description">Description</label>
+        <textarea id="item-description" name="item_description" required></textarea>
+        
         <label for="item-category">Category</label>
         <select id="item-category" name="item_category" required>
           <option value="coffee">Coffee</option>
@@ -535,6 +655,7 @@
           <option value="milktea">MilkTea</option>
           <option value="soda">Soda</option>
         </select>
+        
         <label for="item-image">Image</label>
         <input type="file" id="item-image" name="item_image" accept="image/*" />
         <button class="add-button" type="submit">Add Item</button>

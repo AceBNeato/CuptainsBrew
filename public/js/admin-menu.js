@@ -123,15 +123,37 @@ function handleOutsideClick(event) {
   }
 }
 
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+function enableEditMode() {
+  document.getElementById('overlay').style.display = 'block';
+  document.querySelector('.form-container').style.display = 'block';
+}
+
+function cancelEditMode() {
+  document.getElementById('overlay').style.display = 'none';
+  document.querySelector('.form-container').style.display = 'none';
+}
+
+// Other existing functions...
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 // Modal functions
 function openAddItemModal() {
-  elements.addItemModal.style.display = 'block';
+  document.getElementById('addItemModal').style.display = 'block';
+  document.getElementById('overlay').style.display = 'block';
 }
 
 function closeAddItemModal() {
-  elements.addItemModal.style.display = 'none';
+  document.getElementById('addItemModal').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
 }
 
 
@@ -144,6 +166,7 @@ function openManageModal(name, price, description, image, id, category) {
   elements.editFormContainer.style.display = 'block';
   elements.addButton.style.display = 'none';
 
+  document.getElementById('no-item-selected').style.display = 'none';
   // Populate view data
   document.getElementById('view-image').src = '/public/' + image;
   document.getElementById('view-name').textContent = name;
@@ -192,19 +215,6 @@ function closeModal() {
 }
 
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-
-function enableEditMode() {
-  document.getElementById('overlay').style.display = 'block';
-  document.querySelector('.form-container').style.display = 'block';
-}
-
-function cancelEditMode() {
-  document.getElementById('overlay').style.display = 'none';
-  document.querySelector('.form-container').style.display = 'none';
-}
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -237,3 +247,6 @@ function deleteItem() {
 
 
 document.addEventListener("DOMContentLoaded", initializePage);
+
+/////////////////////////////////////////////////////////////////////////
+////////////////////////////SWEET ALERTS////////////////////////////////////////////
