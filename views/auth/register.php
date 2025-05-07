@@ -5,7 +5,7 @@ $db_pass = '';
 $db_name = 'cafe_db';
 
 // Initialize variables
-$name = $email = '';
+$username = $email = '';
 $errors = [];
 
 // Connect to MySQL server
@@ -14,17 +14,18 @@ $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 // Process form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate and sanitize inputs
-    $name = trim($conn->real_escape_string($_POST['name'] ?? ''));
+    $username = trim($conn->real_escape_string($_POST['username'] ?? ''));
     $email = trim($conn->real_escape_string($_POST['email'] ?? ''));
     $password = trim($_POST['password'] ?? '');
     $confirm_password = trim($_POST['password_confirmation'] ?? '');
     
     // Simple validation
-    if (empty($name)) {
-        $errors[] = "Name is required";
+    if (empty($username)) {
+        $errors[] = "Username is required";
     }
     
     if (empty($email)) {
@@ -43,16 +44,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Passwords do not match";
     }
     
-    // Check if email already exists
+    // Check if username or email already exists
     if (empty($errors)) {
-        $sql = "SELECT id FROM users WHERE email = ?";
+        $sql = "SELECT id FROM users WHERE email = ? OR username = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("ss", $email, $username);
         $stmt->execute();
         $stmt->store_result();
         
         if ($stmt->num_rows > 0) {
-            $errors[] = "Email is already taken";
+            $errors[] = "Username or email already taken";
         }
         $stmt->close();
     }
@@ -63,13 +64,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
         
         // Insert user into database
-        $sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sss", $name, $email, $hashed_password);
+        $stmt->bind_param("sss", $username, $hashed_password, $email);
         
         if ($stmt->execute()) {
             // Registration successful - redirect to login
-            header("Location: /views/login.html");
+            header("Location: /views/auth/login.php");
             exit();
         } else {
             $errors[] = "Something went wrong. Please try again later.";
@@ -118,8 +119,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
         
         <form class="register-form" action="register.php" method="POST">
-            <label for="name" id="label">Name</label>
-            <input id="name" type="text" name="name" placeholder="Enter Name" value="<?php echo htmlspecialchars($name); ?>" required>
+            <label for="username" id="label">Username</label>
+            <input id="username" type="text" name="username" placeholder="Enter Username" value="<?php echo htmlspecialchars($username); ?>" required>
 
             <label for="email" id="label">Email Address</label>
             <input id="email" type="email" name="email" placeholder="Enter Email" value="<?php echo htmlspecialchars($email); ?>" required>
@@ -144,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
         
         <div class="login-link">
-            <p>Already have an account? <a href="/views/login.html">Login here</a></p>
+            <p>Already have an account? <a href="/views/auth/login.php">Login here</a></p>
         </div>
     </div>
  

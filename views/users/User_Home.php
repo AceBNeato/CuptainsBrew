@@ -478,7 +478,7 @@
             <h1 class="glow">Captain's Brew Cafe</h1>
             <p>Where every sip is an adventure. We've got your brew covered.<br>
                Drop anchor, relax, and let your coffee journey begin!</p>
-            <button onclick="window.location.href = '/views/auth/login.php'" class="centered-button" id="view-menu-button">Get Started</button>
+            <button onclick="window.location.href = '/views/users/User-Menu.php'" class="centered-button" id="view-menu-button">View Menu</button>
         </div>
     </div>
 
