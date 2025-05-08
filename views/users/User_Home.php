@@ -482,25 +482,15 @@
         </div>
     </div>
 
-    <div class="menu-image-container">
-        <img src="/public/images/background/menu-bg.png" alt="Menu Background" id="gsmenu">
-        <div class="centered-menu">
-            <h1>MENU</h1>
-            <p>Where every sip is an adventure. We've got your brew covered.<br>
-               Drop anchor, relax, and let your coffee journey begin!</p>
-        </div>
-    </div>
 
     <div class="carousel-container">
-        <div class="carousel-divider">═══════════════════════════════════════════════════════════════════════════════════════════</div>
         <div class="carousel-track">
             <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
             <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
             <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
             <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
         </div>
-        <div class="carousel-divider">═══════════════════════════════════════════════════════════════════════════════════════════</div>
-    </div>
+        </div>
 
     <button id="back-to-top"><img src="/images/top-icon.png" alt="Go to Top"></button>
 
