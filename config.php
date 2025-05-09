@@ -1,73 +1,40 @@
 <?php
 $db_host = 'localhost';
 $db_user = 'root'; 
-$db_pass = ''; 
+$db_pass = ''; // Default XAMPP/WAMP password (change if needed)
 $db_name = 'cafe_db';
 
-
-// Enable error reporting for debugging (disable in production)
+// Enable error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Establish database connection
 try {
-    // Create connection without selecting database
-    $conn = new mysqli($host, $username, $password);
+    // Connect to MySQL (without selecting DB first)
+    $conn = new mysqli($db_host, $db_user, $db_pass);
+    if ($conn->connect_error) {
+        die("MySQL connection failed: " . $conn->connect_error);
+    }
 
-// Create database if not exists
-if (!$conn->query("CREATE DATABASE IF NOT EXISTS $db_name")) {
-    die("Error creating database: " . $conn->error);
-}
+    // Create database if not exists
+    if (!$conn->query("CREATE DATABASE IF NOT EXISTS $db_name")) {
+        die("Error creating database: " . $conn->error);
+    }
 
-// Select database
-if (!$conn->select_db($db_name)) {
-    die("Cannot use database: " . $conn->error);
-}
+    // Select the database
+    if (!$conn->select_db($db_name)) {
+        die("Cannot use database: " . $conn->error);
+    }
 
-// Create categories table (simplified without slug)
-$sql = "CREATE TABLE IF NOT EXISTS categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
-)";
-if (!$conn->query($sql)) {
-    die("Error creating categories table: " . $conn->error);
-}
-
-// Insert basic categories
-$sql = "INSERT IGNORE INTO categories (name) VALUES 
-    ('Coffee'),
-    ('Non-Coffee'),
-    ('Frappe'),
-    ('MilkTea'),
-    ('Soda')";
-if (!$conn->query($sql)) {
-    die("Error inserting categories: " . $conn->error);
-}
-
-// Create products table
-$sql = "CREATE TABLE IF NOT EXISTS products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT NOT NULL,
-    item_name VARCHAR(255) NOT NULL,
-    item_price DECIMAL(10,2) NOT NULL,
-    item_description TEXT NOT NULL,
-    item_image VARCHAR(255),
-    FOREIGN KEY (category_id) REFERENCES categories(id)
-)";
-if (!$conn->query($sql)) {
-    die("Error creating products table: " . $conn->error);
-}
-
-    // Define table creation queries
+    // Define tables in CORRECT ORDER (parents first, then children)
     $queries = [
-        // Categories table
+        // Categories (independent)
         "CREATE TABLE IF NOT EXISTS categories (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL UNIQUE
-        )",
-        
-        // Products table
+        ) ENGINE=InnoDB",
+
+        // Products (depends on categories)
         "CREATE TABLE IF NOT EXISTS products (
             id INT AUTO_INCREMENT PRIMARY KEY,
             category_id INT NOT NULL,
@@ -77,9 +44,9 @@ if (!$conn->query($sql)) {
             item_image VARCHAR(255) NOT NULL,
             stock INT NOT NULL DEFAULT 0,
             FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
-        )",
-        
-        // Users table
+        ) ENGINE=InnoDB",
+
+        // Users (independent)
         "CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) NOT NULL UNIQUE,
@@ -88,9 +55,28 @@ if (!$conn->query($sql)) {
             address TEXT,
             contact VARCHAR(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        
-        // Orders table
+        ) ENGINE=InnoDB",
+
+        // Cart (depends on users and products)
+        "CREATE TABLE IF NOT EXISTS cart (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            product_id INT NOT NULL,
+            quantity INT NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB",
+
+        // Riders (independent)
+        "CREATE TABLE IF NOT EXISTS riders (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            contact VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB",
+
+        // Orders (depends on users and riders)
         "CREATE TABLE IF NOT EXISTS orders (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT,
@@ -103,9 +89,9 @@ if (!$conn->query($sql)) {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
             FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL
-        )",
-        
-        // Order_items table
+        ) ENGINE=InnoDB",
+
+        // Order_items (depends on orders and products)
         "CREATE TABLE IF NOT EXISTS order_items (
             id INT AUTO_INCREMENT PRIMARY KEY,
             order_id INT NOT NULL,
@@ -114,17 +100,9 @@ if (!$conn->query($sql)) {
             price DECIMAL(10, 2) NOT NULL,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-        )",
-        
-        // Riders table
-        "CREATE TABLE IF NOT EXISTS riders (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            contact VARCHAR(20) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )",
-        
-        // Payments table
+        ) ENGINE=InnoDB",
+
+        // Payments (depends on orders)
         "CREATE TABLE IF NOT EXISTS payments (
             id INT AUTO_INCREMENT PRIMARY KEY,
             order_id INT NOT NULL,
@@ -134,9 +112,9 @@ if (!$conn->query($sql)) {
             transaction_id VARCHAR(255),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-        )",
-        
-        // Reviews table
+        ) ENGINE=InnoDB",
+
+        // Reviews (depends on orders and users)
         "CREATE TABLE IF NOT EXISTS reviews (
             id INT AUTO_INCREMENT PRIMARY KEY,
             order_id INT NOT NULL,
@@ -146,31 +124,28 @@ if (!$conn->query($sql)) {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        )"
+        ) ENGINE=InnoDB"
     ];
 
-    // Execute table creation queries
+    // Execute queries
     foreach ($queries as $query) {
         if (!$conn->query($query)) {
-            throw new Exception("Failed to create table: " . $conn->error);
+            throw new Exception("Table creation failed: " . $conn->error);
         }
     }
 
+    // Insert default categories (only if empty)
+    $conn->query("INSERT IGNORE INTO categories (name) VALUES 
+        ('Coffee'), ('Non-Coffee'), ('Frappe'), ('MilkTea'), ('Soda')");
 
+    // Start session
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-
-    
+    global $conn;
 } catch (Exception $e) {
-    // Log error to file and display user-friendly message
     error_log($e->getMessage(), 3, __DIR__ . '/error.log');
-    die("<div class='error-message'>Unable to connect to the database or set up schema. Please try again later.</div>");
+    die("Database error. Check error.log for details.");
 }
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Make $conn available globally
-global $conn;
 ?>

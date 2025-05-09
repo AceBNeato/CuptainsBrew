@@ -112,6 +112,27 @@ require_once __DIR__ . '/../../config.php';
             position: relative;
         }
 
+        .menu-dropdown .nav-button {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-dropdown .nav-button::after {
+            display: none;
+        }
+
+        .menu-dropdown .nav-button::before {
+            content: '▼';
+            font-size: 0.6rem;
+            margin-left: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .menu-dropdown:hover .nav-button::before,
+        .menu-dropdown:focus-within .nav-button::before {
+            transform: rotate(180deg);
+        }
+
         .menu-dropdown:hover .dropdown-content,
         .menu-dropdown:focus-within .dropdown-content {
             opacity: 1;
@@ -134,6 +155,7 @@ require_once __DIR__ . '/../../config.php';
             z-index: 100;
             padding: 0.5rem 0;
             margin-top: 0.5rem;
+            border: 1px solid var(--primary-light);
         }
 
         .dropdown-content::before {
@@ -146,6 +168,8 @@ require_once __DIR__ . '/../../config.php';
             background: var(--white);
             transform: rotate(45deg);
             box-shadow: -2px -2px 5px rgba(0,0,0,0.05);
+            border-top: 1px solid var(--primary-light);
+            border-left: 1px solid var(--primary-light);
         }
 
         .menu-item {
@@ -172,50 +196,30 @@ require_once __DIR__ . '/../../config.php';
             background: var(--secondary-light);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
-            flex-wrap: wrap;
-        }
-
-        .menu-bar .menu-item {
-            padding: 0.5rem 1.5rem;
-            margin: 0 0.5rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--secondary);
-            transition: var(--transition);
-        }
-
-        .menu-bar .menu-item.active {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .menu-bar .menu-item:hover:not(.active) {
-            background: var(--primary-light);
-            color: var(--primary);
         }
 
         .search-box {
-            margin-left: auto;
+            width: 100%;
             display: flex;
             align-items: center;
         }
 
         .search-input {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border: 2px solid var(--primary-light);
             border-radius: var(--border-radius);
             outline: none;
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--secondary);
             transition: var(--transition);
-            width: 180px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .search-input:focus {
             border-color: var(--primary);
-            width: 220px;
+            box-shadow: var(--shadow-medium);
         }
 
         /* Icons and Profile */
@@ -275,6 +279,7 @@ require_once __DIR__ . '/../../config.php';
             z-index: 100;
             padding: 0.5rem 0;
             margin-top: 0.75rem;
+            border: 1px solid var(--primary-light);
         }
 
         .profile:hover .dropdown,
@@ -294,6 +299,8 @@ require_once __DIR__ . '/../../config.php';
             background: var(--white);
             transform: rotate(45deg);
             box-shadow: -2px -2px 5px rgba(0,0,0,0.05);
+            border-top: 1px solid var(--primary-light);
+            border-left: 1px solid var(--primary-light);
         }
 
         .profile .dropdown a {
@@ -307,81 +314,6 @@ require_once __DIR__ . '/../../config.php';
         .profile .dropdown a:hover {
             background-color: var(--secondary-light);
             color: var(--primary);
-        }
-
-        /* Products Container */
-        .products-container {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .product-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-light);
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .product-content {
-            padding: 1.5rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-title {
-            font-size: 1.2rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .product-price {
-            font-size: 1.1rem;
-            color: var(--secondary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .product-desc {
-            font-size: 0.9rem;
-            color: var(--secondary);
-            margin-bottom: 1.5rem;
-            flex: 1;
-        }
-
-        .add-to-cart {
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            text-align: center;
-        }
-
-        .add-to-cart:hover {
-            background: var(--primary-dark);
         }
 
         /* Menu Cards */
@@ -488,6 +420,162 @@ require_once __DIR__ . '/../../config.php';
             border-radius: 3px;
         }
 
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--primary);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+        }
+
+        .modal-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-details h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .modal-details .price {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-details .description {
+            color: var(--secondary);
+            line-height: 1.6;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .quantity-btn {
+            background: var(--primary-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        #productQuantity {
+            width: 60px;
+            text-align: center;
+            padding: 0.5rem;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .add-to-cart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .cart-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-dark);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 3000;
+        }
+
+        .cart-notification.show {
+            opacity: 1;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .header {
@@ -552,6 +640,7 @@ require_once __DIR__ . '/../../config.php';
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.3s ease;
+                border: none;
             }
             
             .menu-dropdown.active .dropdown-content {
@@ -592,6 +681,7 @@ require_once __DIR__ . '/../../config.php';
                 max-height: 0;
                 overflow: hidden;
                 transition: max-height 0.3s ease;
+                border: none;
             }
             
             .profile.active .dropdown {
@@ -607,23 +697,12 @@ require_once __DIR__ . '/../../config.php';
             }
             
             .menu-bar {
-                flex-direction: column;
                 padding: 1rem;
-            }
-            
-            .menu-bar .menu-item {
-                width: 100%;
-                margin: 0.3rem 0;
-                text-align: center;
-            }
-            
-            .search-box {
-                width: 100%;
-                margin: 0.8rem 0 0;
+                margin: 1rem;
             }
             
             .search-input {
-                width: 100%;
+                padding: 0.75rem 1rem;
             }
             
             .products-container {
@@ -651,6 +730,36 @@ require_once __DIR__ . '/../../config.php';
             .menu-manage {
                 align-self: center;
             }
+
+            .modal-body {
+                flex-direction: column;
+            }
+            
+            .modal-image {
+                width: 100%;
+                max-height: none;
+            }
+            
+            .modal-details {
+                width: 100%;
+                padding-left: 0;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .modal-body {
+                flex-direction: row;
+            }
+            
+            .modal-image {
+                width: 50%;
+                max-height: none;
+            }
+            
+            .modal-details {
+                width: 50%;
+                padding-left: 1.5rem;
+            }
         }
 
         #menu-list-container {
@@ -675,13 +784,12 @@ require_once __DIR__ . '/../../config.php';
                 <a href="/views/users/user-menu.php" class="nav-button">Menu</a>
                 <div class="dropdown-content">
                     <?php
-                    // Fetch categories from database
-                    $categoryQuery = $conn->query("SELECT name FROM categories ORDER BY id");
+                    $categoryQuery = $conn->query("SELECT DISTINCT name FROM categories ORDER BY id");
                     if ($categoryQuery && $categoryQuery->num_rows > 0) {
                         while ($catRow = $categoryQuery->fetch_assoc()) {
                             $catName = htmlspecialchars($catRow['name'], ENT_QUOTES);
                             $catSlug = strtolower(str_replace(' ', '-', $catName));
-                            echo "<a href='/views/users/user-menu.php?category=" . urlencode($catSlug) . "' class='menu-item'>$catName</a>";
+                            echo "<a href='/views/users/user-menu.php?category=" . urlencode($catSlug) . "','-', class='menu-item'>$catName</a>";
                         }
                     }
                     ?>
@@ -701,7 +809,6 @@ require_once __DIR__ . '/../../config.php';
                 <img src="/public/images/icons/profile-icon.png" alt="Profile">
                 <span>
                     <?php 
-                    // Display username if logged in
                     echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
                     ?>
                 </span>
@@ -714,43 +821,10 @@ require_once __DIR__ . '/../../config.php';
         </nav>
     </header>
 
-    <!-- Menu Bar -->
+    <!-- Menu Bar with Search -->
     <div class="menu-bar">
-        <?php
-        $currentCategory = $_GET['category'] ?? 'coffee';
-        
-        // Get categories from database
-        $categories = [];
-        $catQuery = $conn->query("SELECT id, name FROM categories ORDER BY id");
-        
-        if ($catQuery && $catQuery->num_rows > 0) {
-            while ($row = $catQuery->fetch_assoc()) {
-                $name = $row['name'];
-                $key = strtolower(str_replace(' ', '-', $name));
-                $categories[$key] = $name;
-            }
-        }
-        
-        // Default categories if database is empty
-        if (empty($categories)) {
-            $categories = [
-                'coffee' => 'Coffee',
-                'non-coffee' => 'Non-Coffee',
-                'frappe' => 'Frappe',
-                'milktea' => 'Milk Tea',
-                'soda' => 'Soda'
-            ];
-        }
-        
-        foreach ($categories as $key => $name): ?>
-            <div class="menu-item <?= $currentCategory === $key ? 'active' : '' ?>" 
-                 onclick="loadCategory('<?= $key ?>')">
-                <?= htmlspecialchars($name) ?>
-            </div>
-        <?php endforeach; ?>
-        
         <div class="search-box">
-            <input type="text" class="search-input" placeholder="🔍 Search item" 
+            <input type="text" class="search-input" placeholder="🔍 Search for drinks..." 
                    id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
                    onkeyup="handleSearch(event)"/>
         </div>
@@ -759,12 +833,13 @@ require_once __DIR__ . '/../../config.php';
     <!-- Category Title -->
     <h1 class="category-title">
         <?php
+        $currentCategory = $_GET['category'] ?? 'coffee';
         $displayCategory = str_replace('-', ' ', $currentCategory);
         echo ucwords(htmlspecialchars($displayCategory));
         ?>
     </h1>
 
-    <!-- Products Container -->
+    <!-- Menu List Container -->
     <div id="menu-list-container">
         <?php
         $category = $_GET['category'] ?? 'coffee';
@@ -810,12 +885,7 @@ require_once __DIR__ . '/../../config.php';
                                     <p class='menu-price'>₱ {$row['item_price']}</p>
                                     <p class='menu-desc'>$desc</p>
                                 </div>
-                                <button class='menu-manage' onclick='addToCart(
-                                    {$row['id']}, 
-                                    \"$name\", 
-                                    {$row['item_price']}, 
-                                    \"$image\"
-                                )'>+</button>
+                                <button class='menu-manage'>+</button>
                               </div>";
                     }
                 } else {
@@ -829,16 +899,38 @@ require_once __DIR__ . '/../../config.php';
         ?>
     </div>
 
-    <!-- Scripts -->
+    <!-- Product View Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <img id="modalProductImage" src="" alt="Product Image" class="modal-image">
+                <div class="modal-details">
+                    <h2 id="modalProductName"></h2>
+                    <p id="modalProductPrice" class="price"></p>
+                    <p id="modalProductDesc" class="description"></p>
+                    
+                    <div class="quantity-control">
+                        <button class="quantity-btn minus">-</button>
+                        <input type="number" id="productQuantity" value="1" min="1" max="10">
+                        <button class="quantity-btn plus">+</button>
+                    </div>
+                    
+                    <button id="addToCartModal" class="add-to-cart-btn">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
     <script>
         // Mobile Menu Toggle
         document.getElementById('hamburger-menu').addEventListener('click', function() {
             document.getElementById('nav-menu').classList.toggle('active');
         });
 
-        // For mobile: Toggle dropdown menus
+        // Mobile Dropdown Handling
         if (window.innerWidth <= 768) {
-            // Menu dropdown toggle
             const menuDropdown = document.querySelector('.menu-dropdown');
             menuDropdown.addEventListener('click', function(e) {
                 if (e.target.classList.contains('nav-button')) {
@@ -847,7 +939,6 @@ require_once __DIR__ . '/../../config.php';
                 }
             });
 
-            // Profile dropdown toggle
             const profile = document.querySelector('.profile');
             profile.addEventListener('click', function(e) {
                 if (!e.target.closest('.dropdown')) {
@@ -857,19 +948,7 @@ require_once __DIR__ . '/../../config.php';
             });
         }
 
-        // Load category
-        function loadCategory(category) {
-            let searchQuery = document.getElementById('search-input').value;
-            let url = '/views/users/user-menu.php?category=' + encodeURIComponent(category);
-            
-            if (searchQuery) {
-                url += '&search=' + encodeURIComponent(searchQuery);
-            }
-            
-            window.location.href = url;
-        }
-
-        // Handle search
+        // Search Functionality
         function handleSearch(event) {
             if (event.key === 'Enter') {
                 let category = '<?= htmlspecialchars($currentCategory) ?>';
@@ -884,35 +963,138 @@ require_once __DIR__ . '/../../config.php';
             }
         }
 
-        // Add to cart function
-        function addToCart(productId, name, price, image) {
-            // You can implement this to add items to cart
-            // For example with AJAX or storing in localStorage
-            console.log(`Adding to cart: ${name} (${productId}) - ₱${price}`);
+        // Product Modal Functionality
+        let currentProduct = null;
+
+        function showProductModal(product) {
+            currentProduct = product;
             
-            // Example using localStorage
+            // Set modal content
+            document.getElementById('modalProductImage').src = '/public/' + product.image;
+            document.getElementById('modalProductName').textContent = product.name;
+            document.getElementById('modalProductPrice').textContent = '₱' + product.price;
+            document.getElementById('modalProductDesc').textContent = product.desc || 'No description available';
+            document.getElementById('productQuantity').value = 1;
+            
+            // Show modal
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active');
+            currentProduct = null;
+        }
+
+        function setupModalListeners() {
+            // Close modal when clicking X
+            document.querySelector('.close-modal').addEventListener('click', closeProductModal);
+            
+            // Close modal when clicking outside content
+            document.getElementById('productModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeProductModal();
+                }
+            });
+            
+            // Quantity controls
+            document.querySelector('.quantity-btn.minus').addEventListener('click', function() {
+                const quantityInput = document.getElementById('productQuantity');
+                if (quantityInput.value > 1) {
+                    quantityInput.value--;
+                }
+            });
+            
+            document.querySelector('.quantity-btn.plus').addEventListener('click', function() {
+                const quantityInput = document.getElementById('productQuantity');
+                if (quantityInput.value < 10) {
+                    quantityInput.value++;
+                }
+            });
+            
+            // Add to cart from modal
+            document.getElementById('addToCartModal').addEventListener('click', function() {
+                const quantity = parseInt(document.getElementById('productQuantity').value);
+                addToCart(
+                    currentProduct.id, 
+                    currentProduct.name, 
+                    currentProduct.price, 
+                    currentProduct.image,
+                    quantity
+                );
+                closeProductModal();
+            });
+        }
+
+        // Cart Functionality
+        function addToCart(productId, name, price, image, quantity = 1) {
+            console.log(`Adding to cart: ${name} (${productId}) - ₱${price} x ${quantity}`);
+            
             let cart = JSON.parse(localStorage.getItem('cart') || '[]');
             
-            // Check if product already exists in cart
             let existingProduct = cart.find(item => item.id === productId);
             
             if (existingProduct) {
-                existingProduct.quantity += 1;
+                existingProduct.quantity += quantity;
             } else {
                 cart.push({
                     id: productId,
                     name: name,
                     price: price,
                     image: image,
-                    quantity: 1
+                    quantity: quantity
                 });
             }
             
             localStorage.setItem('cart', JSON.stringify(cart));
             
-            // Show notification or update cart icon
-            alert(`Added ${name} to cart!`);
+            // Show notification
+            showCartNotification(`${name} added to cart (${quantity}x)`);
         }
+
+        // Cart Notification
+        function showCartNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'cart-notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setupModalListeners();
+            
+            // Add click event to all + buttons
+            document.querySelectorAll('.menu-manage').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const card = this.closest('.menu-card');
+                    const productId = card.id.replace('menuCard-', '');
+                    const productName = card.querySelector('.menu-title').textContent;
+                    const productPrice = parseFloat(card.querySelector('.menu-price').textContent.replace('₱ ', ''));
+                    const productImage = card.querySelector('.menu-image').src.split('/public/')[1];
+                    const productDesc = card.querySelector('.menu-desc').textContent;
+                    
+                    showProductModal({
+                        id: productId,
+                        name: productName,
+                        price: productPrice,
+                        image: productImage,
+                        desc: productDesc
+                    });
+                });
+            });
+        });
     </script>
 </body>
 </html>

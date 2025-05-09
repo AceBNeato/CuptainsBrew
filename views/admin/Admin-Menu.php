@@ -12,6 +12,7 @@
       padding: 0;
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
@@ -69,7 +70,7 @@
       background: #FFFAEE;
       box-shadow: 0 2px 5px rgba(74, 59, 43, 0.2);
       position: sticky;
-      top: 70px;
+      top: 110px;
       z-index: 999;
       border-bottom-left-radius: 10px;
       border-bottom-right-radius: 10px;
@@ -185,7 +186,7 @@
       border-radius: 10px;
       padding: 2rem;
       position: sticky;
-      top: 140px;
+      top: 195px;
       height: fit-content;
       box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
     }
@@ -589,6 +590,7 @@
 
   <div class="edit-container">
     <div class="edit-section" id="edit-section">
+      <h1></h1>
       <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
       
       <div id="no-item-selected" style="margin-top: 20px; text-align: center;">
