@@ -1,192 +1,61 @@
 <?php
-session_start();
+// Use an absolute path based on the current directory
+$config_path = __DIR__ . '..\..\config.php';
 
-// Debug output (remove in production)
-echo "<pre>POST data: ";
-print_r($_POST);
-echo "FILES data: ";
-print_r($_FILES);
-echo "</pre>";
-
-$configPath = __DIR__ . '/../config.php';
-require_once $configPath;
-
-if ($conn->connect_error) {
-    $_SESSION['swal'] = [
-        'title' => 'Database Error',
-        'text' => "Connection failed: " . $conn->connect_error,
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
+if (!file_exists($config_path)) {
+    die("Error: config.php not found at $config_path. Please check the file path.");
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['swal'] = [
-        'title' => 'Invalid Request',
-        'text' => 'Form not submitted properly',
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
+require_once $config_path;
 
-// Validate required fields
-$required = ['item_name', 'item_price', 'item_category'];
-foreach ($required as $field) {
-    if (empty($_POST[$field])) {
-        $_SESSION['swal'] = [
-            'title' => 'Missing Information',
-            'text' => "Please fill in all required fields. Missing: " . $field,
-            'icon' => 'error'
-        ];
-        header('Location: /views/admin/Admin-Menu.php');
-        exit;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // Sanitize inputs
+        $item_name = $conn->real_escape_string($_POST['item_name']);
+        $item_price = (float)$_POST['item_price'];
+        $item_description = $conn->real_escape_string($_POST['item_description']);
+        $category_id = (int)$_POST['category_id'];
+
+        // Handle file upload
+        $item_image = '';
+        if (isset($_FILES['item_image']) && $_FILES['item_image']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = __DIR__ . '/../../public/assets/uploads/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+
+            $file_name = uniqid() . '_' . basename($_FILES['item_image']['name']);
+            $file_path = $upload_dir . $file_name;
+
+            if (move_uploaded_file($_FILES['item_image']['tmp_name'], $file_path)) {
+                $item_image = 'images/' . $file_name;
+            } else {
+                throw new Exception("Failed to upload image.");
+            }
+        } else {
+            throw new Exception("Image upload failed or no image provided.");
+        }
+
+        // Insert into the database
+        $query = "INSERT INTO products (category_id, item_name, item_description, item_price, item_image) 
+                  VALUES ($category_id, '$item_name', '$item_description', $item_price, '$item_image')";
+        
+        if (!$conn->query($query)) {
+            throw new Exception("Failed to add item: " . $conn->error);
+        }
+
+        // Redirect back to admin-menu.php with success message
+        header("Location: /views/admin/admin-menu.php?tab=" . ($_POST['category_id'] <= 2 ? 'drinks' : 'foods') . "&category_id=$category_id&success=Item added successfully");
+        exit();
+
+    } catch (Exception $e) {
+        // Redirect with error message
+        header("Location: /views/admin/admin-menu.php?tab=" . ($_POST['category_id'] <= 2 ? 'drinks' : 'foods') . "&category_id=$category_id&error=" . urlencode($e->getMessage()));
+        exit();
     }
-}
-
-// Process and validate inputs
-$item_name = trim($conn->real_escape_string($_POST['item_name']));
-$item_description = trim($conn->real_escape_string($_POST['item_description'] ?? ''));
-$item_price = filter_var($_POST['item_price'], FILTER_VALIDATE_FLOAT);
-
-$allowed_categories = ['coffee' => 1, 'non_coffee' => 2, 'frappe' => 3, 'milktea' => 4, 'soda' => 5];
-if (!array_key_exists($_POST['item_category'], $allowed_categories)) {
-    $_SESSION['swal'] = [
-        'title' => 'Invalid Category',
-        'text' => 'Please select a valid category',
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-$item_category_id = $allowed_categories[$_POST['item_category']];
-
-if ($item_price === false || $item_price <= 0) {
-    $_SESSION['swal'] = [
-        'title' => 'Invalid Price',
-        'text' => 'Please enter a valid price greater than 0',
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-
-// Image upload handling
-$imagePath = null;
-if (empty($_FILES['item_image']['name'])) {
-    $_SESSION['swal'] = [
-        'title' => 'Image Required',
-        'text' => 'Please select an image to upload',
-        'icon' => 'warning'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-
-// Proceed with image upload
-$uploadDir = realpath(__DIR__ . '/../public/assets/uploads') . '/';
-if (!is_dir($uploadDir)) {
-    if (!mkdir($uploadDir, 0755, true)) {
-        $_SESSION['swal'] = [
-            'title' => 'Upload Error',
-            'text' => 'Failed to create upload directory',
-            'icon' => 'error'
-        ];
-        header('Location: /views/admin/Admin-Menu.php');
-        exit;
-    }
-}
-
-$fileExt = pathinfo($_FILES['item_image']['name'], PATHINFO_EXTENSION);
-$imageName = uniqid() . '.' . strtolower($fileExt);
-$targetFile = $uploadDir . $imageName;
-$imagePath = 'assets/uploads/' . $imageName;
-
-$allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-$fileType = mime_content_type($_FILES["item_image"]["tmp_name"]);
-
-if (!in_array($fileType, $allowedTypes)) {
-    $_SESSION['swal'] = [
-        'title' => 'Invalid Image',
-        'text' => 'Only JPG, PNG, and GIF images are allowed',
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-
-if ($_FILES['item_image']['size'] > 2000000) {
-    $_SESSION['swal'] = [
-        'title' => 'File Too Large',
-        'text' => 'Image size must be less than 2MB',
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-
-if (!move_uploaded_file($_FILES["item_image"]["tmp_name"], $targetFile)) {
-    $_SESSION['swal'] = [
-        'title' => 'Upload Failed',
-        'text' => 'File upload failed. Error: ' . $_FILES["item_image"]["error"],
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-}
-
-// Database transaction
-$conn->begin_transaction();
-
-try {
-    $stmt = $conn->prepare("INSERT INTO products 
-                          (category_id, item_name, item_price, item_description, item_image) 
-                          VALUES (?, ?, ?, ?, ?)");
-    
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
-    }
-    
-    $stmt->bind_param("issss", 
-        $item_category_id, 
-        $item_name,     
-        $item_price,       
-        $item_description,  
-        $imagePath         
-    );
-
-    if (!$stmt->execute()) {
-        throw new Exception("Execute failed: " . $stmt->error);
-    }
-
-    $newItemId = $conn->insert_id;
-    $stmt->close();
-    $conn->commit();
-    
-    $_SESSION['swal'] = [
-        'title' => 'Success!',
-        'text' => 'Item added successfully',
-        'icon' => 'success',
-        'new_id' => $newItemId
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
-
-} catch (Exception $e) {
-    $conn->rollback();
-    
-    // Clean up uploaded file if database operation failed
-    if (isset($targetFile) && file_exists($targetFile)) {
-        unlink($targetFile);
-    }
-    
-    $_SESSION['swal'] = [
-        'title' => 'Database Error',
-        'text' => $e->getMessage(),
-        'icon' => 'error'
-    ];
-    header('Location: /views/admin/Admin-Menu.php');
-    exit;
+} else {
+    // If not a POST request, redirect back
+    header("Location: /views/admin/admin-menu.php");
+    exit();
 }
 ?>

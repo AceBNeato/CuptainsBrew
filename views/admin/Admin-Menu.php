@@ -6,12 +6,15 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Admin Dashboard - Captain's Brew Cafe</title>
   <link rel="icon" href="/images/logo.png" sizes="any" />
+  <!-- Add SweetAlert2 CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- Add SweetAlert2 JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
       font-family: 'Poppins', sans-serif;
     }
 
@@ -74,33 +77,65 @@
       z-index: 999;
       border-bottom-left-radius: 10px;
       border-bottom-right-radius: 10px;
+      padding: 0 1rem;
     }
 
-    .menu-item {
+    .menu-tabs {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .tab {
       padding: 1rem 2rem;
       color: #4a3b2b;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 500;
-      margin: 0 0.5rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover, .tab.active {
+      background-color: #2C6E8A;
+      color: #fff;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .category-section {
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+
+    .category-section.active {
+      display: flex;
+    }
+
+    .menu-item {
+      padding: 0.5rem 1rem;
+      color: #4a3b2b;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      border-radius: 5px;
     }
 
     .menu-item:hover, .menu-item.active {
       background-color: #2C6E8A;
       color: #fff;
-      border-color: #2C6E8A;
       box-shadow: 0 4px 8px rgba(44, 110, 138, 0.2);
     }
 
     .search-box {
       display: flex;
       align-items: center;
-      background:#ffe9d2;
+      background: #ffe9d2;
       border-radius: 20px;
       padding: 0.3rem 1rem;
+      margin-left: auto;
     }
 
     .search-input {
@@ -236,7 +271,7 @@
     }
 
     #view-mode button:hover {
-      background:rgb(2, 31, 45);
+      background: rgb(2, 31, 45);
     }
 
     #view-mode button:first-of-type {
@@ -393,8 +428,7 @@
     }
 
     .close-btn:hover {
-      color:rgb(1, 24, 35);
-      
+      color: rgb(1, 24, 35);
     }
 
     .modal-content h2 {
@@ -428,163 +462,211 @@
       resize: vertical;
     }
 
-
     .footer-bottom {
-    background-color: #FFFAEE;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    padding: 10px;
-}
+      background-color: #FFFAEE;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      padding: 10px;
+    }
 
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        padding: 2vw;
+        text-align: center;
+      }
 
+      .logo-section img {
+        width: 40vw;
+        margin: 0 0 2vw 0;
+      }
 
+      .nav-menu {
+        flex-direction: column;
+        gap: 1vw;
+        width: 100%;
+      }
 
+      .nav-button {
+        padding: 1vw;
+        width: 100%;
+        font-size: 3vw;
+      }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    padding: 2vw;
-    text-align: center;
-  }
+      .menu-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1vw;
+        top: 25vw;
+      }
 
-  .logo-section img {
-    width: 40vw;
-    margin: 0 0 2vw 0;
-  }
+      .menu-tabs {
+        justify-content: center;
+      }
 
-  .nav-menu {
-    flex-direction: column;
-    gap: 1vw;
-    width: 100%;
-  }
+      .tab {
+        font-size: 2.5vw;
+        padding: 1vw 2vw;
+      }
 
-  .nav-button {
-    padding: 1vw;
-    width: 100%;
-    font-size: 3vw;
-  }
+      .category-section {
+        justify-content: center;
+      }
 
-  .menu-bar {
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 1vw;
-    top: 25vw;
-  }
+      .menu-item {
+        padding: 0.5vw 1vw;
+        font-size: 2vw;
+      }
 
-  .menu-item {
-    padding: 1vw;
-    font-size: 2.5vw;
-    margin: 0.5vw;
-  }
+      .search-box {
+        margin: 1vw 0;
+        width: 100%;
+        justify-content: center;
+      }
 
-  .search-box {
-    margin-top: 1vw;
-    width: 100%;
-    justify-content: center;
-  }
+      .search-input {
+        width: 100%;
+        font-size: 2.5vw;
+      }
 
-  .search-input {
-    width: 100%;
-    font-size: 2.5vw;
-  }
+      .main-content {
+        flex-direction: column;
+        padding: 2vw;
+      }
 
-  .main-content {
-    flex-direction: column;
-    padding: 2vw;
-  }
+      .edit-container {
+        position: static;
+        margin-top: 2vw;
+      }
 
-  .edit-container {
-    position: static;
-    margin-top: 2vw;
-  }
+      .form-container {
+        width: 95%;
+        padding: 2vw;
+      }
 
-  .form-container {
-    width: 95%;
-    padding: 2vw;
-  }
+      .modal-content {
+        width: 90%;
+        margin: 15% auto;
+        padding: 3vw;
+      }
 
-  .modal-content {
-    width: 90%;
-    margin: 15% auto;
-    padding: 3vw;
-  }
-  
-  /* Adjust font sizes for mobile */
-  .menu-title {
-    font-size: 3.5vw;
-  }
-  
-  .menu-price {
-    font-size: 3vw;
-  }
-  
-  .menu-desc {
-    font-size: 2.5vw;
-  }
-  
-  #view-name {
-    font-size: 4vw;
-  }
-  
-  #view-price {
-    font-size: 3.5vw;
-  }
-  
-  #view-description {
-    font-size: 3vw;
-  }
-  
-  .add-button {
-    font-size: 3vw;
-  }
-}
+      /* Adjust font sizes for mobile */
+      .menu-title {
+        font-size: 3.5vw;
+      }
+
+      .menu-price {
+        font-size: 3vw;
+      }
+
+      .menu-desc {
+        font-size: 2.5vw;
+      }
+
+      #view-name {
+        font-size: 4vw;
+      }
+
+      #view-price {
+        font-size: 3.5vw;
+      }
+
+      #view-description {
+        font-size: 3vw;
+      }
+
+      .add-button {
+        font-size: 3vw;
+      }
+    }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo-section">
-      <img src="/public/images/logo.png" id="logo" alt="Captain's Brew Cafe Logo" />
-    </div>
-    <nav class="nav-menu" id="nav-menu">
-      <button class="nav-button active" onclick="gotoMenu()">Menu</button>
-      <button class="nav-button" onclick="gotoOrders()">Orders</button>
-      <button class="nav-button" onclick="gotoReports()">Reports</button>
-      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
-      <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
-    </nav>
-  </header>
+<?php
+// Your existing PHP code for fetching categories
+require_once __DIR__ . '/../../config.php';
 
-  <div class="menu-bar">
-    <?php
-    $currentCategory = $_GET['category'] ?? 'coffee';
-    $categories = [
-        'coffee' => 'Coffee',
-        'non-coffee' => 'Non-Coffee',
-        'frappe' => 'Frappe',
-        'milktea' => 'MilkTea',
-        'soda' => 'Soda'
-    ];
-    foreach ($categories as $key => $name): ?>
-        <div class="menu-item <?= $currentCategory === $key ? 'active' : '' ?>" 
-             onclick="loadCategory('<?= $key ?>')">
-            <?= htmlspecialchars($name) ?>
-           
-        </div>
-    <?php endforeach; ?>
-    <div class="search-box">
-        <input type="text" class="search-input" placeholder="🔍 Search item" 
-               id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
-               onkeyup="handleSearch(event)"/>
-    </div>
-    <img src="public/images/icons/coffee.png" alt="">
+// Fetch categories from the database
+$categories_query = "SELECT id, name FROM categories";
+$categories_result = $conn->query($categories_query);
+$categories = [];
+while ($row = $categories_result->fetch_assoc()) {
+    $categories[$row['id']] = $row['name'];
+}
+
+// Group categories into Drinks and Foods
+$drinks = [1 => 'Coffee', 2 => 'Non-Coffee'];
+$foods = [
+    3 => 'Chicken',
+    4 => 'Pasta',
+    5 => 'Waffle',
+    6 => 'Fries',
+    7 => 'Sandwich',
+    8 => 'Add Ons'
+];
+
+// Determine the active tab (default to Drinks)
+$activeTab = $_GET['tab'] ?? 'drinks';
+
+// Default to the first category in the active tab
+$defaultCategoryId = $activeTab === 'drinks' ? array_key_first($drinks) : array_key_first($foods);
+$currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
+?>
+
+<header class="header">
+  <div class="logo-section">
+    <img src="/public/images/logo.png" id="logo" alt="Captain's Brew Cafe Logo" />
   </div>
+  <nav class="nav-menu" id="nav-menu">
+    <button class="nav-button active" onclick="gotoMenu()">Menu</button>
+    <button class="nav-button" onclick="gotoOrders()">Orders</button>
+    <button class="nav-button" onclick="gotoReports()">Reports</button>
+    <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
+    <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
+  </nav>
+</header>
+
+<div class="menu-bar">
+  <div class="menu-tabs">
+    <div class="tab <?= $activeTab === 'drinks' ? 'active' : '' ?>" onclick="switchTab('drinks')">Drinks</div>
+    <div class="tab <?= $activeTab === 'foods' ? 'active' : '' ?>" onclick="switchTab('foods')">Foods</div>
+  </div>
+
+  <div id="drinks-categories" class="category-section <?= $activeTab === 'drinks' ? 'active' : '' ?>">
+    <?php foreach ($drinks as $id => $name): ?>
+      <div class="menu-item <?= $currentCategoryId == $id ? 'active' : '' ?>" 
+           onclick="loadCategory(<?= $id ?>, 'drinks')">
+        <?= htmlspecialchars($name) ?>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
+  <div id="foods-categories" class="category-section <?= $activeTab === 'foods' ? 'active' : '' ?>">
+    <?php foreach ($foods as $id => $name): ?>
+      <div class="menu-item <?= $currentCategoryId == $id ? 'active' : '' ?>" 
+           onclick="loadCategory(<?= $id ?>, 'foods')">
+        <?= htmlspecialchars($name) ?>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
+  <div class="search-box">
+    <input type="text" class="search-input" placeholder="🔍 Search item" 
+           id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+           onkeyup="handleSearch(event)"/>
+  </div>
+  <img src="public/images/icons/coffee.png" alt="">
+</div>
 
 <main class="main-content">
   <div class="products-container"> 
     <section id="menu-list">
-      <?php include 'partials/menu-items.php'; ?>
+      <?php
+      $_GET['category_id'] = $currentCategoryId;
+      include 'partials/menu-items.php';
+      ?>
     </section>
   </div>
 
@@ -597,11 +679,9 @@
         <p>Select an item to edit or add a new one</p>
       </div>
       
-      <!-- This will be shown when an item is selected -->
       <div id="edit-form-container" style="display: none;">
         <div id="view-mode">
           <button onclick="closeModal()" class="close-btn">X</button>
-        
           <img id="view-image" src="" alt="Item Image">
           <input type="hidden" name="existing_image" id="edit-existing-image">
           <h3 id="view-name"></h3>
@@ -615,83 +695,123 @@
   </div>
 </main>
 
-  <div id="overlay"></div>
+<div id="overlay"></div>
 
-  <div class="form-container">
-    <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
-      <input type="hidden" name="id" id="edit-id">
-      <img id="edit-image-preview" src="" alt="Current Image">
-      <label>Change Image:</label>
-      <input type="file" name="item_image" accept="image/*">
-      <label>Name:</label>
-      <input type="text" name="item_name" id="edit-name">
-      <label>Price:</label>
-      <input type="number" name="item_price" id="edit-price">
-      <label>Description:</label>
-      <textarea name="item_description" id="edit-description"></textarea>
-      <input type="hidden" name="category" id="edit-category" value="">
-      <button type="submit">Update Item</button>
-      <button type="button" onclick="cancelEditMode()">Cancel</button>
+<div class="form-container">
+  <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
+    <input type="hidden" name="id" id="edit-id">
+    <img id="edit-image-preview" src="" alt="Current Image">
+    <label>Change Image:</label>
+    <input type="file" name="item_image" accept="image/*">
+    <label>Name:</label>
+    <input type="text" name="item_name" id="edit-name">
+    <label>Price:</label>
+    <input type="number" name="item_price" id="edit-price">
+    <label>Description:</label>
+    <textarea name="item_description" id="edit-description"></textarea>
+    <input type="hidden" name="category_id" id="edit-category" value="">
+    <button type="submit">Update Item</button>
+    <button type="button" onclick="cancelEditMode()">Cancel</button>
+  </form>
+</div>
+
+<div id="addItemModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeAddItemModal()">×</span>
+    <h2>Add New Item</h2>
+    <form action="/controllers/add-item.php" method="POST" enctype="multipart/form-data" id="add-item-form">
+      <label for="item-name">Item Name</label>
+      <input type="text" id="item-name" name="item_name" required />
+
+      <label for="item-price">Price</label>
+      <input type="number" id="item-price" name="item_price" step="0.01" required />
+      
+      <label for="item-description">Description</label>
+      <textarea id="item-description" name="item_description" required></textarea>
+      
+      <label for="item-category">Category</label>
+      <select id="item-category" name="category_id" required>
+        <optgroup label="Drinks">
+          <?php foreach ($drinks as $id => $name): ?>
+            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+        <optgroup label="Foods">
+          <?php foreach ($foods as $id => $name): ?>
+            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+      </select>
+      
+      <label for="item-image">Image</label>
+      <input type="file" id="item-image" name="item_image" accept="image/*" required />
+      <button class="add-button" type="submit">Add Item</button>
     </form>
   </div>
+</div>
 
-  <div id="addItemModal" class="modal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeAddItemModal()">×</span>
-      <h2>Add New Item</h2>
-      <form action="/controllers/add-item.php" method="POST" enctype="multipart/form-data">
-        <label for="item-name">Item Name</label>
-        <input type="text" id="item-name" name="item_name" required />
+<footer>
+  <?php include __DIR__ . '/partials/footer.php'; ?>
+</footer>
 
-        <label for="item-price">Price</label>
-        <input type="number" id="item-price" name="item_price" step="0.01" required />
-        
-        <label for="item-description">Description</label>
-        <textarea id="item-description" name="item_description" required></textarea>
-        
-        <label for="item-category">Category</label>
-        <select id="item-category" name="item_category" required>
-          <option value="coffee">Coffee</option>
-          <option value="non_coffee">Non-Coffee</option>
-          <option value="frappe">Frappe</option>
-          <option value="milktea">MilkTea</option>
-          <option value="soda">Soda</option>
-        </select>
-        
-        <label for="item-image">Image</label>
-        <input type="file" id="item-image" name="item_image" accept="image/*" />
-        <button class="add-button" type="submit">Add Item</button>
-      </form>
-    </div>
-  </div>
+<script>
+  function switchTab(tab) {
+    const url = new URL(window.location.href);
+    url.pathname = '/views/admin/admin-menu.php';
+    url.searchParams.set('tab', tab);
+    url.searchParams.delete('category_id');
+    url.searchParams.delete('search');
+    window.location.href = url.toString();
+  }
 
-  <footer>
-    <?php include __DIR__ . '/partials/footer.php'; ?>
-  </footer>
+  function loadCategory(categoryId, tab) {
+    const url = new URL(window.location.href);
+    url.pathname = '/views/admin/admin-menu.php';
+    url.searchParams.set('category_id', categoryId);
+    url.searchParams.set('tab', tab);
+    window.location.href = url.toString();
+  }
 
-  <script>
-    function loadCategory(category) {
+  function handleSearch(event) {
+    if (event.key === 'Enter') {
+      const searchTerm = event.target.value.trim();
       const url = new URL(window.location.href);
-      url.pathname = '/views/admin/admin-menu.php';
-      url.searchParams.set('category', category);
+      if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+      } else {
+        url.searchParams.delete('search');
+      }
       window.location.href = url.toString();
     }
+  }
 
-    function handleSearch(event) {
-      if (event.key === 'Enter') {
-        const searchTerm = event.target.value.trim();
-        const url = new URL(window.location.href);
-        if (searchTerm) {
-          url.searchParams.set('search', searchTerm);
-        } else {
-          url.searchParams.delete('search');
-        }
-        window.location.href = url.toString();
-      }
+  // SweetAlert2 for success/error messages
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const successMessage = urlParams.get('success');
+    const errorMessage = urlParams.get('error');
+
+    if (successMessage) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: successMessage,
+        confirmButtonColor: '#2C6E8A',
+        confirmButtonText: 'OK'
+      });
+    } else if (errorMessage) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: errorMessage,
+        confirmButtonColor: '#2C6E8A',
+        confirmButtonText: 'OK'
+      });
     }
-  </script>
+  });
+</script>
 
-  <script src="/public/js/admin-menu.js"></script>
-  <script src="/public/js/auth.js"></script>
+<script src="/public/js/admin-menu.js"></script>
+<script src="/public/js/auth.js"></script>
 </body>
 </html>

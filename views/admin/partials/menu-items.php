@@ -1,16 +1,15 @@
 <?php
-global $conn;
 require_once __DIR__ . '../../../../config.php';
 
-$category = $_GET['category'] ?? 'coffee';
-$searchTerm = $_GET['search'] ?? '';
+$category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 1;
+$searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 
-// Always output the container for the edit section
+// Always output the container for the menu list
 echo "<div id='menu-list-container'>";
 
 try {
-    $categoryName = str_replace('_', ' ', $category);
-    $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '$categoryName'");
+    // Verify the category exists
+    $categoryQuery = $conn->query("SELECT id, name FROM categories WHERE id = $category_id");
     
     if (!$categoryQuery) {
         throw new Exception("Category query failed: " . $conn->error);
@@ -21,11 +20,9 @@ try {
     if (!$categoryRow) {
         echo "<div class='no-items'>Category not found.</div>";
     } else {
-        $categoryId = $categoryRow['id'];
-        $query = "SELECT * FROM products WHERE category_id = $categoryId";
+        $query = "SELECT * FROM products WHERE category_id = $category_id";
         
         if (!empty($searchTerm)) {
-            $searchTerm = $conn->real_escape_string($searchTerm);
             $query .= " AND item_name LIKE '%$searchTerm%'";
         }
 
@@ -54,7 +51,7 @@ try {
                             \"$desc\", 
                             \"$image\", 
                             {$row['id']},
-                            \"$category\"
+                            $category_id
                         )'>+</button>
                       </div>";
             }

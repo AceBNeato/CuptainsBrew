@@ -1,6 +1,9 @@
 <?php
+
+
+
 $db_host = 'localhost';
-$db_user = 'root'; 
+$db_user = 'root';
 $db_pass = ''; // Default XAMPP/WAMP password (change if needed)
 $db_name = 'cafe_db';
 
@@ -42,11 +45,10 @@ try {
             item_description TEXT NOT NULL,
             item_price DECIMAL(10, 2) NOT NULL,
             item_image VARCHAR(255) NOT NULL,
-            stock INT NOT NULL DEFAULT 0,
             FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
         ) ENGINE=InnoDB",
 
-        // Users (independent)
+        // Users (independent, fixed syntax)
         "CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) NOT NULL UNIQUE,
@@ -57,12 +59,12 @@ try {
             is_verified BOOLEAN DEFAULT FALSE,
             address TEXT,
             contact VARCHAR(20),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            reset_token VARCHAR(64) DEFAULT NULL;
-            reset_expires DATETIME DEFAULT NULL;
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            reset_token VARCHAR(64) DEFAULT NULL,
+            reset_expires DATETIME DEFAULT NULL
         ) ENGINE=InnoDB",
 
-
+        // Remember Tokens (depends on users)
         "CREATE TABLE IF NOT EXISTS remember_tokens (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -72,8 +74,6 @@ try {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX (token)
         ) ENGINE=InnoDB",
-
-
 
         // Cart (depends on users and products)
         "CREATE TABLE IF NOT EXISTS cart (
@@ -94,7 +94,7 @@ try {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB",
 
-        // Orders (depends on users and riders)
+        // Orders (depends on users and riders, fixed foreign key)
         "CREATE TABLE IF NOT EXISTS orders (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT,
@@ -152,14 +152,20 @@ try {
         }
     }
 
-    // Insert default categories (only if empty)
-    $conn->query("INSERT IGNORE INTO categories (name) VALUES 
-        ('Coffee'), ('Non-Coffee'), ('Frappe'), ('MilkTea'), ('Soda')");
+    // Insert default categories with explicit IDs to match products
+    $conn->query("INSERT INTO categories (id, name) VALUES
+        (1, 'Coffee'),
+        (2, 'Non-Coffee'),
+        (3, 'Chicken'),
+        (4, 'Pasta'),
+        (5, 'Waffle'),
+        (6, 'Fries'),
+        (7, 'Sandwich'),
+        (8, 'Add Ons')
+        ON DUPLICATE KEY UPDATE name = VALUES(name)");
 
-    // Start session
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+   
+    
 
     global $conn;
 } catch (Exception $e) {
