@@ -65,16 +65,26 @@
         .nav-menu {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
+            text-decoration: none;
             flex: 1;
         }
 
+
+
         .nav-link {
+            text-decoration: none;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 0.75rem 1.5rem;
             margin-right: 1rem;
             color: var(--secondary);
             font-weight: 500;
             position: relative;
             transition: var(--transition);
+        }
+        .nav-link:hover{
+            
+            color: steelblue;
         }
 
         .nav-link::after {
@@ -96,7 +106,7 @@
         .nav-link.active {
             color: var(--primary);
         }
-
+        
         .nav-link.active::after {
             width: 70%;
         }
@@ -139,21 +149,20 @@
             background: linear-gradient(rgba(26, 19, 16, 0.7), rgba(26, 19, 16, 0.7)), 
                         url('/public/images/background/getstarted.png') no-repeat center center/cover;
             display: flex;
-            align-items: center;
             text-align: center;
             color: var(--light);
-            padding-top: 80px;
         }
 
         .hero-content {
             max-width: 800px;
             margin: 0 auto;
+            padding-top: 10vw;
         }
 
         .hero h1 {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            font-size: 4.5rem;
+            font-size: 5rem;
             margin-bottom: 20px;
             line-height: 1.2;
             animation: fadeInUp 1s ease;
@@ -168,6 +177,57 @@
             opacity: 0.9;
             animation: fadeInUp 1s ease 0.2s forwards;
             opacity: 0;
+        }
+
+        
+        .btn-gs{
+            display: flex;
+            justify-self: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            font-size: 30px;
+            width: 10vw;
+            border-radius: 10px;
+            padding: 1vw;
+            background-color: #ffb74a;
+            transition: all .3s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-gs:hover{
+            font-size: 30px;
+            background-color:rgb(244, 160, 34);
+            transform: translateY(-5px);
+
+        }
+
+
+
+
+        .btn-primary{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            font-size: 20px;
+            width: 10vw;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            padding: 1vw;
+            background-color: #ffb74a;
+            transition: all .3s ease;
+            text-decoration: none;
+            
+            border-color: transparent;
+            cursor: pointer;
+        }
+        .btn-primary:hover{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            font-size: 20px;
+            width: 10vw;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            padding: 1vw;
+            background-color:rgb(233, 150, 26);
         }
 
         .hero .btn {
@@ -193,6 +253,7 @@
         .menu-preview {
             background-color: var(--light);
             position: relative;
+            padding: 5vw;
         }
 
         .menu-highlight {
@@ -255,9 +316,12 @@
 
         /* Testimonials */
         .testimonials {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(rgba(26, 19, 16, 0.9), rgba(26, 19, 16, 0.9)), 
                         url('/public/images/background/testimonial-bg.jpg') no-repeat center center/cover;
             color: var(--light);
+            color: white;
+            padding: 10vw;
             text-align: center;
         }
 
@@ -286,6 +350,8 @@
         }
 
         .testimonial-author {
+        
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -323,6 +389,8 @@
         }
 
         .newsletter h2 {
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin-bottom: 20px;
         }
 
@@ -355,14 +423,15 @@
         .footer {
             background-color: var(--dark);
             color: var(--light);
-            padding: 80px 0 30px;
         }
 
         .footer-grid {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
-            margin-bottom: 50px;
+            padding: 5vw;
+            color: white;
         }
 
         .footer-col h3 {
@@ -388,6 +457,8 @@
         }
 
         .footer-links a {
+            color: white;
+            text-decoration: none;
             opacity: 0.8;
             transition: var(--transition);
         }
@@ -417,6 +488,10 @@
         .social-links {
             display: flex;
             gap: 15px;
+            justify-content: space-evenly;
+        }
+        .social-links img{
+            width: 20px;
         }
 
         .social-links a {
@@ -535,7 +610,22 @@
                 width: 100%;
             }
         }
+        
+        .btn-outline{
+            display: flex;
+            justify-content: center;
+            color: var(--primary); 
+            border-color: var(--primary); 
+            text-decoration:none; 
+            cursor: pointer;
+            transition: all .3s ease;
+        }
+        
 
+        .btn-outline:hover{
+            color: black;
+            transform: translateY(-5px);
+        }
         @media (max-width: 576px) {
             .hero h1 {
                 font-size: 2rem;
@@ -582,9 +672,10 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container hero-content">
-            <h1>Where Every Sip is an Adventure</h1>
+            <h1>Cuptains Brew Cafe</h1>
+            <p>Where Every Sip is an Adventure</p>
             <p>Discover the finest coffee blends at Captain's Brew Cafe. We've got your brew covered. Drop anchor, relax, and let your coffee journey begin!</p>
-            <a href="/views/auth/login.php" class="btn btn-primary">Get Started</a>
+            <a href="/views/auth/login.php" class="btn-gs">Get Started</a>
         </div>
     </section>
 
@@ -632,7 +723,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 50px;">
-                <a href="/views/menu.php" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);">View Full Menu</a>
+                <a href="/views/menu.php" class="btn-outline">View Full Menu</a>
             </div>
         </div>
     </section>
@@ -672,7 +763,7 @@
             
             <form class="newsletter-form" action="/subscribe.php" method="POST">
                 <input type="email" name="email" placeholder="Your email address" required>
-                <button type="submit" class="btn btn-primary">Subscribe</button>
+                <button type="submit" class="btn-primary">Subscribe</button>
             </form>
         </div>
     </section>
@@ -685,9 +776,9 @@
                     <h3>Captain's Brew</h3>
                     <p style="opacity: 0.8; margin-bottom: 20px;">Where every sip is an adventure. We've got your brew covered.</p>
                     <div class="social-links">
-                        <a href="#"><img src="/public/images/facebook.png" alt="Facebook"></a>
-                        <a href="#"><img src="/public/images/instagram.png" alt="Instagram"></a>
-                        <a href="#"><img src="/public/images/twitter.png" alt="Twitter"></a>
+                        <a href="#"><img src="/public/images/icons/facebook.png" alt="Facebook"></a>
+                        <a href="#"><img src="/public/images/icons/instagram.png" alt="Instagram"></a>
+                        <a href="#"><img src="/public/images/icons/twitter.png" alt="Twitter"></a>
                     </div>
                 </div>
                 
