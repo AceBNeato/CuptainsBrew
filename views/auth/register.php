@@ -1,11 +1,17 @@
 <?php
+session_start();
+
+require '../../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $db_host = 'localhost';
-$db_user = 'root'; 
-$db_pass = ''; 
+$db_user = 'root';
+$db_pass = '';
 $db_name = 'cafe_db';
 
-// Initialize variables
-$username = $email = '';
+$email = '';
 $errors = [];
 
 // Connect to MySQL server
@@ -15,18 +21,207 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Process form data when form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate and sanitize inputs
-    $username = trim($conn->real_escape_string($_POST['username'] ?? ''));
+// Function to generate a unique username
+function generateUsername($email, $conn) {
+    $base = explode('@', $email)[0];
+    $base = preg_replace('/[^a-zA-Z0-9]/', '', $base);
+    $username = $base;
+    $counter = 1;
+
+    while (true) {
+        $sql = "SELECT id FROM users WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 0) {
+            $stmt->close();
+            return $username;
+        }
+
+        $username = $base . $counter;
+        $counter++;
+        $stmt->close();
+    }
+}
+
+// Function to send verification email using PHPMailer
+function sendVerificationEmail($email, $verification_code) {
+    $mail = new PHPMailer(true);
+    try {
+        // Enable debug output (set to 0 in production)
+        $mail->SMTPDebug = 2;
+        $mail->Debugoutput = function($str, $level) {
+            error_log("PHPMailer Debug [$level]: $str\n", 3, '../../logs/phpmailer_debug.log');
+        };
+
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'gdgarcia00410@usep.edu.ph';
+        $mail->Password = 'lkhwwwsvuygopoxs';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        // Recipients
+        $mail->setFrom('gdgarcia00410@usep.edu.ph', "Cuptain's Brew");
+        $mail->addAddress($email);
+        $mail->addReplyTo('gdgarcia00410@usep.edu.ph', "Cuptain's Brew Support");
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = "Cuptain's Brew - Email Verification";
+        $mail->Body = "
+        <html>
+        <head>
+            <title>Email Verification</title>
+            <style>
+                body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+                .content { padding: 20px; background-color: #FFFAEE; }
+                .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+                .verification-code { 
+                    font-size: 24px; 
+                    font-weight: bold; 
+                    letter-spacing: 3px; 
+                    color: #2C6E8A;
+                    text-align: center;
+                    margin: 20px 0;
+                    padding: 10px;
+                    background-color: #A9D6E5;
+                    border-radius: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Cuptain's Brew</h2>
+                </div>
+                <div class='content'>
+                    <h3>Email Verification</h3>
+                    <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+                    <div class='verification-code'>$verification_code</div>
+                    <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+                </div>
+                <div class='footer'>
+                    <p>© " . date('Y') . " Cuptain's Brew. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        $mail->send();
+        error_log("Verification email sent to $email", 3, '../../logs/phpmailer_success.log');
+        return true;
+    } catch (Exception $e) {
+        error_log("PHPMailer Error for $email: {$mail->ErrorInfo}", 3, '../../logs/phpmailer_errors.log');
+        return false;
+    }
+}
+
+// Process verification code if submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_code'])) {
+    $submitted_code = trim($_POST['verification_code'] ?? '');
+    $email = $_SESSION['register_email'] ?? '';
+    
+    if (empty($submitted_code)) {
+        $errors[] = "Verification code is required";
+    } elseif (strlen($submitted_code) !== 6 || !ctype_digit($submitted_code)) {
+        $errors[] = "Verification code must be 6 digits";
+    }
+    
+    if (empty($errors) && !empty($email)) {
+        $sql = "SELECT verification_code, verification_sent_at FROM users WHERE email = ? AND is_verified = FALSE";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            $stored_code = $user['verification_code'];
+            $sent_at = strtotime($user['verification_sent_at']);
+            
+            if (time() - $sent_at > 1800) {
+                $errors[] = "Verification code has expired. Please request a new one.";
+            } elseif ($submitted_code !== $stored_code) {
+                $errors[] = "Invalid verification code";
+            } else {
+                $sql = "UPDATE users SET is_verified = TRUE, verification_code = NULL, verification_sent_at = NULL WHERE email = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $email);
+                
+                if ($stmt->execute()) {
+                    unset($_SESSION['register_email']);
+                    error_log("User $email verified successfully", 3, '../../logs/registration_success.log');
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Registration Successful!',
+                                text: 'Your account has been verified. You will be redirected to the login page.',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            }).then(() => {
+                                window.location.href = '/views/auth/login.php';
+                            }).catch((error) => {
+                                console.error('SweetAlert error:', error);
+                                window.location.href = '/views/auth/login.php';
+                            });
+                        });
+                    </script>";
+                    // Fallback PHP redirect
+                    header("Location: /views/auth/login.php");
+                    exit();
+                } else {
+                    $errors[] = "Something went wrong. Please try again later.";
+                    error_log("Failed to verify user $email: " . $conn->error, 3, '../../logs/registration_errors.log');
+                }
+            }
+        } else {
+            $errors[] = "Email not found or already verified.";
+            error_log("Verification failed for $email: Email not found or already verified", 3, '../../logs/registration_errors.log');
+        }
+        $stmt->close();
+    } else {
+        $errors[] = "Session expired or invalid email. Please register again.";
+        error_log("Verification failed: Empty email or session for code $submitted_code", 3, '../../logs/registration_errors.log');
+    }
+    
+    // Show errors if any
+    if (!empty($errors)) {
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Verification Failed',
+                    html: '" . implode("<br>", array_map("htmlspecialchars", $errors)) . "',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                }).then(() => {
+                    document.getElementById('registration-form').style.display = 'none';
+                    document.getElementById('verification-form').style.display = 'block';
+                    setupVerificationInputs();
+                });
+            });
+        </script>";
+    }
+}
+
+// Process initial registration form data
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
     $email = trim($conn->real_escape_string($_POST['email'] ?? ''));
     $password = trim($_POST['password'] ?? '');
     $confirm_password = trim($_POST['password_confirmation'] ?? '');
-    
-    // Simple validation
-    if (empty($username)) {
-        $errors[] = "Username is required";
-    }
     
     if (empty($email)) {
         $errors[] = "Email is required";
@@ -38,69 +233,123 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Password is required";
     } elseif (strlen($password) < 8) {
         $errors[] = "Password must be at least 8 characters";
+    } elseif (!preg_match("/[A-Z]/", $password)) {
+        $errors[] = "Password must contain at least one uppercase letter";
+    } elseif (!preg_match("/[0-9]/", $password)) {
+        $errors[] = "Password must contain at least one number";
     }
     
     if ($password !== $confirm_password) {
         $errors[] = "Passwords do not match";
     }
     
-    // Check if username or email already exists
     if (empty($errors)) {
-        $sql = "SELECT id FROM users WHERE email = ? OR username = ?";
+        // Check if email exists
+        $sql = "SELECT email, is_verified FROM users WHERE email = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $email, $username);
+        $stmt->bind_param("s", $email);
         $stmt->execute();
-        $stmt->store_result();
+        $result = $stmt->get_result();
         
-        if ($stmt->num_rows > 0) {
-            $errors[] = "Username or email already taken";
-        }
-        $stmt->close();
-    }
-    
-    // If no errors, proceed with registration
-    if (empty($errors)) {
-        // Hash the password (using bcrypt)
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-        
-        // Insert user into database
-        $sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sss", $username, $hashed_password, $email);
-        
-        if ($stmt->execute()) {
-            // Registration successful - show SweetAlert and redirect
-            echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Registration Successful!',
-                        text: 'You will be redirected to the login page.',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    }).then(() => {
-                        window.location.href = '/views/auth/login.php';
-                    });
-                });
-            </script>";
-            exit();
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            if ($user['is_verified'] == FALSE) {
+                // Unverified account: Resend verification code
+                $verification_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                
+                $sql = "UPDATE users SET verification_code = ?, verification_sent_at = NOW() WHERE email = ?";
+                $stmt_update = $conn->prepare($sql);
+                $stmt_update->bind_param("ss", $verification_code, $email);
+                
+                if ($stmt_update->execute()) {
+                    if (sendVerificationEmail($email, $verification_code)) {
+                        $_SESSION['register_email'] = $email;
+                        error_log("Resent verification code $verification_code to unverified email $email", 3, '../../logs/registration_errors.log');
+                        echo "<script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Verification Email Resent',
+                                    html: 'A new 6-digit verification code has been sent to <strong>$email</strong>. Please check your inbox and enter the code below.',
+                                    confirmButtonText: 'Continue to Verification',
+                                    customClass: {
+                                        confirmButton: 'swal2-confirm'
+                                    }
+                                }).then(() => {
+                                    document.getElementById('registration-form').style.display = 'none';
+                                    document.getElementById('verification-form').style.display = 'block';
+                                    setupVerificationInputs();
+                                });
+                            });
+                        </script>";
+                    } else {
+                        $errors[] = "Failed to resend verification email. Please try again later.";
+                        error_log("Failed to resend verification email to $email", 3, '../../logs/registration_errors.log');
+                    }
+                } else {
+                    $errors[] = "Failed to update verification code. Please try again later.";
+                    error_log("Failed to update verification code for $email: " . $conn->error, 3, '../../logs/registration_errors.log');
+                }
+                $stmt_update->close();
+            } else {
+                $errors[] = "Email already taken and verified.";
+            }
         } else {
-            $errors[] = "Something went wrong. Please try again later.";
+            // New registration
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+            $verification_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $username = generateUsername($email, $conn);
+            
+            error_log("Generated verification code: $verification_code for $email");
+            
+            $sql = "INSERT INTO users (username, password, email, verification_code, verification_sent_at) 
+                    VALUES (?, ?, ?, ?, NOW())";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssss", $username, $hashed_password, $email, $verification_code);
+            
+            if ($stmt->execute()) {
+                error_log("Stored verification code $verification_code for $email in database");
+                if (sendVerificationEmail($email, $verification_code)) {
+                    $_SESSION['register_email'] = $email;
+                    error_log("Session email set to: $email");
+                    
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Verification Email Sent',
+                                html: 'We\'ve sent a 6-digit verification code to <strong>$email</strong>. Please check your inbox and enter the code below.',
+                                confirmButtonText: 'Continue to Verification',
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            }).then(() => {
+                                document.getElementById('registration-form').style.display = 'none';
+                                document.getElementById('verification-form').style.display = 'block';
+                                setupVerificationInputs();
+                            });
+                        });
+                    </script>";
+                } else {
+                    $errors[] = "Failed to send verification email. Please check your email address or try again later.";
+                    error_log("Failed to send verification email to $email", 3, '../../logs/registration_errors.log');
+                }
+            } else {
+                $errors[] = "Registration failed. Please try again later.";
+                error_log("Database insertion failed for $email: " . $conn->error, 3, '../../logs/registration_errors.log');
+            }
         }
         $stmt->close();
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuptain's Brew | Register</title>
-    <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
@@ -186,7 +435,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #4a3b2b;
         }
 
-        .edit-form input[type="text"],
         .edit-form input[type="email"],
         .edit-form input[type="password"] {
             padding: 0.5rem;
@@ -253,6 +501,107 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .login-link a:hover {
             text-decoration: underline;
+        }
+
+        /* Verification Form */
+        #verification-form {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .verification-container {
+            text-align: center;
+        }
+
+        .verification-instructions {
+            margin-bottom: 1.5rem;
+            color: #4a3b2b;
+        }
+
+        .verification-instructions h3 {
+            font-size: 1.2rem;
+            color: #2C6E8A;
+            margin-bottom: 0.5rem;
+        }
+
+        .verification-instructions p {
+            font-size: 0.9rem;
+        }
+
+        .verification-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 1.5rem 0;
+        }
+
+        .verification-inputs input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+            background: #A9D6E5;
+            color: #4a3b2b;
+            transition: all 0.3s;
+        }
+
+        .verification-inputs input:focus {
+            outline: none;
+            background: #e9f7fe;
+            transform: scale(1.05);
+        }
+
+        .verification-actions {
+            margin-top: 1.5rem;
+        }
+
+        #verify-button {
+            padding: 0.5rem 2rem;
+            font-size: 0.9rem;
+            background: #2C6E8A;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .resend-code {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #4a3b2b;
+        }
+
+        .resend-code a {
+            color: #2C6E8A;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .resend-code a:hover {
+            text-decoration: underline;
+        }
+
+        .back-to-register {
+            margin-top: 1rem;
+        }
+
+        .back-to-register a {
+            color: #2C6E8A;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-to-register a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* Footer */
@@ -336,105 +685,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-size: 2.5vw;
             }
 
+            .verification-inputs input {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
             .footer-container {
                 flex-direction: column;
                 gap: 2rem;
             }
         }
     </style>
-    <script>
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const confirm = document.getElementById('password-confirm');
-            const type = password.type === 'password' ? 'text' : 'password';
-            password.type = type;
-            confirm.type = type;
-        }
-
-        // Client-side validation with SweetAlert
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('.edit-form');
-            form.addEventListener('submit', function(e) {
-                const username = document.getElementById('username').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const confirm = document.getElementById('password-confirm').value;
-
-                if (!username) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Username is required!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-                if (!email) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Email is required!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-                if (!password) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Password is required!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-                if (password.length < 8) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Password must be at least 8 characters!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-                if (password !== confirm) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Passwords do not match!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-            });
-
-            // Display server-side errors with SweetAlert
-            <?php if (!empty($errors)): ?>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Registration Failed',
-                    html: '<?php echo implode("<br>", array_map("htmlspecialchars", $errors)); ?>',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-            <?php endif; ?>
-        });
-    </script>
 </head>
 <body>
     <header class="header">
@@ -452,10 +714,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="register-container">
         <h2>REGISTER</h2>
         
-        <form class="edit-form" action="register.php" method="POST">
-            <label for="username">Username</label>
-            <input id="username" type="text" name="username" placeholder="Enter Username" value="<?php echo htmlspecialchars($username); ?>" required>
-
+        <!-- Registration Form -->
+        <form id="registration-form" class="edit-form" action="register.php" method="POST">
             <label for="email">Email Address</label>
             <input id="email" type="email" name="email" placeholder="Enter Email" value="<?php echo htmlspecialchars($email); ?>" required>
 
@@ -470,11 +730,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="checkbox" id="showPassword" onclick="togglePassword()">
                     <label for="showPassword">Show Password</label>
                 </div>
-                <a href="#">Forgot Password</a>
+                <a href="/views/auth/forgot-password.php">Forgot Password</a>
             </div>
 
             <button type="submit">Register</button>
         </form>
+        
+        <!-- Verification Form -->
+        <div id="verification-form">
+            <div class="verification-container">
+                <div class="verification-instructions">
+                    <h3>Verify Your Email</h3>
+                    <p>We've sent a 6-digit verification code to <strong><?php echo htmlspecialchars($_SESSION['register_email'] ?? ''); ?></strong></p>
+                    <p>Please enter the code below to complete your registration.</p>
+                </div>
+                
+                <form action="register.php" method="POST" onsubmit="return combineVerificationCode()">
+                    <div class="verification-inputs">
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                    </div>
+                    
+                    <input type="hidden" id="verification_code" name="verification_code">
+                    <input type="hidden" name="verify_code" value="1">
+                    
+                    <div class="verification-actions">
+                        <button id="verify-button" type="submit">Verify Account</button>
+                    </div>
+                </form>
+                
+                <div class="resend-code">
+                    Didn't receive the code? <a href="#" onclick="resendVerificationCode()">Resend Code</a>
+                </div>
+                
+                <div class="back-to-register">
+                    <a href="#" onclick="backToRegistration()">← Back to registration</a>
+                </div>
+            </div>
+        </div>
         
         <div class="login-link">
             <p>Already have an account? <a href="/views/auth/login.php">Login here</a></p>
@@ -513,8 +810,232 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </footer>
 
+    <script>
+        function togglePassword() {
+            const password = document.getElementById('password');
+            const confirm = document.getElementById('password-confirm');
+            const type = password.type === 'password' ? 'text' : 'password';
+            password.type = type;
+            confirm.type = type;
+        }
+        
+        function setupVerificationInputs() {
+            const inputs = document.querySelectorAll('.verification-inputs input');
+            
+            inputs.forEach((input, index) => {
+                if (index === 0) {
+                    input.focus();
+                }
+                
+                input.addEventListener('input', function() {
+                    if (this.value.length === 1) {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        } else {
+                            this.blur();
+                            document.getElementById('verify-button').focus();
+                        }
+                    }
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value.length === 0) {
+                        if (index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    }
+                });
+                
+                input.addEventListener('keypress', function(e) {
+                    if (e.key < '0' || e.key > '9') {
+                        e.preventDefault();
+                    }
+                });
+            });
+        }
+        
+        function combineVerificationCode() {
+            const inputs = document.querySelectorAll('.verification-inputs input');
+            let code = '';
+            inputs.forEach(input => {
+                code += input.value;
+            });
+            
+            if (code.length !== 6) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Incomplete Code',
+                    text: 'Please enter all 6 digits of the verification code.',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                return false;
+            }
+            
+            document.getElementById('verification_code').value = code;
+            return true;
+        }
+        
+        function resendVerificationCode() {
+            Swal.fire({
+                title: 'Resend Verification Code',
+                text: 'Sending a new verification code to your email...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    
+                    fetch('resend_verification.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'email=' + encodeURIComponent('<?php echo $_SESSION['register_email'] ?? ''; ?>')
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Code Resent',
+                                text: 'A new verification code has been sent to your email.',
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed to Resend',
+                                text: data.message || 'Failed to resend verification code. Please try again.',
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while trying to resend the code.',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        function backToRegistration() {
+            document.getElementById('registration-form').style.display = 'block';
+            document.getElementById('verification-form').style.display = 'none';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('#registration-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+                    const confirm = document.getElementById('password-confirm').value;
+        
+                    if (!email) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Email is required!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                    if (!password) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Password is required!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                    if (password.length < 8) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Password must be at least 8 characters!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                    if (!/[A-Z]/.test(password)) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Password must contain at least one uppercase letter!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                    if (!/[0-9]/.test(password)) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Password must contain at least one number!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                    if (password !== confirm) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Passwords do not match!',
+                            customClass: {
+                                confirmButton: 'swal2-confirm'
+                            }
+                        });
+                        return;
+                    }
+                });
+            }
+        
+            <?php if (!empty($errors)): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: '<?php echo (isset($_POST['verify_code']) ? "Verification Failed" : "Registration Failed"); ?>',
+                    html: '<?php echo implode("<br>", array_map("htmlspecialchars", $errors)); ?>',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                
+                <?php if (isset($_POST['verify_code'])): ?>
+                    document.getElementById('registration-form').style.display = 'none';
+                    document.getElementById('verification-form').style.display = 'block';
+                    setupVerificationInputs();
+                <?php endif; ?>
+            <?php endif; ?>
+        });
+    </script>
+    
     <?php
-    // Close database connection
     $conn->close();
     ?>
 </body>

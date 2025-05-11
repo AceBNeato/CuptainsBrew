@@ -52,10 +52,28 @@ try {
             username VARCHAR(255) NOT NULL UNIQUE,
             email VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
+            verification_code VARCHAR(6),
+            verification_sent_at DATETIME,
+            is_verified BOOLEAN DEFAULT FALSE,
             address TEXT,
             contact VARCHAR(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            reset_token VARCHAR(64) DEFAULT NULL;
+            reset_expires DATETIME DEFAULT NULL;
         ) ENGINE=InnoDB",
+
+
+        "CREATE TABLE IF NOT EXISTS remember_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            token VARCHAR(128) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX (token)
+        ) ENGINE=InnoDB",
+
+
 
         // Cart (depends on users and products)
         "CREATE TABLE IF NOT EXISTS cart (

@@ -1,0 +1,1000 @@
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP 98e67ed59e1d1-30ad4d2f3f3sm7275195a91.12 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30ad4d2f3f3sm7275195a91.12 - gsmtp
+
+PHPMailer Debug [1]: SMTP ERROR: Password command failed: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30ad4d2f3f3sm7275195a91.12 - gsmtp
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection 98e67ed59e1d1-30ad4d2f3f3sm7275195a91.12 - gsmtp
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d2e1a72fcca58-74237727a02sm4759093b3a.56 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-74237727a02sm4759093b3a.56 - gsmtp
+
+PHPMailer Debug [1]: SMTP ERROR: Password command failed: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-74237727a02sm4759093b3a.56 - gsmtp
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection d2e1a72fcca58-74237727a02sm4759093b3a.56 - gsmtp
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.mailtrap.io ESMTP ready
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.mailtrap.io
+250-SIZE 5242880
+250-PIPELINING
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250-AUTH PLAIN LOGIN CRAM-MD5
+250 STARTTLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.mailtrap.io
+250-SIZE 5242880
+250-PIPELINING
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250 AUTH PLAIN LOGIN CRAM-MD5
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH CRAM-MD5
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 PDQzMTI2MDUwLjE3NDY5ODAwODVAc210cC5tYWlsdHJhcC5pbz4=
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 535 5.7.0 Invalid credentials
+
+PHPMailer Debug [1]: SMTP ERROR: Username command failed: 535 5.7.0 Invalid credentials
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 
+PHPMailer Debug [1]: SMTP ERROR: QUIT command failed: 
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.mailtrap.io ESMTP ready
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.mailtrap.io
+250-SIZE 5242880
+250-PIPELINING
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250-AUTH PLAIN LOGIN CRAM-MD5
+250 STARTTLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.mailtrap.io
+250-SIZE 5242880
+250-PIPELINING
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250-DSN
+250 AUTH PLAIN LOGIN CRAM-MD5
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH CRAM-MD5
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 PDUwNjIxMjU5Ni4xNzQ2OTgwMTI2QHNtdHAubWFpbHRyYXAuaW8+
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 535 5.7.0 Invalid credentials
+
+PHPMailer Debug [1]: SMTP ERROR: Username command failed: 535 5.7.0 Invalid credentials
+
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 
+PHPMailer Debug [1]: SMTP ERROR: QUIT command failed: 
+PHPMailer Debug [2]: SMTP Error: Could not authenticate.
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MAIL FROM:<yourname@gmail.com>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.0 OK d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: RCPT TO:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.5 OK d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: DATA
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 354 Go ahead d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Date: Sun, 11 May 2025 18:40:51 +0200
+
+PHPMailer Debug [1]: CLIENT -> SERVER: To: gdgarcia00410@usep.edu.ph
+
+PHPMailer Debug [1]: CLIENT -> SERVER: From: Cuptain's Brew <yourname@gmail.com>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Reply-To: Cuptain's Brew Support <yourname@gmail.com>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Subject: Cuptain's Brew - Email Verification
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Message-ID: <mPmXmHTtDyQ44IEr2U2cYVlCMbteNeGJoBOmYy8IVo@localhost>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: X-Mailer: PHPMailer 6.10.0 (https://github.com/PHPMailer/PHPMailer)
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MIME-Version: 1.0
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Type: text/html; charset=iso-8859-1
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Transfer-Encoding: 8bit
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <title>Email Verification</title>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .content { padding: 20px; background-color: #FFFAEE; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .verification-code { 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-size: 24px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-weight: bold; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     letter-spacing: 3px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     color: #2C6E8A;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     text-align: center;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     margin: 20px 0;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     padding: 10px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     background-color: #A9D6E5;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     border-radius: 5px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <div class='container'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='header'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h2>Cuptain's Brew</h2>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='content'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h3>Email Verification</h3>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <div class='verification-code'>607438</div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='footer'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>© 2025 Cuptain's Brew. All rights reserved.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: .
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.0.0 OK  1746981655 d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection d2e1a72fcca58-7423775dc07sm4613626b3a.78 - gsmtp
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MAIL FROM:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.0 OK d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: RCPT TO:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.5 OK d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: DATA
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 354 Go ahead d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Date: Sun, 11 May 2025 19:04:45 +0200
+
+PHPMailer Debug [1]: CLIENT -> SERVER: To: gdgarcia00410@usep.edu.ph
+
+PHPMailer Debug [1]: CLIENT -> SERVER: From: Cuptain's Brew <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Reply-To: Cuptain's Brew Support <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Subject: Cuptain's Brew - Email Verification
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Message-ID: <3lmTFgqIZAUQINuY4vASt0QSjgNWSz8XbWWmkVElSw@localhost>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: X-Mailer: PHPMailer 6.10.0 (https://github.com/PHPMailer/PHPMailer)
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MIME-Version: 1.0
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Type: text/html; charset=iso-8859-1
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Transfer-Encoding: 8bit
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <title>Email Verification</title>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .content { padding: 20px; background-color: #FFFAEE; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .verification-code { 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-size: 24px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-weight: bold; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     letter-spacing: 3px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     color: #2C6E8A;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     text-align: center;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     margin: 20px 0;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     padding: 10px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     background-color: #A9D6E5;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     border-radius: 5px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <div class='container'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='header'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h2>Cuptain's Brew</h2>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='content'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h3>Email Verification</h3>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <div class='verification-code'>312645</div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='footer'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>© 2025 Cuptain's Brew. All rights reserved.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: .
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.0.0 OK  1746983089 d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection d9443c01a7336-22fc82a5d10sm48362995ad.239 - gsmtp
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MAIL FROM:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.0 OK d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: RCPT TO:<businessneato@gmail.com>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.5 OK d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: DATA
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 354 Go ahead d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Date: Sun, 11 May 2025 19:07:59 +0200
+
+PHPMailer Debug [1]: CLIENT -> SERVER: To: businessneato@gmail.com
+
+PHPMailer Debug [1]: CLIENT -> SERVER: From: Cuptain's Brew <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Reply-To: Cuptain's Brew Support <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Subject: Cuptain's Brew - Email Verification
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Message-ID: <eG0UGgFM5oKvvIGHJFTIIu6WpIjyDahIOWM93ZpCGo@localhost>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: X-Mailer: PHPMailer 6.10.0 (https://github.com/PHPMailer/PHPMailer)
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MIME-Version: 1.0
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Type: text/html; charset=iso-8859-1
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Transfer-Encoding: 8bit
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <title>Email Verification</title>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .content { padding: 20px; background-color: #FFFAEE; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .verification-code { 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-size: 24px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-weight: bold; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     letter-spacing: 3px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     color: #2C6E8A;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     text-align: center;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     margin: 20px 0;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     padding: 10px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     background-color: #A9D6E5;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     border-radius: 5px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <div class='container'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='header'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h2>Cuptain's Brew</h2>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='content'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h3>Email Verification</h3>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <div class='verification-code'>039537</div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='footer'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>© 2025 Cuptain's Brew. All rights reserved.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: .
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.0.0 OK  1746983282 d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection d2e1a72fcca58-74237a8f4f2sm4790803b3a.174 - gsmtp
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MAIL FROM:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.0 OK d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: RCPT TO:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.5 OK d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: DATA
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 354 Go ahead d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Date: Sun, 11 May 2025 19:18:52 +0200
+
+PHPMailer Debug [1]: CLIENT -> SERVER: To: gdgarcia00410@usep.edu.ph
+
+PHPMailer Debug [1]: CLIENT -> SERVER: From: Cuptain's Brew <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Reply-To: Cuptain's Brew Support <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Subject: Cuptain's Brew - Email Verification
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Message-ID: <JMpaayJqAkL4dxjsxICV5B2p6UjD6CiQ7lx79LiEzg@localhost>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: X-Mailer: PHPMailer 6.10.0 (https://github.com/PHPMailer/PHPMailer)
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MIME-Version: 1.0
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Type: text/html; charset=iso-8859-1
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Transfer-Encoding: 8bit
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <title>Email Verification</title>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .content { padding: 20px; background-color: #FFFAEE; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .verification-code { 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-size: 24px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-weight: bold; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     letter-spacing: 3px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     color: #2C6E8A;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     text-align: center;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     margin: 20px 0;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     padding: 10px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     background-color: #A9D6E5;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     border-radius: 5px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <div class='container'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='header'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h2>Cuptain's Brew</h2>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='content'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h3>Email Verification</h3>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <div class='verification-code'>647179</div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='footer'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>© 2025 Cuptain's Brew. All rights reserved.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: .
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.0.0 OK  1746983936 d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection d9443c01a7336-22fc7547838sm48562905ad.18 - gsmtp
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: STARTTLS
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+PHPMailer Debug [1]: CLIENT -> SERVER: EHLO localhost
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [2405:8d40:4118:4d64:938:54c:ecfd:1393]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+PHPMailer Debug [1]: CLIENT -> SERVER: AUTH LOGIN
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+PHPMailer Debug [1]: CLIENT -> SERVER: [credentials hidden]
+PHPMailer Debug [2]: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MAIL FROM:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.0 OK 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: RCPT TO:<gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.1.5 OK 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: DATA
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 354 Go ahead 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Date: Sun, 11 May 2025 19:19:20 +0200
+
+PHPMailer Debug [1]: CLIENT -> SERVER: To: gdgarcia00410@usep.edu.ph
+
+PHPMailer Debug [1]: CLIENT -> SERVER: From: Cuptain's Brew <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Reply-To: Cuptain's Brew Support <gdgarcia00410@usep.edu.ph>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Subject: Cuptain's Brew - Email Verification
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Message-ID: <rg7iHe3pUSnYrQ22WROrIQ5kThkDzQ1ZGJUOkrX5clM@localhost>
+
+PHPMailer Debug [1]: CLIENT -> SERVER: X-Mailer: PHPMailer 6.10.0 (https://github.com/PHPMailer/PHPMailer)
+
+PHPMailer Debug [1]: CLIENT -> SERVER: MIME-Version: 1.0
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Type: text/html; charset=iso-8859-1
+
+PHPMailer Debug [1]: CLIENT -> SERVER: Content-Transfer-Encoding: 8bit
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <title>Email Verification</title>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .content { padding: 20px; background-color: #FFFAEE; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 .verification-code { 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-size: 24px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     font-weight: bold; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     letter-spacing: 3px; 
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     color: #2C6E8A;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     text-align: center;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     margin: 20px 0;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     padding: 10px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     background-color: #A9D6E5;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     border-radius: 5px;
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 }
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </style>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </head>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         <body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             <div class='container'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='header'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h2>Cuptain's Brew</h2>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='content'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <h3>Email Verification</h3>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <div class='verification-code'>733044</div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 <div class='footer'>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                     <p>© 2025 Cuptain's Brew. All rights reserved.</p>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:                 </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:             </div>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </body>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         </html>
+
+PHPMailer Debug [1]: CLIENT -> SERVER:         
+
+PHPMailer Debug [1]: CLIENT -> SERVER: 
+
+PHPMailer Debug [1]: CLIENT -> SERVER: .
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 250 2.0.0 OK  1746983963 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
+PHPMailer Debug [1]: CLIENT -> SERVER: QUIT
+
+PHPMailer Debug [2]: SERVER -> CLIENT: 221 2.0.0 closing connection 41be03b00d2f7-b2350ddb4cbsm4268951a12.52 - gsmtp
+
