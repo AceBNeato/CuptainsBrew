@@ -367,7 +367,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         /* Header */
         .header {
             display: flex;
-            align-items: center;
+            justify-content: center;
             padding: 1rem 2rem;
             background: linear-gradient(135deg, #FFFAEE, #FFDBB5);
             box-shadow: 0 2px 5px rgba(74, 59, 43, 0.3);
@@ -410,8 +410,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         /* Form Container */
         .register-container {
             max-width: 450px;
-            margin: 3rem auto;
-            padding: 2rem;
+            margin: 4rem auto;
+            padding: 3rem;
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
@@ -652,7 +652,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
 
             .logo-section img {
                 width: 40vw;
-                margin: 0 0 2vw 0;
             }
 
             .nav-menu {
@@ -669,7 +668,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
 
             .register-container {
                 width: 95%;
-                padding: 2vw;
+                padding: 10vw;
                 margin: 2rem auto;
             }
 
@@ -703,12 +702,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         <div class="logo-section">
             <img src="/public/images/LOGO.png" alt="Cuptain's Brew Logo">
         </div>
-        <nav class="nav-menu">
-            <button class="nav-button" onclick="window.location.href='/views/home.html'">Home</button>
-            <button class="nav-button" onclick="window.location.href='/views/menu.html'">Menu</button>
-            <button class="nav-button" onclick="window.location.href='/views/career.html'">Career</button>
-            <button class="nav-button" onclick="window.location.href='/views/aboutus.html'">About Us</button>
-        </nav>
     </header>
 
     <div class="register-container">

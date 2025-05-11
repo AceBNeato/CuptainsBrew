@@ -232,7 +232,7 @@ if (isset($_GET['forgot'])) {
         /* Header */
         .header {
             display: flex;
-            align-items: center;
+            justify-content: center;
             padding: 1rem 2rem;
             background: linear-gradient(135deg, #FFFAEE, #FFDBB5);
             box-shadow: 0 2px 5px rgba(74, 59, 43, 0.3);
@@ -681,9 +681,7 @@ if (isset($_GET['forgot'])) {
                 <img src="/public/images/LOGO.png" alt="Captain's Brew Cafe">
             </a>
         </div>
-        <nav class="nav-menu">
-            <button class="nav-button" onclick="window.location.href='/views/auth/register.php'">Sign Up</button>
-        </nav>
+       
     </header>
 
     <!-- Main Content -->
