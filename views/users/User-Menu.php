@@ -1,6 +1,76 @@
 <?php
+session_start();
 global $conn;
 require_once __DIR__ . '/../../config.php';
+
+// Handle add_to_cart action directly
+if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
+    header('Content-Type: application/json');
+
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['success' => false, 'error' => 'User not logged in']);
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+        exit;
+    }
+
+    $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+
+    if ($product_id <= 0 || $quantity <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Invalid product ID or quantity']);
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+
+    $check_query = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+    if ($check_query === false) {
+        echo json_encode(['success' => false, 'error' => 'Database query preparation failed']);
+        exit;
+    }
+    $check_query->bind_param("ii", $user_id, $product_id);
+    $check_query->execute();
+    $check_result = $check_query->get_result();
+
+    if ($check_result === false) {
+        echo json_encode(['success' => false, 'error' => 'Database query execution failed']);
+        exit;
+    }
+
+    if ($check_result->num_rows > 0) {
+        $row = $check_result->fetch_assoc();
+        $new_quantity = $row['quantity'] + $quantity;
+        $update_query = $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
+        if ($update_query === false) {
+            echo json_encode(['success' => false, 'error' => 'Database query preparation failed']);
+            exit;
+        }
+        $update_query->bind_param("ii", $new_quantity, $row['id']);
+        $success = $update_query->execute();
+        $update_query->close();
+    } else {
+        $insert_query = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
+        if ($insert_query === false) {
+            echo json_encode(['success' => false, 'error' => 'Database query preparation failed']);
+            exit;
+        }
+        $insert_query->bind_param("iii", $user_id, $product_id, $quantity);
+        $success = $insert_query->execute();
+        $insert_query->close();
+    }
+    $check_query->close();
+
+    if ($success) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => $conn->error]);
+    }
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +80,7 @@ require_once __DIR__ . '/../../config.php';
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Captain's Brew Cafe</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary: #2C6E8A;
@@ -775,7 +846,7 @@ require_once __DIR__ . '/../../config.php';
         <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
 
         <!-- Navigation Menu -->
-        <div id="hamburger-menu" class="hamburger">&#9776;</div>
+        <div id="hamburger-menu" class="hamburger">☰</div>
 
         <nav class="button-container" id="nav-menu">
             <a href="/views/users/user-home.php" class="nav-button">Home</a>
@@ -789,7 +860,7 @@ require_once __DIR__ . '/../../config.php';
                         while ($catRow = $categoryQuery->fetch_assoc()) {
                             $catName = htmlspecialchars($catRow['name'], ENT_QUOTES);
                             $catSlug = strtolower(str_replace(' ', '-', $catName));
-                            echo "<a href='/views/users/user-menu.php?category=" . urlencode($catSlug) . "','-', class='menu-item'>$catName</a>";
+                            echo "<a href='/views/users/user-menu.php?category=" . urlencode($catSlug) . "' class='menu-item'>$catName</a>";
                         }
                     }
                     ?>
@@ -902,21 +973,21 @@ require_once __DIR__ . '/../../config.php';
     <!-- Product View Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal">×</span>
             <div class="modal-body">
-                <img id="modalProductImage" src="" alt="Product Image" class="modal-image">
-                <div class="modal-details">
-                    <h2 id="modalProductName"></h2>
-                    <p id="modalProductPrice" class="price"></p>
-                    <p id="modalProductDesc" class="description"></p>
+                <img id="modalProductImage" src="" alt="Product Image" class='modal-image'>
+                <div class='modal-details'>
+                    <h2 id='modalProductName'></h2>
+                    <p id='modalProductPrice' class='price'></p>
+                    <p id='modalProductDesc' class='description'></p>
                     
-                    <div class="quantity-control">
-                        <button class="quantity-btn minus">-</button>
-                        <input type="number" id="productQuantity" value="1" min="1" max="10">
-                        <button class="quantity-btn plus">+</button>
+                    <div class='quantity-control'>
+                        <button class='quantity-btn minus'>-</button>
+                        <input type='number' id='productQuantity' value='1' min='1' max='10'>
+                        <button class='quantity-btn plus'>+</button>
                     </div>
                     
-                    <button id="addToCartModal" class="add-to-cart-btn">Add to Cart</button>
+                    <button id='addToCartModal' class='add-to-cart-btn'>Add to Cart</button>
                 </div>
             </div>
         </div>
@@ -1027,28 +1098,55 @@ require_once __DIR__ . '/../../config.php';
 
         // Cart Functionality
         function addToCart(productId, name, price, image, quantity = 1) {
-            console.log(`Adding to cart: ${name} (${productId}) - ₱${price} x ${quantity}`);
-            
-            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            
-            let existingProduct = cart.find(item => item.id === productId);
-            
-            if (existingProduct) {
-                existingProduct.quantity += quantity;
-            } else {
-                cart.push({
-                    id: productId,
-                    name: name,
-                    price: price,
-                    image: image,
-                    quantity: quantity
+            fetch('/views/users/user-menu.php?action=add_to_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `product_id=${productId}&quantity=${quantity}`
+            })
+            .then(response => {
+                console.log('Response Status:', response.status);
+                console.log('Response Headers:', response.headers.get('content-type'));
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw Response:', text);
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        showCartNotification(`${name} added to cart (${quantity}x)`);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: `${name} added to cart (${quantity}x)`,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to add to cart: ' + data.error,
+                        });
+                    }
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Invalid response from server: ' + e.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred: ' + error.message,
                 });
-            }
-            
-            localStorage.setItem('cart', JSON.stringify(cart));
-            
-            // Show notification
-            showCartNotification(`${name} added to cart (${quantity}x)`);
+            });
         }
 
         // Cart Notification

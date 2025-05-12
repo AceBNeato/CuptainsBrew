@@ -328,6 +328,19 @@ if (isset($_GET['forgot'])) {
             padding: 0.8rem 1rem;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background: #A9D6E5;
+            color: #4a3b2b;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+
+
+        .edit-form input[type="text"] {
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             background: #f9f9f9;
             color: #4a3b2b;
             font-size: 0.9rem;

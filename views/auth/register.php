@@ -444,7 +444,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             color: #4a3b2b;
             font-size: 0.9rem;
             width: 100%;
+            
+            transition: all 0.3s;
         }
+
+
+        .edit-form input[type="text"] {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            background: #A9D6E5;
+            color: #4a3b2b;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+
+
+        .edit-form input:focus {
+            outline: none;
+            border-color: #2C6E8A;
+            box-shadow: 0 0 0 2px rgba(44, 110, 138, 0.2);
+            background: #fff;
+        }
+
 
         .edit-form button {
             padding: 0.5rem;
@@ -723,7 +746,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                     <input type="checkbox" id="showPassword" onclick="togglePassword()">
                     <label for="showPassword">Show Password</label>
                 </div>
-                <a href="/views/auth/forgot-password.php">Forgot Password</a>
+                
             </div>
 
             <button type="submit">Register</button>
