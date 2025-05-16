@@ -458,14 +458,14 @@
         <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Cafe Logo">
         <nav class="button-container" id="nav-menu">
             <a href="/views/home.html" class="nav-button">Home</a>
-            <a href="/views/menu.html" class="nav-button">Menu</a>
-            <a href="/views/career.html" class="nav-button">Career</a>
-            <a href="/views/aboutus.html" class="nav-button">About Us</a>
+            <a href="/views/users/User-Menu.php" class="nav-button">Menu</a>
+            <a href="/views/users/User-Menu.php" class="nav-button">Career</a>
+            <a href="/views/users/User-Menu.php" class="nav-button">About Us</a>
             <div class="icon-container">
-                <a href="/views/users/cart.html" id="cart-icon" class="nav-icon hidden">
+                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon hidden">
                     <img src="/images/cart-icon.png" alt="Cart">
                 </a>
-                <a href="/views/users/profile.html" id="profile-icon" class="nav-icon hidden">
+                <a href="/views/users/profile.php" id="profile-icon" class="nav-icon hidden">
                     <img src="/images/profile-icon.png" alt="Profile">
                 </a>
             </div>

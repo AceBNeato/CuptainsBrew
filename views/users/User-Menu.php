@@ -84,17 +84,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
     <style>
         :root {
             --primary: #2C6E8A;
-            --primary-dark: #235A73;
-            --primary-light: #A9D6E5;
-            --secondary: #4a3b2b;
-            --secondary-light: #FFFAEE;
-            --secondary-lighter: #FFDBB5;
-            --white: #fff;
-            --shadow-light: 0 2px 5px rgba(74, 59, 43, 0.2);
-            --shadow-medium: 0 4px 8px rgba(44, 110, 138, 0.2);
-            --shadow-dark: 0 5px 15px rgba(74, 59, 43, 0.5);
-            --border-radius: 10px;
-            --transition: all 0.3s ease;
+            --primary-dark: #1B4A5E;
+            --primary-light: #B3E0F2;
+            --secondary: #4A3B2B;
+            --secondary-light: #FFF8E7;
+            --secondary-lighter: #FFE8C2;
+            --white: #FFFFFF;
+            --black: #1A1A1A;
+            --shadow-light: 0 4px 12px rgba(74, 59, 43, 0.15);
+            --shadow-medium: 0 6px 16px rgba(44, 110, 138, 0.2);
+            --shadow-dark: 0 8px 24px rgba(74, 59, 43, 0.3);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -102,6 +103,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
@@ -121,7 +124,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .header {
             display: flex;
             align-items: center;
-            padding: 0.75rem 2rem;
+            padding: 1rem 2rem;
             background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
             box-shadow: var(--shadow-light);
             position: sticky;
@@ -131,90 +134,122 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
         #logo {
             height: 60px;
-            margin-right: 3rem;
+            margin-right: 2rem;
             transition: var(--transition);
         }
 
         #logo:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
+            filter: brightness(1.1);
         }
 
         .hamburger {
             display: none;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             cursor: pointer;
-            margin-left: auto;
             color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .hamburger:hover {
+            color: var(--primary);
         }
 
         .button-container {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             flex: 1;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .nav-button {
-            padding: 0.75rem 1.5rem;
-            margin-right: 1rem;
+            padding: 0.75rem 1.25rem;
             color: var(--secondary);
             font-weight: 500;
-            position: relative;
+            font-size: 1rem;
+            border-radius: 8px;
             transition: var(--transition);
         }
 
-        .nav-button::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
+        .nav-button:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
             background: var(--primary);
-            transition: var(--transition);
-            transform: translateX(-50%);
+            color: var(--white);
+            font-weight: 600;
         }
 
-        .nav-button:hover::after {
-            width: 70%;
-        }
-
-        /* Menu Dropdown */
-        .menu-dropdown {
-            position: relative;
-        }
-
-        .menu-dropdown .nav-button {
+        /* Icons and Profile */
+        .icon-profile-container {
             display: flex;
             align-items: center;
+            gap: 1rem;
         }
 
-        .menu-dropdown .nav-button::after {
-            display: none;
+        .icon-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .menu-dropdown .nav-button::before {
-            content: '▼';
-            font-size: 0.6rem;
-            margin-left: 0.5rem;
+        .nav-icon {
+            position: relative;
             transition: var(--transition);
         }
 
-        .menu-dropdown:hover .nav-button::before,
-        .menu-dropdown:focus-within .nav-button::before {
-            transform: rotate(180deg);
+        .nav-icon img {
+            width: 28px;
+            height: 28px;
+            transition: var(--transition);
         }
 
-        .menu-dropdown:hover .dropdown-content,
-        .menu-dropdown:focus-within .dropdown-content {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
+        .nav-icon:hover img {
+            transform: scale(1.15);
+            filter: brightness(1.2);
         }
 
-        .dropdown-content {
+        .profile {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .profile:hover {
+            background: var(--primary-light);
+        }
+
+        .profile img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            border: 2px solid var(--primary-light);
+        }
+
+        .profile span {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+
+        .profile .dropdown {
             position: absolute;
             top: 100%;
-            left: 0;
+            right: 0;
             background: var(--white);
             min-width: 180px;
             box-shadow: var(--shadow-medium);
@@ -224,132 +259,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             transform: translateY(10px);
             transition: var(--transition);
             z-index: 100;
-            padding: 0.5rem 0;
+            padding: 0.75rem 0;
             margin-top: 0.5rem;
-            border: 1px solid var(--primary-light);
-        }
-
-        .dropdown-content::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 20px;
-            width: 12px;
-            height: 12px;
-            background: var(--white);
-            transform: rotate(45deg);
-            box-shadow: -2px -2px 5px rgba(0,0,0,0.05);
-            border-top: 1px solid var(--primary-light);
-            border-left: 1px solid var(--primary-light);
-        }
-
-        .menu-item {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: var(--secondary);
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
-
-        .menu-item:hover {
-            background-color: var(--secondary-light);
-            color: var(--primary);
-        }
-
-        /* Menu Bar */
-        .menu-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem 2rem;
-            margin: 1rem auto;
-            max-width: 1000px;
-            background: var(--secondary-light);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-light);
-        }
-
-        .search-box {
-            width: 100%;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 0.75rem 1.5rem;
-            border: 2px solid var(--primary-light);
-            border-radius: var(--border-radius);
-            outline: none;
-            font-size: 1rem;
-            color: var(--secondary);
-            transition: var(--transition);
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-medium);
-        }
-
-        /* Icons and Profile */
-        .icon-container {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-icon {
-            margin-left: 1rem;
-            position: relative;
-        }
-
-        .nav-icon img {
-            width: 24px;
-            height: 24px;
-            transition: var(--transition);
-        }
-
-        .nav-icon:hover img {
-            transform: scale(1.1);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            margin-left: 1.5rem;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .profile img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 0.5rem;
-        }
-
-        .profile span {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .profile .dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--white);
-            min-width: 160px;
-            box-shadow: var(--shadow-medium);
-            border-radius: var(--border-radius);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 100;
-            padding: 0.5rem 0;
-            margin-top: 0.75rem;
             border: 1px solid var(--primary-light);
         }
 
@@ -363,86 +274,238 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .profile .dropdown::before {
             content: '';
             position: absolute;
-            top: -6px;
-            right: 20px;
-            width: 12px;
-            height: 12px;
+            top: -8px;
+            right: 16px;
+            width: 14px;
+            height: 14px;
             background: var(--white);
             transform: rotate(45deg);
-            box-shadow: -2px -2px 5px rgba(0,0,0,0.05);
             border-top: 1px solid var(--primary-light);
             border-left: 1px solid var(--primary-light);
+            box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .profile .dropdown a {
             display: block;
-            padding: 0.6rem 1rem;
+            padding: 0.75rem 1.25rem;
             color: var(--secondary);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: var(--transition);
         }
 
         .profile .dropdown a:hover {
-            background-color: var(--secondary-light);
-            color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        /* Menu Bar */
+        .menu-bar {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            margin: 0 0 2rem 0;
+            width: 100%;
+            background: var(--white);
+            border-radius: var(--border-radius);
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--border-radius);
+            outline: none;
+            font-size: 1rem;
+            color: var(--secondary);
+            width: 100%;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--secondary);
+            opacity: 0.7;
+        }
+
+        /* Left Navigation */
+        .left-nav {
+            width: 260px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            padding: 1.5rem;
+            position: sticky;
+            top: 90px;
+            z-index: 100;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            border: 1px solid rgba(44, 110, 138, 0.1);
+        }
+
+        .left-nav-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .left-nav-list {
+            list-style: none;
+        }
+
+        .left-nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .left-nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--secondary);
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .left-nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateX(4px);
+        }
+
+        .left-nav-link.active {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .left-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-dark);
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            align-items: start;
+        }
+
+        #menu-list-container {
+            flex: 1;
+            padding: 0;
+        }
+
+        /* Category Title */
+        .category-title {
+            text-align: left;
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin: 0 0 1.5rem 0;
+            font-weight: 700;
+            text-transform: capitalize;
+            position: relative;
+        }
+
+        .category-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: var(--primary-light);
+            border-radius: 4px;
         }
 
         /* Menu Cards */
         .menu-card {
-            display: flex;
+            display: grid;
+            margin: 2vw;
+            grid-template-columns: 150px 1fr auto;
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
-            padding: 1rem;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
             transition: var(--transition);
             align-items: center;
+            gap: 1.5rem;
         }
 
         .menu-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-medium);
         }
 
         .menu-image {
+            width: 150px;
+            height: 150px;
             border-radius: var(--border-radius);
             object-fit: cover;
+            border: 2px solid var(--primary-light);
         }
 
         .menu-content {
-            flex: 1;
-            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .menu-title {
-            font-size: 1.3rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin: 0;
         }
 
         .menu-price {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--secondary);
             font-weight: 600;
-            margin-bottom: 0.5rem;
         }
 
         .menu-desc {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--secondary);
+            line-height: 1.5;
+            opacity: 0.9;
         }
 
         .menu-manage {
             background: var(--primary);
             color: var(--white);
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -450,45 +513,26 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .menu-manage:hover {
             background: var(--primary-dark);
             transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
         }
 
         .no-items {
             text-align: center;
-            padding: 2rem;
+            padding: 2.5rem;
             color: var(--secondary);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: var(--white);
         }
 
         .error-message {
-            background: #ffe0e0;
-            color: #d32f2f;
+            background: #FFEBEE;
+            color: #D32F2F;
             padding: 1rem;
             border-radius: var(--border-radius);
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             text-align: center;
-        }
-
-        /* Category Title */
-        .category-title {
-            text-align: center;
-            font-size: 2rem;
-            color: var(--primary);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            position: relative;
-            text-transform: capitalize;
-        }
-
-        .category-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background: var(--primary-light);
-            border-radius: 3px;
+            font-weight: 500;
         }
 
         /* Modal Styles */
@@ -498,14 +542,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            transition: var(--transition);
         }
 
         .modal.active {
@@ -517,7 +561,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             background: var(--white);
             border-radius: var(--border-radius);
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
             max-height: 90vh;
             overflow-y: auto;
             padding: 2rem;
@@ -529,27 +573,28 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             cursor: pointer;
             color: var(--secondary);
             transition: var(--transition);
         }
 
         .close-modal:hover {
-            color: var(--primary);
+            color: var(--primary-dark);
+            transform: rotate(90deg);
         }
 
         .modal-body {
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         .modal-image {
             width: 100%;
-            max-height: 300px;
+            max-height: 350px;
             object-fit: cover;
             border-radius: var(--border-radius);
+            border: 2px solid var(--primary-light);
         }
 
         .modal-details {
@@ -559,37 +604,39 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         }
 
         .modal-details h2 {
-            color: var(--primary);
-            font-size: 1.8rem;
+            color: var(--primary-dark);
+            font-size: 2rem;
+            font-weight: 600;
             margin: 0;
         }
 
         .modal-details .price {
             color: var(--secondary);
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 600;
-            margin: 0;
         }
 
         .modal-details .description {
             color: var(--secondary);
+            font-size: 1rem;
             line-height: 1.6;
+            opacity: 0.9;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             margin: 1rem 0;
         }
 
         .quantity-btn {
             background: var(--primary-light);
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -599,48 +646,53 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
         .quantity-btn:hover {
             background: var(--primary);
-            color: white;
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
         }
 
         #productQuantity {
-            width: 60px;
+            width: 80px;
             text-align: center;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border: 2px solid var(--primary-light);
             border-radius: var(--border-radius);
-            font-size: 1rem;
+            font-size: 1.1rem;
+            background: var(--white);
         }
 
         .add-to-cart-btn {
             background: var(--primary);
-            color: white;
+            color: var(--white);
             border: none;
-            padding: 1rem;
+            padding: 1rem 2rem;
             border-radius: var(--border-radius);
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            margin-top: 1rem;
         }
 
         .add-to-cart-btn:hover {
             background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
         }
 
         .cart-notification {
             position: fixed;
-            bottom: 20px;
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--primary);
-            color: white;
+            color: var(--white);
             padding: 1rem 2rem;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-dark);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: var(--transition);
             z-index: 3000;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .cart-notification.show {
@@ -652,19 +704,20 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             .header {
                 padding: 0.75rem 1rem;
             }
-            
+
             #logo {
-                height: 40px;
+                height: 48px;
                 margin-right: 1rem;
             }
-            
+
             .hamburger {
                 display: block;
+                margin-left: auto;
             }
-            
+
             .button-container {
                 position: fixed;
-                top: 70px;
+                top: 64px;
                 left: 0;
                 width: 100%;
                 flex-direction: column;
@@ -678,126 +731,169 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 z-index: 999;
                 align-items: flex-start;
             }
-            
+
             .button-container.active {
                 transform: translateY(0);
                 opacity: 1;
                 visibility: visible;
             }
-            
+
+            .nav-links {
+                width: 100%;
+                flex-direction: column;
+            }
+
             .nav-button {
                 width: 100%;
                 padding: 0.75rem 1.5rem;
-                margin: 0;
+                margin: 0.25rem 0;
+                text-align: left;
             }
-            
-            .nav-button::after {
-                display: none;
-            }
-            
-            .menu-dropdown {
-                width: 100%;
-            }
-            
-            .dropdown-content {
-                position: static;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease;
-                border: none;
-            }
-            
-            .menu-dropdown.active .dropdown-content {
-                max-height: 300px;
-            }
-            
-            .dropdown-content::before {
-                display: none;
-            }
-            
-            .menu-item {
-                padding: 0.6rem 2.5rem;
-            }
-            
-            .icon-container {
+
+            .icon-profile-container {
                 width: 100%;
                 justify-content: flex-end;
                 padding: 0 1.5rem;
                 margin: 0.5rem 0;
             }
-            
+
             .profile {
                 width: 100%;
                 padding: 0.75rem 1.5rem;
                 margin: 0;
                 justify-content: space-between;
             }
-            
+
             .profile .dropdown {
                 position: static;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
                 opacity: 1;
                 visibility: visible;
                 transform: none;
                 box-shadow: none;
                 margin: 0;
                 padding: 0;
-                width: 100%;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease;
                 border: none;
             }
-            
+
             .profile.active .dropdown {
                 max-height: 300px;
             }
-            
+
             .profile .dropdown::before {
                 display: none;
             }
-            
+
             .profile .dropdown a {
-                padding: 0.6rem 2.5rem;
+                padding: 0.75rem 2.5rem;
             }
-            
-            .menu-bar {
-                padding: 1rem;
-                margin: 1rem;
-            }
-            
-            .search-input {
-                padding: 0.75rem 1rem;
-            }
-            
-            .products-container {
-                padding: 1rem;
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 1rem;
-            }
-            
-            .menu-card {
+
+            .main-content {
                 flex-direction: column;
+                padding: 1rem;
+            }
+
+            .left-nav {
+                width: 100%;
+                position: static;
+                height: auto;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-light);
+            }
+
+            .left-nav-title {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .left-nav-list {
+                display: flex;
+                overflow-x: auto;
+                gap: 0.75rem;
+                padding-bottom: 0.75rem;
+                scrollbar-width: thin;
+                scrollbar-color: var(--primary-light) var(--white);
+            }
+
+            .left-nav-list::-webkit-scrollbar {
+                height: 8px;
+            }
+
+            .left-nav-list::-webkit-scrollbar-track {
+                background: var(--white);
+            }
+
+            .left-nav-list::-webkit-scrollbar-thumb {
+                background: var(--primary-light);
+                border-radius: 4px;
+            }
+
+            .left-nav-item {
+                flex: 0 0 auto;
+                margin-bottom: 0;
+            }
+
+            .left-nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.95rem;
+                white-space: nowrap;
+                border-radius: 20px;
+            }
+
+            .left-nav-link:hover {
+                transform: none;
+            }
+
+            .left-nav-link.active {
+                background: var(--primary);
+                color: var(--white);
+            }
+
+            .left-nav-link.active::before {
+                display: none;
+            }
+
+            .menu-bar {
+                margin: 0 0 1rem 0;
+                padding: 0.75rem;
+            }
+
+            .category-title {
+                font-size: 2rem;
+                margin: 0 0 1rem 0;
                 text-align: center;
             }
-            
+
+            .category-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .menu-card {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 1rem;
+            }
+
             .menu-image {
                 width: 100%;
                 height: auto;
-                margin: 0 0 1rem 0;
+                max-height: 200px;
+                margin-bottom: 1rem;
             }
-            
+
             .menu-content {
                 padding: 0;
                 margin-bottom: 1rem;
             }
-            
+
             .menu-manage {
                 align-self: center;
             }
@@ -805,14 +901,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             .modal-body {
                 flex-direction: column;
             }
-            
+
             .modal-image {
-                width: 100%;
-                max-height: none;
+                max-height: 250px;
             }
-            
+
             .modal-details {
-                width: 100%;
                 padding-left: 0;
             }
         }
@@ -821,22 +915,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             .modal-body {
                 flex-direction: row;
             }
-            
+
             .modal-image {
                 width: 50%;
-                max-height: none;
+                max-height: 400px;
             }
-            
+
             .modal-details {
                 width: 50%;
                 padding-left: 1.5rem;
             }
-        }
-
-        #menu-list-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 1rem;
         }
     </style>
 </head>
@@ -844,130 +932,114 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
     <!-- Header Section -->
     <header class="header">
         <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-
-        <!-- Navigation Menu -->
         <div id="hamburger-menu" class="hamburger">☰</div>
-
         <nav class="button-container" id="nav-menu">
-            <a href="/views/users/user-home.php" class="nav-button">Home</a>
-            
-            <div class="menu-dropdown">
+            <div class="nav-links">
+                <a href="/views/users/user-home.php" class="nav-button">Home</a>
                 <a href="/views/users/user-menu.php" class="nav-button">Menu</a>
-                <div class="dropdown-content">
-                    <?php
-                    $categoryQuery = $conn->query("SELECT DISTINCT name FROM categories ORDER BY id");
-                    if ($categoryQuery && $categoryQuery->num_rows > 0) {
-                        while ($catRow = $categoryQuery->fetch_assoc()) {
-                            $catName = htmlspecialchars($catRow['name'], ENT_QUOTES);
-                            $catSlug = strtolower(str_replace(' ', '-', $catName));
-                            echo "<a href='/views/users/user-menu.php?category=" . urlencode($catSlug) . "' class='menu-item'>$catName</a>";
-                        }
-                    }
-                    ?>
+                <a href="/views/users/user-career.php" class="nav-button">Career</a>
+                <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
+            </div>
+            <div class="icon-profile-container">
+                <div class="icon-container">
+                    <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
+                        <img src="/public/images/icons/cart-icon.png" alt="Cart">
+                    </a>
                 </div>
-            </div>
-            
-            <a href="/views/users/user-career.php" class="nav-button">Career</a>
-            <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
-
-            <div class="icon-container">
-                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                </a>
-            </div>
-
-            <div class="profile">
-                <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                <span>
-                    <?php 
-                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                    ?>
-                </span>
-                <div class="dropdown">
-                    <a href="/views/users/account.php">My Account</a>
-                    <a href="/views/users/purchases.php">My Purchase</a>
-                    <a href="/logout.php" id="logout-button">Logout</a>
+                <div class="profile">
+                    <img src="/public/images/icons/profile-icon.png" alt="Profile">
+                    <span>
+                        <?php 
+                        echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
+                        ?>
+                    </span>
+                    <div class="dropdown">
+                        <a href="/views/users/account.php">My Account</a>
+                        <a href="/views/users/purchases.php">My Purchase</a>
+                        <a href="/logout.php" id="logout-button">Logout</a>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Menu Bar with Search -->
-    <div class="menu-bar">
-        <div class="search-box">
-            <input type="text" class="search-input" placeholder="🔍 Search for drinks..." 
-                   id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
-                   onkeyup="handleSearch(event)"/>
-        </div>
-    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <?php include __DIR__ . '/partials/left-nav.php'; ?>
 
-    <!-- Category Title -->
-    <h1 class="category-title">
-        <?php
-        $currentCategory = $_GET['category'] ?? 'coffee';
-        $displayCategory = str_replace('-', ' ', $currentCategory);
-        echo ucwords(htmlspecialchars($displayCategory));
-        ?>
-    </h1>
+        <div id="menu-list-container">
+            <!-- Menu Bar with Search -->
+            <div class="menu-bar">
+                 <!-- Category Title -->
 
-    <!-- Menu List Container -->
-    <div id="menu-list-container">
-        <?php
-        $category = $_GET['category'] ?? 'coffee';
-        $searchTerm = $_GET['search'] ?? '';
-        
-        try {
-            $categoryName = str_replace('-', ' ', $category);
-            $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '" . $conn->real_escape_string($categoryName) . "'");
+           
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="🔍 Search for drinks..." 
+                           id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                           onkeyup="handleSearch(event)"/>
+                </div>
+            </div>
+
+           
+
+            <!-- Menu Items -->
+            <?php
+            $category = $_GET['category'] ?? 'coffee';
+            $searchTerm = $_GET['search'] ?? '';
             
-            if (!$categoryQuery) {
-                throw new Exception("Category query failed: " . $conn->error);
-            }
-
-            $categoryRow = $categoryQuery->fetch_assoc();
-
-            if (!$categoryRow) {
-                echo "<div class='no-items'>Category not found.</div>";
-            } else {
-                $categoryId = $categoryRow['id'];
-                $query = "SELECT * FROM products WHERE category_id = $categoryId";
+            try {
+                $categoryName = str_replace('-', ' ', $category);
+                $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '" . $conn->real_escape_string($categoryName) . "'");
                 
-                if (!empty($searchTerm)) {
-                    $searchTerm = $conn->real_escape_string($searchTerm);
-                    $query .= " AND item_name LIKE '%$searchTerm%'";
+                if (!$categoryQuery) {
+                    throw new Exception("Category query failed: " . $conn->error);
                 }
 
-                $products = $conn->query($query);
-                
-                if (!$products) {
-                    throw new Exception("Products query failed: " . $conn->error);
-                }
+                $categoryRow = $categoryQuery->fetch_assoc();
 
-                if ($products->num_rows > 0) {
-                    while ($row = $products->fetch_assoc()) {
-                        $name = htmlspecialchars($row['item_name'], ENT_QUOTES);
-                        $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
-                        $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
-                        
-                        echo "<div class='menu-card' id='menuCard-{$row['id']}'>
-                                <img src='/public/{$image}' alt='$name' class='menu-image' style='width: 150px; height:auto; margin: 0px 40px 0px 0px;'>
-                                <div class='menu-content'>
-                                    <h2 class='menu-title'>$name</h2>
-                                    <p class='menu-price'>₱ {$row['item_price']}</p>
-                                    <p class='menu-desc'>$desc</p>
-                                </div>
-                                <button class='menu-manage'>+</button>
-                              </div>";
-                    }
+                if (!$categoryRow) {
+                    echo "<div class='no-items'>Category not found.</div>";
                 } else {
-                    $message = empty($searchTerm) ? "in this category." : "matching your search.";
-                    echo "<div class='no-items'>No items found $message</div>";
+                    $categoryId = $categoryRow['id'];
+                    $query = "SELECT * FROM products WHERE category_id = $categoryId";
+                    
+                    if (!empty($searchTerm)) {
+                        $searchTerm = $conn->real_escape_string($searchTerm);
+                        $query .= " AND item_name LIKE '%$searchTerm%'";
+                    }
+
+                    $products = $conn->query($query);
+                    
+                    if (!$products) {
+                        throw new Exception("Products query failed: " . $conn->error);
+                    }
+
+                    if ($products->num_rows > 0) {
+                        while ($row = $products->fetch_assoc()) {
+                            $name = htmlspecialchars($row['item_name'], ENT_QUOTES);
+                            $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
+                            $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
+                            
+                            echo "<div class='menu-card' id='menuCard-{$row['id']}'>
+                                    <img src='/public/{$image}' alt='$name' class='menu-image'>
+                                    <div class='menu-content'>
+                                        <h2 class='menu-title'>$name</h2>
+                                        <p class='menu-price'>₱ {$row['item_price']}</p>
+                                        <p class='menu-desc'>$desc</p>
+                                    </div>
+                                    <button class='menu-manage'>+</button>
+                                  </div>";
+                        }
+                    } else {
+                        $message = empty($searchTerm) ? "in this category." : "matching your search.";
+                        echo "<div class='no-items'>No items found $message</div>";
+                    }
                 }
+            } catch (Exception $e) {
+                echo "<div class='error-message'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
             }
-        } catch (Exception $e) {
-            echo "<div class='error-message'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
-        }
-        ?>
+            ?>
+        </div>
     </div>
 
     <!-- Product View Modal -->
@@ -980,13 +1052,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                     <h2 id='modalProductName'></h2>
                     <p id='modalProductPrice' class='price'></p>
                     <p id='modalProductDesc' class='description'></p>
-                    
                     <div class='quantity-control'>
                         <button class='quantity-btn minus'>-</button>
                         <input type='number' id='productQuantity' value='1' min='1' max='10'>
                         <button class='quantity-btn plus'>+</button>
                     </div>
-                    
                     <button id='addToCartModal' class='add-to-cart-btn'>Add to Cart</button>
                 </div>
             </div>
@@ -1000,24 +1070,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             document.getElementById('nav-menu').classList.toggle('active');
         });
 
-        // Mobile Dropdown Handling
-        if (window.innerWidth <= 768) {
-            const menuDropdown = document.querySelector('.menu-dropdown');
-            menuDropdown.addEventListener('click', function(e) {
-                if (e.target.classList.contains('nav-button')) {
-                    e.preventDefault();
-                    this.classList.toggle('active');
-                }
-            });
-
-            const profile = document.querySelector('.profile');
-            profile.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown')) {
-                    e.preventDefault();
-                    this.classList.toggle('active');
-                }
-            });
-        }
+       
 
         // Search Functionality
         function handleSearch(event) {

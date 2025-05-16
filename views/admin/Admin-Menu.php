@@ -219,9 +219,8 @@
       flex: 1;
       background: #fff;
       border-radius: 10px;
-      padding: 2rem;
       position: sticky;
-      top: 195px;
+      top: 207px;
       height: fit-content;
       box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
     }
@@ -291,6 +290,7 @@
       color: #fff;
       border: none;
       padding: 0.75rem;
+      margin: 2rem 2rem 0rem;
       border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
@@ -327,7 +327,6 @@
       width: 90%;
       max-width: 450px;
       max-height: 80vh;
-      overflow-y: auto;
     }
 
     .edit-form {
@@ -675,7 +674,7 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
       <h1></h1>
       <button class="add-button" id="add-button" onclick="openAddItemModal()">Add Item</button>
       
-      <div id="no-item-selected" style="margin-top: 20px; text-align: center;">
+      <div id="no-item-selected" style="margin: 50px; text-align: center;">
         <p>Select an item to edit or add a new one</p>
       </div>
       
