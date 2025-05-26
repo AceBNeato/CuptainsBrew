@@ -214,381 +214,450 @@ if (isset($_GET['forgot'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="/public/images/LOGO.png" sizes="any">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+    :root {
+        --primary: #2C6E8A;
+        --primary-dark: #1B4A5E;
+        --primary-light: #B3E0F2;
+        --secondary: #4A3B2B;
+        --secondary-light: #FFF8E7;
+        --secondary-lighter: #FFE8C2;
+        --white: #FFFFFF;
+        --black: #1A1A1A;
+        --accent: #ffb74a;
+        --dark: #1a1310;
+        --shadow-light: 0 4px 12px rgba(74, 59, 43, 0.15);
+        --shadow-medium: 0 6px 16px rgba(44, 110, 138, 0.2);
+        --shadow-dark: 0 8px 24px rgba(74, 59, 43, 0.3);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        body {
-            background: #fff;
-            color: #4a3b2b;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #FFFAEE, #FFDBB5);
-            box-shadow: 0 2px 5px rgba(74, 59, 43, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
+    }
 
-        .logo-section img {
-            width: 200px;
-            margin: 0px 100px 0px 100px;
-            transition: transform 0.3s;
-        }
+    /* Background Image */
+    .image-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        z-index: -1;
+    }
 
-        .logo-section img:hover {
-            transform: scale(1.1);
-        }
+    #getstarted {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(60%); /* Slightly darker for better contrast */
+    }
 
-        .nav-menu {
-            display: flex;
-            gap: 3rem;
-        }
+    /* Overlay for better text readability */
+    .image-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3); /* Subtle dark overlay */
+    }
 
-        .nav-button {
-            background: none;
-            border: none;
-            color: #4a3b2b;
-            font-size: 1rem;
-            padding: 1rem 2rem;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: center;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
+        box-shadow: var(--shadow-light);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
 
-        .nav-button:hover, .nav-button.active {
-            background-color: #2C6E8A;
-            color: #fff;
-        }
+    .logo-section img {
+        width: 200px;
+        transition: var(--transition);
+    }
 
-        /* Main Content */
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
+    .logo-section img:hover {
+        transform: scale(1.1);
+    }
+.back-button {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    z-index: 1001; /* Above header and background */
+    transition: var(--transition);
+}
 
-        /* Form Container */
-        .login-container {
-            width: 100%;
-            max-width: 450px;
-            padding: 2rem;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
-            margin: 2rem 0;
-        }
+.back-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
 
-        .login-container h2 {
-            font-size: 1.5rem;
-            color: #2C6E8A;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.back-button i {
+    font-size: 1rem;
+}
 
-        .edit-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+.image-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120%;
+    z-index: -1;
+}
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+#getstarted {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(60%); /* Slightly darker for better contrast */
+}
 
-        .edit-form label {
-            font-size: 0.9rem;
-            color: #4a3b2b;
-            font-weight: 500;
-        }
+/* Overlay for better text readability */
+.image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Subtle dark overlay */
+}
 
-        .input-wrapper {
-            position: relative;
-        }
+/* Header */
+.header {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
+    box-shadow: var(--shadow-light);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
 
-        .edit-form input[type="email"],
-        .edit-form input[type="password"] {
-            padding: 0.8rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #A9D6E5;
-            color: #4a3b2b;
-            font-size: 0.9rem;
-            width: 100%;
-            transition: all 0.3s;
-        }
+.logo-section img {
+    width: 200px;
+    transition: var(--transition);
+}
 
+.logo-section img:hover {
+    transform: scale(1.1);
+}
 
+/* Main Content */
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    min-height: calc(100vh - 60px); /* Adjust for header height */
+}
 
-        .edit-form input[type="text"] {
-            padding: 0.8rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #f9f9f9;
-            color: #4a3b2b;
-            font-size: 0.9rem;
-            width: 100%;
-            transition: all 0.3s;
-        }
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    backdrop-filter: blur(10px); /* Glassmorphism effect */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-dark);
+    margin: 2rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-        .edit-form input:focus {
-            outline: none;
-            border-color: #2C6E8A;
-            box-shadow: 0 0 0 2px rgba(44, 110, 138, 0.2);
-            background: #fff;
-        }
+.login-container h2 {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
 
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #4a3b2b;
-            cursor: pointer;
-            font-size: 1rem;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-        }
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
 
-        .password-toggle:hover {
-            opacity: 1;
-        }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0.5rem 0;
-        }
+.edit-form label {
+    font-size: 0.9rem;
+    color: var(--secondary);
+    font-weight: 500;
+}
 
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
+.input-wrapper {
+    position: relative;
+}
 
-        .remember-me input {
-            cursor: pointer;
-        }
+.edit-form input[type="email"],
+.edit-form input[type="password"] {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--primary-light);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--secondary);
+    font-size: 0.95rem;
+    width: 100%;
+    transition: var(--transition);
+}
 
-        .forgot-password {
-            color: #2C6E8A;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-        }
+.edit-form input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 110, 138, 0.2);
+    background: var(--white);
+}
 
-        .forgot-password:hover {
-            color: #235A73;
-            text-decoration: underline;
-        }
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.7;
+    transition: var(--transition);
+}
 
-        .edit-form button {
-            padding: 0.8rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: #2C6E8A;
-            color: #fff;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.password-toggle:hover {
+    opacity: 1;
+    color: var(--primary);
+}
 
-        .edit-form button:hover {
-            background: #235A73;
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(44, 110, 138, 0.3);
-        }
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+}
 
-        .create-account {
-            text-align: center;
-            margin-top: 1.5rem;
-        }
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--secondary);
+}
 
-        .create-account p {
-            font-size: 0.9rem;
-            color: #4a3b2b;
-        }
+.remember-me input {
+    cursor: pointer;
+    accent-color: var(--primary);
+}
 
-        .create-account a {
-            color: #2C6E8A;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
+.forgot-password {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
 
-        .create-account a:hover {
-            color: #235A73;
-            text-decoration: underline;
-        }
+.forgot-password:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
 
-        /* Footer */
-        footer {
-            margin-top: auto;
-        }
+.edit-form button {
+    padding: 0.9rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-        .footer-container {
-            background-color: #2C6E8A;
-            color: white;
-            padding: 2rem;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
+.edit-form button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
 
-        .footer-left, .footer-right {
-            flex: 1;
-            min-width: 250px;
-        }
+.create-account {
+    text-align: center;
+    margin-top: 1.5rem;
+}
 
-        .footer-links ul {
-            list-style: none;
-            padding: 0;
-        }
+.create-account p {
+    font-size: 0.9rem;
+    color: var(--secondary);
+}
 
-        .footer-links li {
-            margin-bottom: 0.5rem;
-        }
+.create-account a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
 
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
+.create-account a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
 
-        .footer-links a:hover {
-            color: #FFDBB5;
-            text-decoration: underline;
-        }
+/* SweetAlert Custom Styles */
+.swal2-confirm {
+    background-color: var(--primary) !important;
+    color: var(--white) !important;
+    border-radius: var(--border-radius) !important;
+    padding: 0.5rem 1.5rem !important;
+}
 
-        .footer-social {
-            margin-top: 1.5rem;
-            display: flex;
-            gap: 1rem;
-        }
+.swal2-confirm:hover {
+    background-color: var(--primary-dark) !important;
+}
 
-        .footer-social img {
-            width: 30px;
-            transition: transform 0.3s;
-        }
+.swal2-cancel {
+    margin-right: 10px !important;
+}
 
-        .footer-social img:hover {
-            transform: scale(1.1);
-        }
+.swal2-input {
+    border: 1px solid var(--primary-light) !important;
+    box-shadow: none !important;
+}
 
-        .footer-contact h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        padding: 0.75rem 1rem;
+    }
 
-        .footer-contact p {
-            margin-bottom: 0.5rem;
-            line-height: 1.5;
-        }
+    .logo-section img {
+        width: 150px;
+    }
 
-        .footer-bottom {
-            background-color: #FFFAEE;
-            text-align: center;
-            padding: 1rem;
-            color: #4a3b2b;
-            font-size: 0.9rem;
-        }
+    main {
+        padding: 1rem;
+    }
 
-        /* SweetAlert Custom Styles */
-        .swal2-confirm {
-            background-color: #2C6E8A !important;
-            color: #fff !important;
-            border-radius: 5px !important;
-            padding: 0.5rem 1.5rem !important;
-        }
+    .login-container {
+        padding: 1.5rem;
+        max-width: 90%;
+    }
 
-        .swal2-confirm:hover {
-            background-color: #235A73 !important;
-        }
+    .login-container h2 {
+        font-size: 1.5rem;
+    }
 
-        .swal2-cancel {
-            margin-right: 10px !important;
-        }
+    .edit-form input[type="email"],
+    .edit-form input[type="password"] {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+    }
 
-        .swal2-input {
-            border: 1px solid #ddd !important;
-            box-shadow: none !important;
-        }
+    .edit-form button {
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                padding: 1rem;
-            }
+    .back-button {
+        top: 0.75rem;
+        left: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
 
-            .logo-section img {
-                width: 150px;
-                margin: 0 0 1rem 0;
-            }
+    .back-button i {
+        font-size: 0.9rem;
+    }
+}
 
-            .nav-menu {
-                width: 100%;
-                justify-content: center;
-                gap: 0.5rem;
-            }
+@media (max-width: 480px) {
+    .logo-section img {
+        width: 120px;
+    }
 
-            .nav-button {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
+    .login-container {
+        padding: 1rem;
+        max-width: 95%;
+    }
 
-            .login-container {
-                padding: 1.5rem;
-                margin: 1rem;
-            }
+    .login-container h2 {
+        font-size: 1.3rem;
+    }
 
-            .footer-container {
-                flex-direction: column;
-                gap: 2rem;
-                padding: 1.5rem;
-            }
-        }
+    .edit-form input[type="email"],
+    .edit-form input[type="password"] {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
 
-        @media (max-width: 480px) {
-            .form-options {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
+    .edit-form button {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+    }
 
-            .edit-form input[type="email"],
-            .edit-form input[type="password"] {
-                padding: 0.7rem 1rem;
-            }
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
 
-            .edit-form button {
-                padding: 0.7rem;
-            }
-        }
-    </style>
+    .remember-me, .forgot-password {
+        font-size: 0.85rem;
+    }
+
+    .create-account p {
+        font-size: 0.85rem;
+    }
+
+    .back-button {
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .back-button i {
+        font-size: 0.8rem;
+    }
+}
+</style>
     <script>
         // Toggle Password Visibility
         function togglePassword() {
@@ -687,15 +756,15 @@ if (isset($_GET['forgot'])) {
     </script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="logo-section">
-            <a href="/">
-                <img src="/public/images/LOGO.png" alt="Captain's Brew Cafe">
-            </a>
-        </div>
-       
-    </header>
+    <!-- Background Image -->
+    <div class="image-container">
+        <img src="/public/images/background/login.jpg" alt="Login Background" id="getstarted">
+    </div>
+
+    <!-- Back Button -->
+    <a href="/views/index.php" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
 
     <!-- Main Content -->
     <main>
@@ -735,44 +804,9 @@ if (isset($_GET['forgot'])) {
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-left">
-                <div class="footer-links">
-                    <ul>
-                        <li><a href="/views/index.php">Home</a></li>
-                        <li><a href="/views/menu.html">Menu</a></li>
-                        <li><a href="/views/aboutus.html">About Us</a></li>
-                    </ul>
-                </div>
-                <div class="footer-social">
-                    <a href="#"><img src="/public/images/facebook.png" alt="facebook"></a>
-                    <a href="#"><img src="/public/images/twitter.png" alt="twitter"></a>
-                    <a href="#"><img src="/public/images/instagram.png" alt="instagram"></a>
-                </div>
-            </div>
-            
-            <div class="footer-right">
-                <div class="footer-contact">
-                    <h3>CONTACT US</h3>
-                    <p>123 Coffee Street, City Name</p>
-                    <p><strong>Phone:</strong> +1 800 555 6789</p>
-                    <p><strong>E-mail:</strong> support@captainsbrew.com</p>
-                    <p><strong>Website:</strong> www.captainsbrew.com</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>© Copyright 2025 Captain's Brew Cafe. All Rights Reserved.</p>
-        </div>
-    </footer>
-
     <?php
     // Close database connection
     $conn->close();
     ob_end_flush();
     ?>
 </body>
-</html>

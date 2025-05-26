@@ -251,33 +251,54 @@ session_start();
         .image-container {
             position: relative;
             width: 100%;
+            min-height: 650px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #getstarted {
             width: 100%;
+            object-fit: cover; 
+            position: absolute;
+            top: 0;
+            left: 0;
             filter: brightness(50%);
             box-shadow: 1px 1px 10px var(--secondary);
+            z-index: -1; /* Place image behind the content */
         }
 
         .centered-home {
-            position: absolute;
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             text-align: center;
             color: var(--white);
+            max-width: 800px; /* Limit width for readability */
+            padding: 2rem; /* Add padding for spacing */
         }
 
         .centered-home h1 {
-            font-size: 5vw;
-            font-weight: 400;
+            font-size: 4rem; /* Adjusted to match screenshot proportions */
+            font-weight: 600;
+            margin-bottom: 0.5rem;
             animation: glow 10s ease-in-out infinite alternate;
         }
 
+        .glow h1{
+            animation: fadeInUp 1s ease;
+        }
+
+        .centered-home h2 {
+            font-size: 2.5rem; /* Adjusted for "Cafe" in the screenshot */
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
         .centered-home p {
-            font-size: 1vw;
-            font-style: italic;
-            padding: 0.5vw 0 2vw;
+            font-size: 1.2rem; /* Adjusted to match subtitle size */
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            opacity: 0.9;
         }
 
         @keyframes glow {
@@ -293,10 +314,11 @@ session_start();
             font-family: 'Poppins', sans-serif;
             background-color: var(--primary);
             color: var(--white);
-            font-size: 2vw;
+            font-size: 1.1rem; /* Adjusted to match button size in screenshot */
+            font-weight: 500;
             border: none;
             border-radius: var(--border-radius);
-            padding: 1vw 2vw;
+            padding: 0.75rem 2rem;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -307,7 +329,6 @@ session_start();
             box-shadow: var(--shadow-medium);
             transform: translateY(-2px);
         }
-
         /* Menu Section */
         .menu-image-container {
             position: relative;
@@ -408,7 +429,7 @@ session_start();
             transform: translateY(-3px);
         }
 
-        /* Footer (Copied from index.php) */
+        /* Footer */
         .footer {
             background-color: var(--dark);
             color: var(--white);
@@ -679,41 +700,45 @@ session_start();
 <body>
     <!-- Header Section -->
     <header class="header">
-        <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-        <div id="hamburger-menu" class="hamburger">☰</div>
-        <nav class="button-container" id="nav-menu">
-            <div class="nav-links">
-                <a href="/views/users/user-home.php" class="nav-button active">Home</a>
-                <a href="/views/users/user-menu.php" class="nav-button">Menu</a>
-                <a href="/views/users/user-career.php" class="nav-button">Career</a>
-                <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
+    <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
+    <div id="hamburger-menu" class="hamburger">☰</div>
+    <nav class="button-container" id="nav-menu">
+        <div class="nav-links">
+            <a href="/views/users/User-Home.php" class="nav-button active">Home</a>
+            <a href="/views/users/User-Menu.php" class="nav-button">Menu</a>
+            <a href="/views/users/User-Career.php" class="nav-button">Career</a>
+            <a href="/views/users/User-Aboutus.php" class="nav-button">About Us</a>
+        </div>
+        <div class="icon-profile-container">
+            <div class="icon-container">
+                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
+                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
+                </a>
             </div>
-             <div class="icon-profile-container">
-                <div class="icon-container">
-                    <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                        <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                    </a>
-                </div>
-                <div class="profile">
-                    <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                    <span>
-                        <?php 
-                        echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                        ?>
-                    </span>
-                    <div class="dropdown">
+            <div class="profile">
+                <img src="/public/images/icons/profile-icon.png" alt="Profile">
+                <span>
+                    <?php 
+                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
+                    ?>
+                </span>
+                <div class="dropdown">
+                    <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="/views/users/account.php">My Account</a>
                         <a href="/views/users/purchases.php">My Purchase</a>
-                        <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
-                    </div>
+                        <a class="nav-button" onclick="showLogoutOverlay()">Logout</a>
+                    <?php else: ?>
+                        <a class="nav-button" onclick="window.location.href='/views/auth/login.php'">Login</a>
+                    <?php endif; ?>
                 </div>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
 
     <!-- Hero Section -->
     <div class="image-container">
-        <img src="/public/images/background/getstarted.png" alt="Get Started" id="getstarted">
+        <img src="/public/images/background/home.jpg" alt="Get Started" id="getstarted">
         <div class="centered-home">
             <h1 class="glow">Captain's Brew Cafe</h1>
             <p>Where every sip is an adventure. We've got your brew covered.<br>
@@ -723,14 +748,6 @@ session_start();
     </div>
 
     <!-- Menu Section -->
-    <div class="menu-image-container">
-        <img src="/public/images/background/gsmenu.png" alt="Menu" id="gsmenu">
-        <div class="centered-menu">
-            <h1>Explore Our Menu</h1>
-            <p>Discover a variety of handcrafted beverages and delicious treats.</p>
-            <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button">View Menu</button>
-        </div>
-    </div>
 
     <!-- Carousel -->
     <div class="carousel-container">

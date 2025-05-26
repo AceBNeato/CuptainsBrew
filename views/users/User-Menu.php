@@ -175,6 +175,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             font-size: 1rem;
             border-radius: 8px;
             transition: var(--transition);
+            justify-self: center;
         }
 
         .nav-button:hover {
@@ -465,7 +466,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             height: 150px;
             border-radius: var(--border-radius);
             object-fit: cover;
-            border: 2px solid var(--primary-light);
         }
 
         .menu-content {
@@ -885,7 +885,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 width: 100%;
                 height: auto;
                 max-height: 200px;
-                margin-bottom: 1rem;
+                margin-top: -1rem;
             }
 
             .menu-content {
@@ -934,31 +934,35 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
     <div id="hamburger-menu" class="hamburger">☰</div>
     <nav class="button-container" id="nav-menu">
         <div class="nav-links">
-            <a href="/views/users/user-home.php" class="nav-button">Home</a>
-            <a href="/views/users/user-menu.php" class="nav-button active">Menu</a>
-            <a href="/views/users/user-career.php" class="nav-button">Career</a>
-            <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
+            <a href="/views/users/User-Home.php" class="nav-button">Home</a>
+            <a href="/views/users/User-Menu.php" class="nav-button active">Menu</a>
+            <a href="/views/users/User-Career.php" class="nav-button">Career</a>
+            <a href="/views/users/User-Aboutus.php" class="nav-button">About Us</a>
         </div>
         <div class="icon-profile-container">
-                <div class="icon-container">
-                    <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                        <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                    </a>
-                </div>
-                <div class="profile">
-                    <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                    <span>
-                        <?php 
-                        echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                        ?>
-                    </span>
-                    <div class="dropdown">
+            <div class="icon-container">
+                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
+                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
+                </a>
+            </div>
+            <div class="profile">
+                <img src="/public/images/icons/profile-icon.png" alt="Profile">
+                <span>
+                    <?php 
+                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
+                    ?>
+                </span>
+                <div class="dropdown">
+                    <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="/views/users/account.php">My Account</a>
                         <a href="/views/users/purchases.php">My Purchase</a>
-                        <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
-                    </div>
+                        <a onclick="showLogoutOverlay()">Logout</a>
+                    <?php else: ?>
+                        <a onclick="window.location.href='/views/auth/login.php'">Login</a>
+                    <?php endif; ?>
                 </div>
             </div>
+        </div>
     </nav>
 </header>
 
@@ -1066,10 +1070,20 @@ try {
 
     <!-- JavaScript -->
     <script>
-        // Mobile Menu Toggle
+        // Hamburger menu toggle
         document.getElementById('hamburger-menu').addEventListener('click', function() {
             document.getElementById('nav-menu').classList.toggle('active');
         });
+
+        // Profile dropdown toggle for mobile
+        const profile = document.querySelector('.profile');
+        if (profile) {
+            profile.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    this.classList.toggle('active');
+                }
+            });
+        }
 
        
 

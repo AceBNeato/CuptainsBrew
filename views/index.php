@@ -615,11 +615,11 @@ session_start();
             <p>Embark on a coffee adventure with us! Enjoy handcrafted beverages and delightful treats in a cozy atmosphere. Sign in to start your journey or explore our menu as a guest.</p>
             <div class="hero-buttons">
                 <?php if (isset($_SESSION['username'])): ?>
-                    <button class="hero-button" onclick="window.location.href = '/views/users/user-menu.php'">Explore Menu</button>
+                    <button class="hero-button" onclick="window.location.href = '/views/users/User-Menu.php'">Explore Menu</button>
                 <?php else: ?>
                     <button class="hero-button" onclick="window.location.href = '/views/auth/login.php'">Login</button>
                     <button class="hero-button secondary" onclick="window.location.href = '/views/auth/register.php'">Register</button>
-                    <button class="hero-button secondary" onclick="window.location.href = '/views/users/user-home.php'">Continue as Guest</button>
+                    <button class="hero-button secondary" onclick="window.location.href = '/views/users/User-Home.php'">Continue as Guest</button>
                 <?php endif; ?>
             </div>
         </div>
@@ -664,5 +664,7 @@ session_start();
             });
         });
     </script>
+
+    <script src="/public/js/auth.js"></script>
 </body>
 </html>

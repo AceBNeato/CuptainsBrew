@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
             loadingOverlay.style.display = "flex";
 
             setTimeout(() => {
-                if (email === "admin@123.com" && password === "admin123") {
+                if (email === "admin@usep.edu.ph" && password === "admin123") {
                    
                     sessionStorage.setItem("userRole", "admin");
                     localStorage.setItem("userLoggedIn", "true");
