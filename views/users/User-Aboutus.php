@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Cuptain's Brew</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/public/css/style.css">
 
 </head>
 <body>
@@ -100,7 +100,7 @@
             <p>Join us and experience the magic in every sip.</p>
         </div>
         <div class="about-image">
-            <img src="/images/cbc-opening.jpg" alt="Cuptain's Brew Cafe">
+            <img src="/public/images/background/cbc-opening.jpg" alt="Cuptain's Brew Cafe">
         </div>
     </div>
 </section>
