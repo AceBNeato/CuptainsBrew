@@ -89,7 +89,6 @@
 
     </nav>
 </header>
-
 <section class="about-us">
     <div class="container">
         <div class="about-content">
@@ -101,6 +100,9 @@
         </div>
         <div class="about-image">
             <img src="/public/images/background/cbc-opening.jpg" alt="Cuptain's Brew Cafe">
+        </div>
+        <div class="about-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d247.2574719023001!2d125.80107775944143!3d7.452024028726014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32f9530005299dc7%3A0x459d7947f646be48!2sCaptain%E2%80%99s%20Brew!5e0!3m2!1sen!2sph!4v1748249923111!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </div>
 </section>
