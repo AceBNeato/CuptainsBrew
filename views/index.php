@@ -1,20 +1,22 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Captain's Brew Cafe</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Captain's Brew Cafe - Welcome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Segoe+UI:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Updated Root Variables with User Menu Colors */
         :root {
             --primary: #2C6E8A;
             --primary-dark: #235A73;
             --primary-light: #A9D6E5;
-            --secondary: #4a3b2b;
+            --secondary: #4A3B2B;
             --secondary-light: #FFFAEE;
             --secondary-lighter: #FFDBB5;
             --accent: #ffb74a;
@@ -27,10 +29,30 @@
             --border-radius: 10px;
             --transition: all 0.3s ease;
         }
-            *{
-                margin: 0;
-            }
-        /* Header - Updated to Match User Menu */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--secondary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -42,85 +64,78 @@
             z-index: 1000;
         }
 
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
+        #logo {
             height: 60px;
-            margin-right: 3rem;
+            margin-right: 2rem;
             transition: var(--transition);
         }
 
-        .logo:hover {
+        #logo:hover {
             transform: scale(1.05);
         }
 
-        /* Navigation - Updated to Match User Menu */
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            text-decoration: none;
-            flex: 1;
-        }
-
-
-
-        .nav-link {
-            text-decoration: none;
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 0.75rem 1.5rem;
-            margin-right: 1rem;
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
             color: var(--secondary);
-            font-weight: 500;
-            position: relative;
             transition: var(--transition);
         }
-        .nav-link:hover{
-            
-            color: steelblue;
-        }
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: var(--transition);
-            transform: translateX(-50%);
-        }
-
-        .nav-link:hover::after {
-            width: 70%;
-        }
-
-        .nav-link.active {
+        .hamburger:hover {
             color: var(--primary);
         }
-        
-        .nav-link.active::after {
-            width: 70%;
-        }
 
-        /* Icons and Profile - Updated to Match User Menu */
-        .nav-icons {
-            margin-left: auto;
+        .button-container {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.25rem;
+            color: var(--secondary);
+            font-weight: 500;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .nav-button:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .icon-profile-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .nav-icon {
-            margin-left: 1rem;
             position: relative;
+            transition: var(--transition);
         }
 
         .nav-icon img {
@@ -133,109 +148,131 @@
             transform: scale(1.1);
         }
 
-        /* Hamburger Menu - Updated */
-        .hamburger {
-            display: none;
-            font-size: 1.5rem;
+        .profile {
+            display: flex;
+            align-items: center;
+            position: relative;
             cursor: pointer;
-            margin-left: auto;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .profile:hover {
+            background: var(--primary-light);
+        }
+
+        .profile img {
+            width: 48px;
+            height: auto;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            border: 2px solid var(--primary-light);
+        }
+
+        .profile span {
+            font-size: 0.95rem;
+            font-weight: 500;
             color: var(--secondary);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .profile .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            min-width: 180px;
+            box-shadow: var(--shadow-medium);
+            border-radius: var(--border-radius);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition);
+            z-index: 100;
+            padding: 0.75rem 0;
+            margin-top: 0.5rem;
+            border: 1px solid var(--primary-light);
+        }
+
+        .profile:hover .dropdown,
+        .profile:focus-within .dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile .dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 16px;
+            width: 14px;
+            height: 14px;
+            background: var(--white);
+            transform: rotate(45deg);
+            border-top: 1px solid var(--primary-light);
+            border-left: 1px solid var(--primary-light);
+            box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile .dropdown a {
+            display: block;
+            padding: 0.75rem 1.25rem;
+            color: var(--secondary);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .profile .dropdown a:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
         }
 
         /* Hero Section */
-        .hero {
+        .hero-container {
+            position: relative;
+            width: 100%;
             height: 100vh;
             min-height: 700px;
-            background: linear-gradient(rgba(26, 19, 16, 0.7), rgba(26, 19, 16, 0.7)), 
-                        url('/public/images/background/getstarted.png') no-repeat center center/cover;
             display: flex;
-            text-align: center;
-            color: var(--light);
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(40%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
         }
 
         .hero-content {
+            text-align: center;
+            color: var(--white);
+            padding: 2rem;
             max-width: 800px;
-            margin: 0 auto;
-            padding-top: 10vw;
         }
 
-        .hero h1 {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            font-size: 5rem;
-            margin-bottom: 20px;
-            line-height: 1.2;
+        .hero-content h1 {
+            font-size: 4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
             animation: fadeInUp 1s ease;
         }
 
-        .hero p {
-            
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+        .hero-content p {
             font-size: 1.2rem;
-            margin-bottom: 40px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
             opacity: 0.9;
             animation: fadeInUp 1s ease 0.2s forwards;
-            opacity: 0;
-        }
-
-        
-        .btn-gs{
-            display: flex;
-            justify-self: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            font-size: 30px;
-            width: 10vw;
-            border-radius: 10px;
-            padding: 1vw;
-            background-color: #ffb74a;
-            transition: all .3s ease;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .btn-gs:hover{
-            font-size: 30px;
-            background-color:rgb(244, 160, 34);
-            transform: translateY(-5px);
-
-        }
-
-
-
-
-        .btn-primary{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            font-size: 20px;
-            width: 10vw;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            padding: 1vw;
-            background-color: #ffb74a;
-            transition: all .3s ease;
-            text-decoration: none;
-            
-            border-color: transparent;
-            cursor: pointer;
-        }
-        .btn-primary:hover{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            font-size: 20px;
-            width: 10vw;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            padding: 1vw;
-            background-color:rgb(233, 150, 26);
-        }
-
-        .hero .btn {
-            
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            animation: fadeInUp 1s ease 0.4s forwards;
-            opacity: 0;
         }
 
         @keyframes fadeInUp {
@@ -249,189 +286,59 @@
             }
         }
 
-        /* Menu Preview Section */
-        .menu-preview {
-            background-color: var(--light);
-            position: relative;
-            padding: 5vw;
-        }
-
-        .menu-highlight {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-
-        .menu-item {
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .menu-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .menu-item-img {
-            height: 250px;
-            overflow: hidden;
-        }
-
-        .menu-item-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: var(--transition);
-        }
-
-        .menu-item:hover .menu-item-img img {
-            transform: scale(1.05);
-        }
-
-        .menu-item-content {
-            padding: 20px;
-        }
-
-        .menu-item-content h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .menu-item-content p {
-            color: var(--text);
-            opacity: 0.8;
-            margin-bottom: 15px;
-        }
-
-        .menu-item-content .price {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        /* Testimonials */
-        .testimonials {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(rgba(26, 19, 16, 0.9), rgba(26, 19, 16, 0.9)), 
-                        url('/public/images/background/testimonial-bg.jpg') no-repeat center center/cover;
-            color: var(--light);
-            color: white;
-            padding: 10vw;
-            text-align: center;
-        }
-
-        .testimonial-slider {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .testimonial {
-            padding: 0 20px;
-        }
-
-        .testimonial-text {
-            font-size: 1.2rem;
-            font-style: italic;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .testimonial-text::before,
-        .testimonial-text::after {
-            content: '"';
-            font-size: 2rem;
-            color: var(--accent);
-            opacity: 0.5;
-        }
-
-        .testimonial-author {
-        
-            color: white;
+        .hero-buttons {
             display: flex;
-            align-items: center;
+            gap: 1rem;
             justify-content: center;
-            gap: 15px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.4s forwards;
         }
 
-        .author-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            overflow: hidden;
-        }
-
-        .author-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .author-info h4 {
-            margin-bottom: 5px;
-        }
-
-        .author-info p {
-            opacity: 0.7;
-            font-size: 0.9rem;
-        }
-
-        /* Newsletter */
-        .newsletter {
-            background-color: var(--primary);
-            color: var(--light);
-            text-align: center;
-            padding: 60px 0;
-        }
-
-        .newsletter h2 {
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin-bottom: 20px;
-        }
-
-        .newsletter p {
-            max-width: 600px;
-            margin: 0 auto 30px;
-            opacity: 0.8;
-        }
-
-        .newsletter-form {
-            display: flex;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .newsletter-form input {
-            flex: 1;
-            padding: 15px 20px;
+        .hero-button {
+            background-color: var(--accent);
+            color: var(--white);
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.75rem 2rem;
             border: none;
-            border-radius: 30px 0 0 30px;
-            font-family: inherit;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        .newsletter-form .btn {
-            border-radius: 0 30px 30px 0;
-            padding: 15px 25px;
+        .hero-button:hover {
+            background-color: #e69626;
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .hero-button.secondary {
+            background-color: transparent;
+            border: 2px solid var(--primary-light);
+            color: var(--primary-light);
+        }
+
+        .hero-button.secondary:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
         }
 
         /* Footer */
         .footer {
             background-color: var(--dark);
-            color: var(--light);
+            color: var(--white);
+            padding: 5vw 0;
         }
 
         .footer-grid {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
-            padding: 5vw;
-            color: white;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .footer-col h3 {
@@ -457,7 +364,7 @@
         }
 
         .footer-links a {
-            color: white;
+            color: var(--white);
             text-decoration: none;
             opacity: 0.8;
             transition: var(--transition);
@@ -483,14 +390,15 @@
         .contact-info i {
             margin-right: 10px;
             color: var(--accent);
+            font-style: normal;
         }
 
         .social-links {
             display: flex;
             gap: 15px;
-            justify-content: space-evenly;
         }
-        .social-links img{
+
+        .social-links img {
             width: 20px;
         }
 
@@ -516,6 +424,9 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             opacity: 0.7;
             font-size: 0.9rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         /* Back to Top Button */
@@ -526,7 +437,7 @@
             width: 50px;
             height: 50px;
             background-color: var(--accent);
-            color: white;
+            color: var(--white);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -536,7 +447,7 @@
             visibility: hidden;
             transition: var(--transition);
             z-index: 999;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-medium);
         }
 
         .back-to-top.active {
@@ -551,297 +462,194 @@
 
         /* Responsive Design */
         @media (max-width: 992px) {
-            .hero h1 {
+            .hero-content h1 {
                 font-size: 3.5rem;
             }
         }
 
         @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                gap: 20px;
+            .header {
+                padding: 0.75rem 1rem;
             }
 
-            .nav-menu {
-                flex-direction: column;
-                gap: 15px;
-                display: none;
-            }
-
-            .nav-menu.active {
-                display: flex;
+            #logo {
+                height: 48px;
+                margin-right: 1rem;
             }
 
             .hamburger {
                 display: block;
-                position: absolute;
-                top: 25px;
-                right: 20px;
+                margin-left: auto;
             }
 
-            .hero {
-                min-height: 600px;
-                padding-top: 120px;
+            .button-container {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                background: var(--white);
+                box-shadow: var(--shadow-medium);
+                padding: 1rem 0;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition);
+                z-index: 999;
+                align-items: flex-start;
             }
 
-            .hero h1 {
-                font-size: 2.5rem;
+            .button-container.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
             }
 
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .section-title h2 {
-                font-size: 2rem;
-            }
-
-            .newsletter-form {
+            .nav-links {
+                width: 100%;
                 flex-direction: column;
             }
 
-            .newsletter-form input {
-                border-radius: 30px;
-                margin-bottom: 10px;
-            }
-
-            .newsletter-form .btn {
-                border-radius: 30px;
+            .nav-button {
                 width: 100%;
+                padding: 0.75rem 1.5rem;
+                margin: 0.25rem 0;
+                text-align: left;
+            }
+
+            .icon-profile-container {
+                width: 100%;
+                justify-content: flex-end;
+                padding: 0 1.5rem;
+                margin: 0.5rem 0;
+            }
+
+            .profile {
+                width: 100%;
+                padding: 0.75rem 1.5rem;
+                margin: 0;
+                justify-content: space-between;
+            }
+
+            .profile .dropdown {
+                position: static;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                border: none;
+            }
+
+            .profile.active .dropdown {
+                max-height: 300px;
+            }
+
+            .profile .dropdown::before {
+                display: none;
+            }
+
+            .profile .dropdown a {
+                padding: 0.75rem 2.5rem;
+            }
+
+            .hero-container {
+                height: 80vh;
+                min-height: 600px;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content p {
+                font-size: 1rem;
+            }
+
+            .hero-button {
+                font-size: 1rem;
+                padding: 0.5rem 1.5rem;
+            }
+
+            .social-links img {
+                width: 5vw;
             }
         }
-        
-        .btn-outline{
-            display: flex;
-            justify-content: center;
-            color: var(--primary); 
-            border-color: var(--primary); 
-            text-decoration:none; 
-            cursor: pointer;
-            transition: all .3s ease;
-        }
-        
 
-        .btn-outline:hover{
-            color: black;
-            transform: translateY(-5px);
-        }
         @media (max-width: 576px) {
-            .hero h1 {
+            #logo {
+                height: 40px;
+            }
+
+            .nav-button {
+                font-size: 0.9rem;
+            }
+
+            .hero-content h1 {
                 font-size: 2rem;
             }
 
-            .section-title h2 {
-                font-size: 1.8rem;
+            .hero-content p {
+                font-size: 0.9rem;
             }
 
-            .menu-highlight {
-                grid-template-columns: 1fr;
+            .hero-button {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container header-container">
-            <a href="/">
-                <img src="/public/images/LOGO.png" alt="Captain's Brew Cafe" class="logo">
-            </a>
-            
-            <div class="hamburger" id="hamburger">☰</div>
-            
-            <?php if(isset($_SESSION['user_id'])): ?>
-                <div class="nav-icons">
-                    <a href="/views/cart.php" class="nav-icon">
-                        <img src="/public/images/icons/cart.png" alt="Cart">
-                    </a>
-                    <a href="/views/profile.php" class="nav-icon">
-                        <img src="/public/images/icons/user.png" alt="Profile">
-                    </a>
-                </div>
-            <?php else: ?>
-                <div class="nav-menu" id="navMenu">
-                    <a href="/views/auth/login.php" class="nav-link">Login</a>
-                    <a href="/views/auth/register.php" class="nav-link">Register</a>
-                </div>
-            <?php endif; ?>
-        </div>
-    </header>
+    <!-- Header Section -->
+    
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="container hero-content">
-            <h1>Cuptains Brew Cafe</h1>
-            <p>Where Every Sip is an Adventure</p>
-            <p>Discover the finest coffee blends at Captain's Brew Cafe. We've got your brew covered. Drop anchor, relax, and let your coffee journey begin!</p>
-            <a href="/views/auth/login.php" class="btn-gs">Get Started</a>
-        </div>
-    </section>
-
-    <!-- Menu Preview Section -->
-    <section class="menu-preview">
-        <div class="container">
-            <div class="section-title">
-                <h2>Our Signature Brews</h2>
-                <p>Explore our handcrafted selection of premium coffees and delicious treats</p>
-            </div>
-            
-            <div class="menu-highlight">
-                <div class="menu-item">
-                    <div class="menu-item-img">
-                        <img src="/public/images/carousel-img/img-1.png" alt="Coffee Blend">
-                    </div>
-                    <div class="menu-item-content">
-                        <h3>Captain's Dark Roast</h3>
-                        <p>Our signature dark roast with rich, bold flavors and a smooth finish</p>
-                        <div class="price">$4.50</div>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="menu-item-img">
-                        <img src="/public/images/carousel-img/img-2.png" alt="Coffee Blend">
-                    </div>
-                    <div class="menu-item-content">
-                        <h3>Caramel Wave Latte</h3>
-                        <p>Espresso with steamed milk and our homemade caramel sauce</p>
-                        <div class="price">$5.25</div>
-                    </div>
-                </div>
-                
-                <div class="menu-item">
-                    <div class="menu-item-img">
-                        <img src="/public/images/carousel-img/img-3.png" alt="Coffee Blend">
-                    </div>
-                    <div class="menu-item-content">
-                        <h3>Sea Salt Mocha</h3>
-                        <p>Chocolatey mocha with a hint of sea salt for the perfect balance</p>
-                        <div class="price">$5.75</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 50px;">
-                <a href="/views/menu.php" class="btn-outline">View Full Menu</a>
+    <div class="hero-container">
+        <img src="/public/images/background/getstarted.png" alt="Welcome to Captain's Brew" class="hero-image">
+        <div class="hero-content">
+            <h1>Welcome to Captain's Brew Cafe</h1>
+            <p>Embark on a coffee adventure with us! Enjoy handcrafted beverages and delightful treats in a cozy atmosphere. Sign in to start your journey or explore our menu as a guest.</p>
+            <div class="hero-buttons">
+                <?php if (isset($_SESSION['username'])): ?>
+                    <button class="hero-button" onclick="window.location.href = '/views/users/user-menu.php'">Explore Menu</button>
+                <?php else: ?>
+                    <button class="hero-button" onclick="window.location.href = '/views/auth/login.php'">Login</button>
+                    <button class="hero-button secondary" onclick="window.location.href = '/views/auth/register.php'">Register</button>
+                    <button class="hero-button secondary" onclick="window.location.href = '/views/users/user-home.php'">Continue as Guest</button>
+                <?php endif; ?>
             </div>
         </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-title">
-                <h2>What Our Customers Say</h2>
-                <p>Hear from fellow coffee enthusiasts who've experienced Captain's Brew</p>
-            </div>
-            
-            <div class="testimonial-slider">
-                <div class="testimonial">
-                    <div class="testimonial-text">
-                        The best coffee I've had in years! The atmosphere is perfect for both work and relaxation. I come here every morning before work.
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-img">
-                            <img src="/public/images/testimonials/testimonial-1.jpg" alt="Sarah J.">
-                        </div>
-                        <div class="author-info">
-                            <h4>Sarah J.</h4>
-                            <p>Regular Customer</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Newsletter Section -->
-    <section class="newsletter">
-        <div class="container">
-            <h2>Join Our Coffee Club</h2>
-            <p>Subscribe to our newsletter and receive exclusive offers, updates on new blends, and special events</p>
-            
-            <form class="newsletter-form" action="/subscribe.php" method="POST">
-                <input type="email" name="email" placeholder="Your email address" required>
-                <button type="submit" class="btn-primary">Subscribe</button>
-            </form>
-        </div>
-    </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Captain's Brew</h3>
-                    <p style="opacity: 0.8; margin-bottom: 20px;">Where every sip is an adventure. We've got your brew covered.</p>
-                    <div class="social-links">
-                        <a href="#"><img src="/public/images/icons/facebook.png" alt="Facebook"></a>
-                        <a href="#"><img src="/public/images/icons/instagram.png" alt="Instagram"></a>
-                        <a href="#"><img src="/public/images/icons/twitter.png" alt="Twitter"></a>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/views/menu.php">Menu</a></li>
-                        <li><a href="/views/career.php">Careers</a></li>
-                        <li><a href="/views/aboutus.php">About Us</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Contact Us</h3>
-                    <div class="contact-info">
-                        <p><i>📍</i> 123 Coffee Street, City Name</p>
-                        <p><i>📞</i> +1 800 555 6789</p>
-                        <p><i>✉️</i> support@captainsbrew.com</p>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3>Opening Hours</h3>
-                    <div class="contact-info">
-                        <p><i>⏰</i> Monday - Friday: 7am - 8pm</p>
-                        <p><i>⏰</i> Saturday: 8am - 9pm</p>
-                        <p><i>⏰</i> Sunday: 8am - 6pm</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> Captain's Brew Cafe. All Rights Reserved.</p>
-            </div>
-        </div>
+        <?php include __DIR__ . '/partials/footer.php'; ?>
     </footer>
 
     <!-- Back to Top Button -->
-    <div class="back-to-top" id="backToTop">
-        ↑
-    </div>
+    <div class="back-to-top" id="backToTop">↑</div>
 
+    <!-- JavaScript -->
     <script>
-        // Mobile Navigation Toggle
-        const hamburger = document.getElementById('hamburger');
-        const navMenu = document.getElementById('navMenu');
-        
-        hamburger.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+        // Hamburger menu toggle
+        document.getElementById('hamburger-menu').addEventListener('click', function() {
+            document.getElementById('nav-menu').classList.toggle('active');
         });
 
-        // Header Scroll Effect
-        const header = document.querySelector('.header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+        // Profile dropdown toggle for mobile
+        document.querySelector('.profile').addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                this.classList.toggle('active');
             }
         });
 
-        // Back to Top Button
+        // Back to top button
         const backToTop = document.getElementById('backToTop');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 300) {

@@ -121,6 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Cart - Captain's Brew Cafe</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Optional: Font Awesome for better icons -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
     <style>
         :root {
             --primary: #2C6E8A;
@@ -161,6 +163,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             max-width: 1000px;
             margin: 0 auto;
             padding: 2rem 1rem;
+            position: relative; /* Added to position back button */
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-dark);
+            background: var(--primary-light);
         }
 
         .cart-title {
@@ -415,7 +437,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     </style>
 </head>
 <body>
+
+    <a href="/views/users/User-Home.php" class="back-btn" title="Back to Home">
+            <span class="back-icon">←</span>
+            <!-- Optional: Use Font Awesome icon instead -->
+            <!-- <i class="fas fa-arrow-left"></i> -->
+        </a>
     <div class="container">
+        
         <h1 class="cart-title">Your Cart</h1>
 
         <?php if (isset($error)): ?>

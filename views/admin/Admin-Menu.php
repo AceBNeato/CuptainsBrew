@@ -462,7 +462,6 @@
     }
 
     .footer-bottom {
-      background-color: #FFFAEE;
       display: flex;
       flex-direction: column;
       text-align: center;
@@ -584,7 +583,7 @@
 </head>
 <body>
 <?php
-// Your existing PHP code for fetching categories
+// Include the database configuration
 require_once __DIR__ . '/../../config.php';
 
 // Fetch categories from the database
@@ -595,22 +594,16 @@ while ($row = $categories_result->fetch_assoc()) {
     $categories[$row['id']] = $row['name'];
 }
 
-// Group categories into Drinks and Foods
-$drinks = [1 => 'Coffee', 2 => 'Non-Coffee'];
-$foods = [
-    3 => 'Chicken',
-    4 => 'Pasta',
-    5 => 'Waffle',
-    6 => 'Fries',
-    7 => 'Sandwich',
-    8 => 'Add Ons'
+// Define drinks categories (based on config)
+$drinks = [
+    1 => 'Coffee',
+    2 => 'Non-Coffee',
+    3 => 'Frappe',
+    4 => 'Milktea'
 ];
 
-// Determine the active tab (default to Drinks)
-$activeTab = $_GET['tab'] ?? 'drinks';
-
-// Default to the first category in the active tab
-$defaultCategoryId = $activeTab === 'drinks' ? array_key_first($drinks) : array_key_first($foods);
+// Set default category
+$defaultCategoryId = 1; // Default to 'Coffee'
 $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
 ?>
 
@@ -629,23 +622,13 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
 
 <div class="menu-bar">
   <div class="menu-tabs">
-    <div class="tab <?= $activeTab === 'drinks' ? 'active' : '' ?>" onclick="switchTab('drinks')">Drinks</div>
-    <div class="tab <?= $activeTab === 'foods' ? 'active' : '' ?>" onclick="switchTab('foods')">Foods</div>
+    <div class="tab active">Drinks</div>
   </div>
 
-  <div id="drinks-categories" class="category-section <?= $activeTab === 'drinks' ? 'active' : '' ?>">
+  <div id="drinks-categories" class="category-section active">
     <?php foreach ($drinks as $id => $name): ?>
       <div class="menu-item <?= $currentCategoryId == $id ? 'active' : '' ?>" 
-           onclick="loadCategory(<?= $id ?>, 'drinks')">
-        <?= htmlspecialchars($name) ?>
-      </div>
-    <?php endforeach; ?>
-  </div>
-
-  <div id="foods-categories" class="category-section <?= $activeTab === 'foods' ? 'active' : '' ?>">
-    <?php foreach ($foods as $id => $name): ?>
-      <div class="menu-item <?= $currentCategoryId == $id ? 'active' : '' ?>" 
-           onclick="loadCategory(<?= $id ?>, 'foods')">
+           onclick="loadCategory(<?= $id ?>)">
         <?= htmlspecialchars($name) ?>
       </div>
     <?php endforeach; ?>
@@ -730,16 +713,9 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
       
       <label for="item-category">Category</label>
       <select id="item-category" name="category_id" required>
-        <optgroup label="Drinks">
-          <?php foreach ($drinks as $id => $name): ?>
-            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
-          <?php endforeach; ?>
-        </optgroup>
-        <optgroup label="Foods">
-          <?php foreach ($foods as $id => $name): ?>
-            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
-          <?php endforeach; ?>
-        </optgroup>
+        <?php foreach ($drinks as $id => $name): ?>
+          <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+        <?php endforeach; ?>
       </select>
       
       <label for="item-image">Image</label>
@@ -754,20 +730,10 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
 </footer>
 
 <script>
-  function switchTab(tab) {
-    const url = new URL(window.location.href);
-    url.pathname = '/views/admin/admin-menu.php';
-    url.searchParams.set('tab', tab);
-    url.searchParams.delete('category_id');
-    url.searchParams.delete('search');
-    window.location.href = url.toString();
-  }
-
-  function loadCategory(categoryId, tab) {
+  function loadCategory(categoryId) {
     const url = new URL(window.location.href);
     url.pathname = '/views/admin/admin-menu.php';
     url.searchParams.set('category_id', categoryId);
-    url.searchParams.set('tab', tab);
     window.location.href = url.toString();
   }
 

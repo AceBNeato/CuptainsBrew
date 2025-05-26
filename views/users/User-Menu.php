@@ -411,7 +411,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .main-content {
             display: flex;
             min-height: calc(100vh - 200px);
-            align-items: start;
         }
 
         #menu-list-container {
@@ -930,17 +929,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 </head>
 <body>
     <!-- Header Section -->
-    <header class="header">
-        <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-        <div id="hamburger-menu" class="hamburger">☰</div>
-        <nav class="button-container" id="nav-menu">
-            <div class="nav-links">
-                <a href="/views/users/user-home.php" class="nav-button">Home</a>
-                <a href="/views/users/user-menu.php" class="nav-button">Menu</a>
-                <a href="/views/users/user-career.php" class="nav-button">Career</a>
-                <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
-            </div>
-            <div class="icon-profile-container">
+<header class="header">
+    <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
+    <div id="hamburger-menu" class="hamburger">☰</div>
+    <nav class="button-container" id="nav-menu">
+        <div class="nav-links">
+            <a href="/views/users/user-home.php" class="nav-button">Home</a>
+            <a href="/views/users/user-menu.php" class="nav-button active">Menu</a>
+            <a href="/views/users/user-career.php" class="nav-button">Career</a>
+            <a href="/views/users/user-aboutus.php" class="nav-button">About Us</a>
+        </div>
+        <div class="icon-profile-container">
                 <div class="icon-container">
                     <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
                         <img src="/public/images/icons/cart-icon.png" alt="Cart">
@@ -956,12 +955,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                     <div class="dropdown">
                         <a href="/views/users/account.php">My Account</a>
                         <a href="/views/users/purchases.php">My Purchase</a>
-                        <a href="/logout.php" id="logout-button">Logout</a>
+                        <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
                     </div>
                 </div>
             </div>
-        </nav>
-    </header>
+    </nav>
+</header>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -984,61 +983,63 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
             <!-- Menu Items -->
             <?php
-            $category = $_GET['category'] ?? 'coffee';
-            $searchTerm = $_GET['search'] ?? '';
-            
-            try {
-                $categoryName = str_replace('-', ' ', $category);
-                $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '" . $conn->real_escape_string($categoryName) . "'");
-                
-                if (!$categoryQuery) {
-                    throw new Exception("Category query failed: " . $conn->error);
-                }
+$category = $_GET['category'] ?? 'coffee';
+$searchTerm = $_GET['search'] ?? '';
 
-                $categoryRow = $categoryQuery->fetch_assoc();
+try {
+    $categoryName = str_replace(' ', ' ', $category);
+    $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '" . $conn->real_escape_string($categoryName) . "'");
 
-                if (!$categoryRow) {
-                    echo "<div class='no-items'>Category not found.</div>";
-                } else {
-                    $categoryId = $categoryRow['id'];
-                    $query = "SELECT * FROM products WHERE category_id = $categoryId";
-                    
-                    if (!empty($searchTerm)) {
-                        $searchTerm = $conn->real_escape_string($searchTerm);
-                        $query .= " AND item_name LIKE '%$searchTerm%'";
-                    }
+    if (!$categoryQuery) {
+        throw new Exception("Category query failed: " . $conn->error);
+    }
 
-                    $products = $conn->query($query);
-                    
-                    if (!$products) {
-                        throw new Exception("Products query failed: " . $conn->error);
-                    }
+    $categoryRow = $categoryQuery->fetch_assoc();
 
-                    if ($products->num_rows > 0) {
-                        while ($row = $products->fetch_assoc()) {
-                            $name = htmlspecialchars($row['item_name'], ENT_QUOTES);
-                            $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
-                            $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
-                            
-                            echo "<div class='menu-card' id='menuCard-{$row['id']}'>
-                                    <img src='/public/{$image}' alt='$name' class='menu-image'>
-                                    <div class='menu-content'>
-                                        <h2 class='menu-title'>$name</h2>
-                                        <p class='menu-price'>₱ {$row['item_price']}</p>
-                                        <p class='menu-desc'>$desc</p>
-                                    </div>
-                                    <button class='menu-manage'>+</button>
-                                  </div>";
-                        }
-                    } else {
-                        $message = empty($searchTerm) ? "in this category." : "matching your search.";
-                        echo "<div class='no-items'>No items found $message</div>";
-                    }
-                }
-            } catch (Exception $e) {
-                echo "<div class='error-message'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    if (!$categoryRow) {
+        echo "<div class='no-items'>Category not found.</div>";
+    } else {
+        $categoryId = $categoryRow['id'];
+        $query = "SELECT * FROM products WHERE category_id = $categoryId";
+
+        if (!empty($searchTerm)) {
+            $searchTerm = $conn->real_escape_string($searchTerm);
+            $query .= " AND item_name LIKE '%$searchTerm%'";
+        }
+
+        $products = $conn->query($query);
+
+        if (!$products) {
+            throw new Exception("Products query failed: " . $conn->error);
+        }
+
+        if ($products->num_rows > 0) {
+            while ($row = $products->fetch_assoc()) {
+                $name = htmlspecialchars($row['item_name'], ENT_QUOTES);
+                $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
+                $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
+                $isLoggedIn = isset($_SESSION['user_id']);
+                $buttonAttributes = $isLoggedIn ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;" title="Please log in to add to cart"';
+
+                echo "<div class='menu-card' id='menuCard-{$row['id']}'>
+                        <img src='/public/{$image}' alt='$name' class='menu-image'>
+                        <div class='menu-content'>
+                            <h2 class='menu-title'>$name</h2>
+                            <p class='menu-price'>₱ {$row['item_price']}</p>
+                            <p class='menu-desc'>$desc</p>
+                        </div>
+                        <button class='menu-manage' $buttonAttributes>+</button>
+                      </div>";
             }
-            ?>
+        } else {
+            $message = empty($searchTerm) ? "in this category." : "matching your search.";
+            echo "<div class='no-items'>No items found $message</div>";
+        }
+    }
+} catch (Exception $e) {
+    echo "<div class='error-message'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
+?>
         </div>
     </div>
 
@@ -1151,56 +1152,70 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
         // Cart Functionality
         function addToCart(productId, name, price, image, quantity = 1) {
-            fetch('/views/users/user-menu.php?action=add_to_cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `product_id=${productId}&quantity=${quantity}`
-            })
-            .then(response => {
-                console.log('Response Status:', response.status);
-                console.log('Response Headers:', response.headers.get('content-type'));
-                return response.text();
-            })
-            .then(text => {
-                console.log('Raw Response:', text);
-                try {
-                    const data = JSON.parse(text);
-                    if (data.success) {
-                        showCartNotification(`${name} added to cart (${quantity}x)`);
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: `${name} added to cart (${quantity}x)`,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to add to cart: ' + data.error,
-                        });
-                    }
-                } catch (e) {
-                    console.error('JSON Parse Error:', e);
+    fetch('/views/users/user-menu.php?action=add_to_cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `product_id=${productId}&quantity=${quantity}`
+    })
+    .then(response => {
+        console.log('Response Status:', response.status);
+        console.log('Response Headers:', response.headers.get('content-type'));
+        return response.text();
+    })
+    .then(text => {
+        console.log('Raw Response:', text);
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                showCartNotification(`${name} added to cart (${quantity}x)`);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: `${name} added to cart (${quantity}x)`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                if (data.error === 'User not logged in') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Login Required',
+                        text: 'Please log in to add items to your cart.',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Go to Login',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/views/users/login.php';
+                        }
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Invalid response from server: ' + e.message,
+                        text: 'Failed to add to cart: ' + data.error,
                     });
                 }
-            })
-            .catch(error => {
-                console.error('Fetch Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred: ' + error.message,
-                });
+            }
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Invalid response from server: ' + e.message,
             });
         }
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred: ' + error.message,
+        });
+    });
+}
 
         // Cart Notification
         function showCartNotification(message) {
@@ -1247,5 +1262,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             });
         });
     </script>
+
+<script src="/public/js/auth.js"></script>
 </body>
 </html>

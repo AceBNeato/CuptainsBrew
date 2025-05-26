@@ -156,12 +156,8 @@ try {
     $conn->query("INSERT INTO categories (id, name) VALUES
         (1, 'Coffee'),
         (2, 'Non-Coffee'),
-        (3, 'Chicken'),
-        (4, 'Pasta'),
-        (5, 'Waffle'),
-        (6, 'Fries'),
-        (7, 'Sandwich'),
-        (8, 'Add Ons')
+        (3, 'Frappe'),
+        (4, 'Milktea')
         ON DUPLICATE KEY UPDATE name = VALUES(name)");
 
    

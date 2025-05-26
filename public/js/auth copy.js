@@ -158,20 +158,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* ========================== Logout Function ========================== */
 function showLogoutOverlay() {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to log out?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#2C6E8A',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, log out',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = '/views/auth/logout.php';
-        }
-    });
+   
+    const overlay = document.createElement("div");
+    overlay.id = "logout-overlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+    overlay.style.display = "flex";
+    overlay.style.fontFamily = "Segoe UI";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "9999";
+
+  
+    const modal = document.createElement("div");
+    modal.style.backgroundColor = "#fff";
+    modal.style.padding = "20px";
+    modal.style.borderRadius = "8px";
+    modal.style.textAlign = "center";
+    modal.style.boxShadow = "0px 4px 6px rgba(0,0,0,0.1)";
+    modal.style.minWidth = "300px";
+
+
+    const message = document.createElement("p");
+    message.innerText = "Thanks for stopping by. See you soon!";
+    message.style.fontSize = "16px";
+    message.style.marginBottom = "20px";
+
+   
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.style.display = "flex";
+    buttonsContainer.style.justifyContent = "space-between";
+
+   
+    const cancelButton = document.createElement("button");
+    cancelButton.innerText = "Cancel";
+    cancelButton.style.padding = "10px 20px";
+    cancelButton.style.border = "none";
+    cancelButton.style.backgroundColor = "#6C4E31";
+    cancelButton.style.color = "white";
+    cancelButton.style.borderRadius = "5px";
+    cancelButton.style.cursor = "pointer";
+    cancelButton.onclick = function () {
+        document.body.removeChild(overlay);
+    };
+
+    const logoutButton = document.createElement("button");
+    logoutButton.innerText = "Logout";
+    logoutButton.style.padding = "10px 20px";
+    logoutButton.style.border = "none";
+    logoutButton.style.backgroundColor = "#6C4E31";
+    logoutButton.style.color = "white";
+    logoutButton.style.borderRadius = "5px";
+    logoutButton.style.cursor = "pointer";
+    logoutButton.onclick = logout;
+
+    buttonsContainer.appendChild(cancelButton);
+    buttonsContainer.appendChild(logoutButton);
+    modal.appendChild(message);
+    modal.appendChild(buttonsContainer);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
 }
 
 function logout() {
