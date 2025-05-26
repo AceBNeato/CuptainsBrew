@@ -606,8 +606,6 @@ session_start();
     </style>
 </head>
 <body>
-    <!-- Header Section -->
-    
 
     <!-- Hero Section -->
     <div class="hero-container">

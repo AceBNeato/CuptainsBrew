@@ -12,9 +12,9 @@
                 <h3>Quick Links</h3>
                 <ul class="footer-links">
                     <li><a href="/views/users/User-Home.php">Home</a></li>
-                    <li><a href="/views/users/user-menu.php">Menu</a></li>
-                    <li><a href="/views/users/user-career.php">Careers</a></li>
-                    <li><a href="/views/users/user-aboutus.php">About Us</a></li>
+                    <li><a href="/views/users/User-Menu.php">Menu</a></li>
+                    <li><a href="/views/users/User-Career.php">Careers</a></li>
+                    <li><a href="/views/users/User-Aboutus.php">About Us</a></li>
                 </ul>
             </div>
             <div class="footer-col">
