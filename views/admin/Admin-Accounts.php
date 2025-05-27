@@ -115,6 +115,10 @@ $conn->close();
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Admin Accounts - Captain's Brew Cafe</title>
     <link rel="icon" href="/images/LOGO.png" sizes="any" />
+    <!-- Add SweetAlert2 CSS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Add SweetAlert2 JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -371,7 +375,7 @@ $conn->close();
             <button class="nav-button" onclick="gotoOrders()">Orders</button>
             <button class="nav-button" onclick="gotoReports()">Reports</button>
             <button class="nav-button active" onclick="gotoAccounts()">Accounts</button>
-            <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
+            <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
         </nav>
     </header>
 
@@ -626,6 +630,7 @@ $conn->close();
         }
 
     </script>
-
+    
+<script src="/public/js/auth.js"></script>
 </body>
 </html>
