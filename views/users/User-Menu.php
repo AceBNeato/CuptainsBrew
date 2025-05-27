@@ -559,11 +559,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .modal-content {
             background: var(--white);
             border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 900px;
+            width: 50%;
+            max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 2rem;
             position: relative;
             box-shadow: var(--shadow-dark);
         }
@@ -584,22 +583,22 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         }
 
         .modal-body {
-            display: flex;
+            flex-direction: row;
             gap: 2rem;
         }
 
         .modal-image {
             width: 100%;
-            max-height: 350px;
+            max-height: 200px;
             object-fit: cover;
             border-radius: var(--border-radius);
-            border: 2px solid var(--primary-light);
         }
 
         .modal-details {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            padding: 1vw;
         }
 
         .modal-details h2 {
@@ -632,8 +631,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         .quantity-btn {
             background: var(--primary-light);
             border: none;
-            width: 48px;
-            height: 48px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             font-size: 1.4rem;
             cursor: pointer;
@@ -652,7 +651,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         #productQuantity {
             width: 80px;
             text-align: center;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border: 2px solid var(--primary-light);
             border-radius: var(--border-radius);
             font-size: 1.1rem;
@@ -713,6 +712,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 display: block;
                 margin-left: auto;
             }
+
+            .add-to-cart-btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 2.5vw;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
 
             .button-container {
                 position: fixed;
@@ -901,13 +912,39 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 flex-direction: column;
             }
 
+            .modal-content{
+                width: 300px;
+            }
+
             .modal-image {
-                max-height: 250px;
+                max-height: 150px;
             }
 
             .modal-details {
                 padding-left: 0;
+                padding: 2vw;
             }
+
+
+            .quantity-btn {
+            background: var(--primary-light);
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
+        }
         }
 
         @media (min-width: 768px) {
@@ -916,13 +953,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             }
 
             .modal-image {
-                width: 50%;
-                max-height: 400px;
             }
 
             .modal-details {
-                width: 50%;
+                width: 100%;
                 padding-left: 1.5rem;
+                padding: 1vw;
             }
         }
     </style>
@@ -1061,8 +1097,9 @@ try {
                         <button class='quantity-btn minus'>-</button>
                         <input type='number' id='productQuantity' value='1' min='1' max='10'>
                         <button class='quantity-btn plus'>+</button>
+                        <button id='addToCartModal' class='add-to-cart-btn'>Add to Cart</button>
                     </div>
-                    <button id='addToCartModal' class='add-to-cart-btn'>Add to Cart</button>
+                    
                 </div>
             </div>
         </div>
