@@ -11,7 +11,7 @@ try {
             LEFT JOIN users u ON o.user_id = u.id
             LEFT JOIN order_items oi ON o.id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.id
-            WHERE o.status IN ('Rejected', 'Pending', 'Approved', 'Out for Delivery', 'Delivered')
+            WHERE o.status IN ('Rejected', 'Pending', 'Approved', 'Out for Delivery', 'Delivered', 'Canceled')
             ORDER BY o.created_at DESC";
     
     $result = $conn->query($sql);
@@ -226,14 +226,16 @@ $conn->close();
   </header>
 
   <div class="reports-container">
-    <div class="report-filter">
+    <Canceled class="report-filter">
       <div class="filter-item active" onclick="filterOrders('all')">All Orders</div>
       <div class="filter-item" onclick="filterOrders('Pending')">Pending Orders</div>
       <div class="filter-item" onclick="filterOrders('Approved')">Approved Orders</div>
       <div class="filter-item" onclick="filterOrders('Out for Delivery')">Out for Delivery</div>
       <div class="filter-item" onclick="filterOrders('Delivered')">Delivered Orders</div>
       <div class="filter-item" onclick="filterOrders('Rejected')">Rejected Orders</div>
-    </div>
+      <div class="filter-item" onclick="filterOrders('Canceled')">Canceled Orders</div>
+      
+    </Canceled>
     <div class="report-table">
       <h2 class="report-title">Order Reports</h2>
       <div id="orders-table">
