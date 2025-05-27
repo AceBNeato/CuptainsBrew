@@ -688,7 +688,7 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
     <label>Name:</label>
     <input type="text" name="item_name" id="edit-name">
     <label>Price:</label>
-    <input type="number" name="item_price" id="edit-price">
+    <input type="number"  name="item_price" id="edit-price" step="0.01" required />
     <label>Description:</label>
     <textarea name="item_description" id="edit-description"></textarea>
     <input type="hidden" name="category_id" id="edit-category" value="">
@@ -790,7 +790,7 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
       });
     } else if (errorMessage) {
       Swal.fire({
-        icon: 'error',
+        icon: 'error', 
         title: 'Error!',
         text: errorMessage,
         confirmButtonColor: '#2C6E8A',

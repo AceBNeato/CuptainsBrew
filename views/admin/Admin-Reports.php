@@ -1,29 +1,44 @@
 <?php
 require_once '../../config.php';
 
-// Initialize arrays and fetch orders with joined product details
+// Initialize arrays and fetch orders with joined user and product details
 $allOrders = [];
 try {
-    $sql = "SELECT o.id, o.order_date, o.order_time, o.status, 
-                   oi.product_id, p.item_name, p.item_image
+    $sql = "SELECT o.id AS order_id, o.user_id, u.username, u.email, 
+                   o.status, o.created_at, o.updated_at,
+                   oi.product_id, p.item_name, p.item_image, oi.quantity, oi.price
             FROM orders o
+            LEFT JOIN users u ON o.user_id = u.id
             LEFT JOIN order_items oi ON o.id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.id
-            WHERE o.status IN ('Pending', 'Delivered')
-            ORDER BY o.order_date DESC, o.order_time DESC";
+            WHERE o.status IN ('Rejected', 'Pending', 'Approved', 'Out for Delivery', 'Delivered')
+            ORDER BY o.created_at DESC";
     
     $result = $conn->query($sql);
 
     if ($result && $result->num_rows > 0) {
+        // Group orders by order_id and user
         while ($row = $result->fetch_assoc()) {
-            $allOrders[] = [
-                'id' => $row['id'],
-                'item_name' => $row['item_name'] ?? 'Unknown Item',
-                'item_image' => $row['item_image'] ?? '/public/images/default-item.jpg',
-                'date' => $row['order_date'],
-                'time' => $row['order_time'],
-                'status' => $row['status']
-            ];
+            $order_id = $row['order_id'];
+            if (!isset($allOrders[$order_id])) {
+                $allOrders[$order_id] = [
+                    'order_id' => $order_id,
+                    'user_id' => $row['user_id'],
+                    'username' => $row['username'] ?? 'Guest',
+                    'email' => $row['email'] ?? 'N/A',
+                    'status' => $row['status'],
+                    'created_at' => $row['created_at'],
+                    'items' => []
+                ];
+            }
+            if ($row['product_id']) {
+                $allOrders[$order_id]['items'][] = [
+                    'item_name' => $row['item_name'] ?? 'Unknown Item',
+                    'item_image' => $row['item_image'] ?? '/public/images/default-item.jpg',
+                    'quantity' => $row['quantity'],
+                    'price' => $row['price']
+                ];
+            }
         }
     }
 } catch (Exception $e) {
@@ -165,10 +180,24 @@ $conn->close();
     }
 
     .item-img {
-      width: 100px;
-      height: 100px;
+      width: 60px;
+      height: 60px;
       object-fit: cover;
       border-radius: 8px;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .no-reports-message, .error-message {
@@ -200,7 +229,10 @@ $conn->close();
     <div class="report-filter">
       <div class="filter-item active" onclick="filterOrders('all')">All Orders</div>
       <div class="filter-item" onclick="filterOrders('Pending')">Pending Orders</div>
+      <div class="filter-item" onclick="filterOrders('Approved')">Approved Orders</div>
+      <div class="filter-item" onclick="filterOrders('Out for Delivery')">Out for Delivery</div>
       <div class="filter-item" onclick="filterOrders('Delivered')">Delivered Orders</div>
+      <div class="filter-item" onclick="filterOrders('Rejected')">Rejected Orders</div>
     </div>
     <div class="report-table">
       <h2 class="report-title">Order Reports</h2>
@@ -216,22 +248,35 @@ $conn->close();
               <thead>
                 <tr>
                   <th>Order Number</th>
-                  <th>Item Name</th>
+                  <th>User</th>
+                  <th>Ordered Items</th>
                   <th>Order Date</th>
-                  <th>Order Time</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody id="orders-body">
                 <?php foreach ($allOrders as $order): ?>
                   <tr class="order-row" data-status="<?= htmlspecialchars($order['status']) ?>">
-                    <td><?= htmlspecialchars($order['id']) ?></td>
+                    <td><?= htmlspecialchars($order['order_id']) ?></td>
                     <td>
-                      <img src="<?= htmlspecialchars($order['item_image']) ?>" class="item-img" alt="Item Image">
-                      <?= htmlspecialchars($order['item_name']) ?>
+                      <?= htmlspecialchars($order['username']) ?><br>
+                      <small><?= htmlspecialchars($order['email']) ?></small>
                     </td>
-                    <td><?= htmlspecialchars($order['date']) ?></td>
-                    <td><?= htmlspecialchars(date("g:i A", strtotime($order['time']))) ?></td>
+                    <td>
+                      <div class="items-list">
+                        <?php foreach ($order['items'] as $item): ?>
+                          <div class="item-row">
+                            <img src="<?= htmlspecialchars($item['item_image']) ?>" class="item-img" alt="Item Image">
+                            <span>
+                              <?= htmlspecialchars($item['item_name']) ?> 
+                              (Qty: <?= htmlspecialchars($item['quantity']) ?>, 
+                              Price: $<?= number_format($item['price'], 2) ?>)
+                            </span>
+                          </div>
+                        <?php endforeach; ?>
+                      </div>
+                    </td>
+                    <td><?= htmlspecialchars(date('Y-m-d g:i A', strtotime($order['created_at']))) ?></td>
                     <td><?= htmlspecialchars($order['status']) ?></td>
                   </tr>
                 <?php endforeach; ?>

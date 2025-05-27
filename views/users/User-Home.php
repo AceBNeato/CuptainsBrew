@@ -1,252 +1,10 @@
 <?php
-session_start();
+require_once __DIR__ . '/partials/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Captain's Brew Cafe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Segoe+UI:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <title>Captain's Brew Cafe - Home</title>
     <style>
-        :root {
-            --primary: #2C6E8A;
-            --primary-dark: #1B4A5E;
-            --primary-light: #B3E0F2;
-            --secondary: #4A3B2B;
-            --secondary-light: #FFF8E7;
-            --secondary-lighter: #FFE8C2;
-            --white: #FFFFFF;
-            --black: #1A1A1A;
-            --accent: #ffb74a;
-            --dark: #1a1310;
-            --shadow-light: 0 4px 12px rgba(74, 59, 43, 0.15);
-            --shadow-medium: 0 6px 16px rgba(44, 110, 138, 0.2);
-            --shadow-dark: 0 8px 24px rgba(74, 59, 43, 0.3);
-            --border-radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-            background: var(--white);
-            color: var(--secondary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
-            box-shadow: var(--shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        #logo {
-            height: 60px;
-            margin-right: 2rem;
-            transition: var(--transition);
-        }
-
-        #logo:hover {
-            transform: scale(1.08);
-            filter: brightness(1.1);
-        }
-
-        .hamburger {
-            display: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            color: var(--secondary);
-            transition: var(--transition);
-        }
-
-        .hamburger:hover {
-            color: var(--primary);
-        }
-
-        .button-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex: 1;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-button {
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-weight: 500;
-            font-size: 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .nav-button:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .nav-button.active {
-            background: var(--primary);
-            color: var(--white);
-            font-weight: 600;
-        }
-
-        .icon-profile-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .icon-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .nav-icon {
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .nav-icon img {
-            width: 28px;
-            height: 28px;
-            transition: var(--transition);
-        }
-
-        .nav-icon:hover img {
-            transform: scale(1.15);
-            filter: brightness(1.2);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .profile:hover {
-            background: var(--primary-light);
-        }
-
-        .profile img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: 0.75rem;
-            border: 2px solid var(--primary-light);
-        }
-
-        .profile span {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--secondary);
-        }
-
-        .profile .dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--white);
-            min-width: 180px;
-            box-shadow: var(--shadow-medium);
-            border-radius: var(--border-radius);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 100;
-            padding: 0.75rem 0;
-            margin-top: 0.5rem;
-            border: 1px solid var(--primary-light);
-        }
-
-        .profile:hover .dropdown,
-        .profile:focus-within .dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile .dropdown::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 16px;
-            width: 14px;
-            height: 14px;
-            background: var(--white);
-            transform: rotate(45deg);
-            border-top: 1px solid var(--primary-light);
-            border-left: 1px solid var(--primary-light);
-            box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .profile .dropdown a,
-        .profile .dropdown button {
-            display: block;
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
-
-        .profile .dropdown a:hover,
-        .profile .dropdown button:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-        }
-
-        .login-button {
-            background: var(--primary);
-            color: var(--white);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .login-button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
         /* Hero Section */
         .image-container {
             position: relative;
@@ -265,36 +23,36 @@ session_start();
             left: 0;
             filter: brightness(50%);
             box-shadow: 1px 1px 10px var(--secondary);
-            z-index: -1; /* Place image behind the content */
+            z-index: -1;
         }
 
         .centered-home {
             text-align: center;
             color: var(--white);
-            max-width: 800px; /* Limit width for readability */
-            padding: 2rem; /* Add padding for spacing */
+            max-width: 800px;
+            padding: 2rem;
         }
 
         .centered-home h1 {
-            font-size: 4rem; /* Adjusted to match screenshot proportions */
+            font-size: 4rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
             animation: glow 10s ease-in-out infinite alternate;
         }
 
-        .glow h1{
+        .glow h1 {
             animation: fadeInUp 1s ease;
         }
 
         .centered-home h2 {
-            font-size: 2.5rem; /* Adjusted for "Cafe" in the screenshot */
+            font-size: 2.5rem;
             font-weight: 400;
             margin-bottom: 1.5rem;
             text-transform: uppercase;
         }
 
         .centered-home p {
-            font-size: 1.2rem; /* Adjusted to match subtitle size */
+            font-size: 1.2rem;
             font-weight: 300;
             line-height: 1.6;
             margin-bottom: 2rem;
@@ -314,7 +72,7 @@ session_start();
             font-family: 'Poppins', sans-serif;
             background-color: var(--primary);
             color: var(--white);
-            font-size: 1.1rem; /* Adjusted to match button size in screenshot */
+            font-size: 1.1rem;
             font-weight: 500;
             border: none;
             border-radius: var(--border-radius);
@@ -328,36 +86,6 @@ session_start();
             color: var(--white);
             box-shadow: var(--shadow-medium);
             transform: translateY(-2px);
-        }
-        /* Menu Section */
-        .menu-image-container {
-            position: relative;
-            margin-top: -10vw;
-        }
-
-        #gsmenu {
-            width: 100%;
-            filter: brightness(40%);
-        }
-
-        .centered-menu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--white);
-        }
-
-        .centered-menu h1 {
-            font-size: 3vw;
-            font-weight: 400;
-        }
-
-        .centered-menu p {
-            font-size: 1vw;
-            font-style: italic;
-            padding: 0.5vw 0;
         }
 
         /* Carousel */
@@ -534,99 +262,7 @@ session_start();
             padding: 20px;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .header {
-                padding: 0.75rem 1rem;
-            }
-
-            #logo {
-                height: 48px;
-                margin-right: 1rem;
-            }
-
-            .hamburger {
-                display: block;
-                margin-left: auto;
-            }
-
-            .button-container {
-                position: fixed;
-                top: 64px;
-                left: 0;
-                width: 100%;
-                flex-direction: column;
-                background: var(--white);
-                box-shadow: var(--shadow-medium);
-                padding: 1rem 0;
-                transform: translateY(-100%);
-                opacity: 0;
-                visibility: hidden;
-                transition: var(--transition);
-                z-index: 999;
-                align-items: flex-start;
-            }
-
-            .button-container.active {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .nav-links {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .nav-button {
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                margin: 0.25rem 0;
-                text-align: left;
-            }
-
-            .icon-profile-container {
-                width: 100%;
-                justify-content: flex-end;
-                padding: 0 1.5rem;
-                margin: 0.5rem 0;
-            }
-
-            .profile {
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                margin: 0;
-                justify-content: space-between;
-            }
-
-            .profile .dropdown {
-                position: static;
-                width: 100%;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
-                border: none;
-            }
-
-            .profile.active .dropdown {
-                max-height: 300px;
-            }
-
-            .profile .dropdown::before {
-                display: none;
-            }
-
-            .profile .dropdown a,
-            .profile .dropdown button {
-                padding: 0.75rem 2.5rem;
-            }
-
             .centered-home {
                 top: 50%;
             }
@@ -646,14 +282,6 @@ session_start();
                 border-radius: 3vw;
             }
 
-            .centered-menu h1 {
-                font-size: 5vw;
-            }
-
-            .centered-menu p {
-                font-size: 2vw;
-            }
-
             .carousel-item {
                 width: 60vw;
                 margin: 0 15px;
@@ -665,14 +293,6 @@ session_start();
         }
 
         @media (max-width: 480px) {
-            #logo {
-                height: 40px;
-            }
-
-            .nav-button {
-                font-size: 5vw;
-            }
-
             .centered-home {
                 top: 40%;
             }
@@ -698,44 +318,6 @@ session_start();
     </style>
 </head>
 <body>
-    <!-- Header Section -->
-    <header class="header">
-    <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-    <div id="hamburger-menu" class="hamburger">☰</div>
-    <nav class="button-container" id="nav-menu">
-        <div class="nav-links">
-            <a href="/views/users/User-Home.php" class="nav-button active">Home</a>
-            <a href="/views/users/User-Menu.php" class="nav-button">Menu</a>
-            <a href="/views/users/User-Career.php" class="nav-button">Career</a>
-            <a href="/views/users/User-Aboutus.php" class="nav-button">About Us</a>
-        </div>
-        <div class="icon-profile-container">
-            <div class="icon-container">
-                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                </a>
-            </div>
-            <div class="profile">
-                <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                <span>
-                    <?php 
-                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                    ?>
-                </span>
-                <div class="dropdown">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="/views/users/account.php">My Account</a>
-                        <a href="/views/users/purchases.php">My Purchase</a>
-                        <a class="nav-button" onclick="showLogoutOverlay()">Logout</a>
-                    <?php else: ?>
-                        <a class="nav-button" onclick="window.location.href='/views/auth/login.php'">Login</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-</header>
-
     <!-- Hero Section -->
     <div class="image-container">
         <img src="/public/images/background/home.jpg" alt="Get Started" id="getstarted">
@@ -746,8 +328,6 @@ session_start();
             <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button" id="view-menu-button">View Menu</button>
         </div>
     </div>
-
-    <!-- Menu Section -->
 
     <!-- Carousel -->
     <div class="carousel-container">
@@ -812,21 +392,6 @@ session_start();
 
     <!-- JavaScript -->
     <script>
-        // Hamburger menu toggle
-        document.getElementById('hamburger-menu').addEventListener('click', function() {
-            document.getElementById('nav-menu').classList.toggle('active');
-        });
-
-        // Profile dropdown toggle for mobile
-        const profile = document.querySelector('.profile');
-        if (profile) {
-            profile.addEventListener('click', function(e) {
-                if (window.innerWidth <= 768) {
-                    this.classList.toggle('active');
-                }
-            });
-        }
-
         // Back to top button
         const backToTop = document.getElementById('backToTop');
         window.addEventListener('scroll', () => {
@@ -844,6 +409,5 @@ session_start();
             });
         });
     </script>
-    <script src="/public/js/auth.js"></script>
 </body>
 </html>

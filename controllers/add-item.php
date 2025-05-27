@@ -1,5 +1,5 @@
 <?php
-// Use an absolute path based on the current directory
+
 $config_path = __DIR__ . '..\..\config.php';
 
 if (!file_exists($config_path)) {

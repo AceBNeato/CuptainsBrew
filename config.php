@@ -99,7 +99,7 @@ try {
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT,
             total_amount DECIMAL(10, 2) NOT NULL,
-            status ENUM('Pending', 'Approved', 'Processing', 'Assigned', 'Out for Delivery', 'Delivered', 'Rejected', 'Completed') DEFAULT 'Pending',
+            status ENUM('Pending', 'Approved', 'Processing', 'Assigned', 'Out for Delivery', 'Delivered', 'Rejected', 'Canceled') DEFAULT 'Pending',
             delivery_address TEXT NOT NULL,
             payment_method ENUM('Card', 'COD', 'Digital Wallet') NOT NULL,
             rider_id INT,
@@ -108,6 +108,19 @@ try {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
             FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL
         ) ENGINE=InnoDB",
+
+         // Order Cancellations (depends on orders and users)
+        "CREATE TABLE IF NOT EXISTS order_cancellations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            order_id INT NOT NULL,
+            user_id INT,
+            reason VARCHAR(255) NOT NULL,
+            custom_reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        ) ENGINE=InnoDB",
+
 
         // Order_items (depends on orders and products)
         "CREATE TABLE IF NOT EXISTS order_items (

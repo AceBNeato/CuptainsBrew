@@ -1,6 +1,7 @@
 <?php
-session_start();
+require_once __DIR__ . '/partials/header.php';
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -54,185 +55,7 @@ session_start();
             color: inherit;
         }
 
-        /* Header */
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
-            box-shadow: var(--shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        #logo {
-            height: 60px;
-            margin-right: 2rem;
-            transition: var(--transition);
-        }
-
-        #logo:hover {
-            transform: scale(1.08);
-            filter: brightness(1.1);
-        }
-
-        .hamburger {
-            display: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            color: var(--secondary);
-            transition: var(--transition);
-        }
-
-        .hamburger:hover {
-            color: var(--primary);
-        }
-
-        .button-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex: 1;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-button {
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-weight: 500;
-            font-size: 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .nav-button:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .nav-button.active {
-            background: var(--primary);
-            color: var(--white);
-            font-weight: 600;
-        }
-
-        .icon-profile-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .icon-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .nav-icon {
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .nav-icon img {
-            width: 28px;
-            height: 28px;
-            transition: var(--transition);
-        }
-
-        .nav-icon:hover img {
-            transform: scale(1.15);
-            filter: brightness(1.2);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .profile:hover {
-            background: var(--primary-light);
-        }
-
-        .profile img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: 0.75rem;
-            border: 2px solid var(--primary-light);
-        }
-
-        .profile span {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--secondary);
-        }
-
-        .profile .dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--white);
-            min-width: 180px;
-            box-shadow: var(--shadow-medium);
-            border-radius: var(--border-radius);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 100;
-            padding: 0.75rem 0;
-            margin-top: 0.5rem;
-            border: 1px solid var(--primary-light);
-        }
-
-        .profile:hover .dropdown,
-        .profile:focus-within .dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile .dropdown::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 16px;
-            width: 14px;
-            height: 14px;
-            background: var(--white);
-            transform: rotate(45deg);
-            border-top: 1px solid var(--primary-light);
-            border-left: 1px solid var(--primary-light);
-            box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .profile .dropdown a,
-        .profile .dropdown button {
-            display: block;
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
-
-        .profile .dropdown a:hover,
-        .profile .dropdown button:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-        }
-
+        
 
 
         /* About Us Section */
@@ -558,47 +381,7 @@ session_start();
                 text-align: left;
             }
 
-            .icon-profile-container {
-                width: 100%;
-                justify-content: flex-end;
-                padding: 0 1.5rem;
-                margin: 0.5rem 0;
-            }
-
-            .profile {
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                margin: 0;
-                justify-content: space-between;
-            }
-
-            .profile .dropdown {
-                position: static;
-                width: 100%;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
-                border: none;
-            }
-
-            .profile.active .dropdown {
-                max-height: 300px;
-            }
-
-            .profile .dropdown::before {
-                display: none;
-            }
-
-            .profile .dropdown a,
-            .profile .dropdown button {
-                padding: 0.75rem 2.5rem;
-            }
+            
 
             .about-us {
                 padding: 30px 15px;
@@ -663,43 +446,7 @@ session_start();
         }
     </style>
 
-    <!-- Header Section -->
-    <header class="header">
-    <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-    <div id="hamburger-menu" class="hamburger">☰</div>
-    <nav class="button-container" id="nav-menu">
-        <div class="nav-links">
-            <a href="/views/users/User-Home.php" class="nav-button">Home</a>
-            <a href="/views/users/User-Menu.php" class="nav-button active">Menu</a>
-            <a href="/views/users/User-Career.php" class="nav-button">Career</a>
-            <a href="/views/users/User-Aboutus.php" class="nav-button active">About Us</a>
-        </div>
-        <div class="icon-profile-container">
-            <div class="icon-container">
-                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                </a>
-            </div>
-            <div class="profile">
-                <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                <span>
-                    <?php 
-                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                    ?>
-                </span>
-                <div class="dropdown">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="/views/users/account.php">My Account</a>
-                        <a href="/views/users/purchases.php">My Purchase</a>
-                        <a class="nav-button" onclick="showLogoutOverlay()">Logout</a>
-                    <?php else: ?>
-                        <a class="nav-button" onclick="window.location.href='/views/auth/login.php'">Login</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-</header>
+    
     
     <section class="about-us">
         <div class="container">
