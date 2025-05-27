@@ -730,6 +730,30 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
 </footer>
 
 <script>
+
+          
+  function gotoMenu() {
+  window.location.href = '/views/admin/Admin-Menu.php';
+  }
+
+  function gotoReports(){
+  window.location.href = '/views/admin/Admin-Reports.php';
+  }
+
+  function gotoOrders() {
+  window.location.href = '/views/admin/Admin-Orders.php';
+  }
+
+  function gotoAccounts(){
+  window.location.href = '/views/admin/Admin-Accounts.php';
+  }
+
+
+
+
+
+
+
   function loadCategory(categoryId) {
     const url = new URL(window.location.href);
     url.pathname = '/views/admin/admin-menu.php';

@@ -1,30 +1,35 @@
 <?php
 require_once '../../config.php';
 
-// Fetch orders from the database for reports
+// Initialize arrays and fetch orders with joined product details
 $allOrders = [];
-$sql = "SELECT id, name, order_date, order_time, status FROM orders";
-$result = $conn->query($sql);
+try {
+    $sql = "SELECT o.id, o.order_date, o.order_time, o.status, 
+                   oi.product_id, p.item_name, p.item_image
+            FROM orders o
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            LEFT JOIN products p ON oi.product_id = p.id
+            WHERE o.status IN ('Pending', 'Delivered')
+            ORDER BY o.order_date DESC, o.order_time DESC";
+    
+    $result = $conn->query($sql);
 
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $allOrders[] = [
-            'id' => $row['id'],
-            'name' => $row['name'],
-            'date' => $row['order_date'],
-            'time' => $row['order_time'],
-            'status' => $row['status']
-        ];
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $allOrders[] = [
+                'id' => $row['id'],
+                'item_name' => $row['item_name'] ?? 'Unknown Item',
+                'item_image' => $row['item_image'] ?? '/public/images/default-item.jpg',
+                'date' => $row['order_date'],
+                'time' => $row['order_time'],
+                'status' => $row['status']
+            ];
+        }
     }
+} catch (Exception $e) {
+    error_log("Error fetching orders: " . $e->getMessage(), 3, __DIR__ . '/error.log');
+    $error_message = "Failed to load orders. Please try again later.";
 }
-
-$pendingOrders = array_filter($allOrders, function($order) {
-    return $order['status'] === 'Pending';
-});
-
-$deliveredOrders = array_filter($allOrders, function($order) {
-    return $order['status'] === 'Delivered';
-});
 
 $conn->close();
 ?>
@@ -166,7 +171,7 @@ $conn->close();
       border-radius: 8px;
     }
 
-    .no-reports-message {
+    .no-reports-message, .error-message {
       text-align: center;
       padding: 2rem;
       color: #4a3b2b;
@@ -194,14 +199,16 @@ $conn->close();
   <div class="reports-container">
     <div class="report-filter">
       <div class="filter-item active" onclick="filterOrders('all')">All Orders</div>
-      <div class="filter-item" onclick="filterOrders('pending')">Pending Orders</div>
-      <div class="filter-item" onclick="filterOrders('delivered')">Delivered Orders</div>
+      <div class="filter-item" onclick="filterOrders('Pending')">Pending Orders</div>
+      <div class="filter-item" onclick="filterOrders('Delivered')">Delivered Orders</div>
     </div>
     <div class="report-table">
       <h2 class="report-title">Order Reports</h2>
       <div id="orders-table">
         <?php
-        if (empty($allOrders)) {
+        if (isset($error_message)) {
+            echo '<p class="error-message">' . htmlspecialchars($error_message) . '</p>';
+        } elseif (empty($allOrders)) {
             echo '<p class="no-reports-message">No orders available for reporting.</p>';
         } else {
             ?>
@@ -220,8 +227,8 @@ $conn->close();
                   <tr class="order-row" data-status="<?= htmlspecialchars($order['status']) ?>">
                     <td><?= htmlspecialchars($order['id']) ?></td>
                     <td>
-                      <img src="/public/images/default-item.jpg" class="item-img" alt="Item Image">
-                      <?= htmlspecialchars($order['name']) ?>
+                      <img src="<?= htmlspecialchars($order['item_image']) ?>" class="item-img" alt="Item Image">
+                      <?= htmlspecialchars($order['item_name']) ?>
                     </td>
                     <td><?= htmlspecialchars($order['date']) ?></td>
                     <td><?= htmlspecialchars(date("g:i A", strtotime($order['time']))) ?></td>
@@ -262,7 +269,8 @@ $conn->close();
       document.querySelector(`.filter-item[onclick="filterOrders('${status}')"]`).classList.add('active');
 
       rows.forEach(row => {
-        if (status === 'all' || row.getAttribute('data-status') === status) {
+        const rowStatus = row.getAttribute('data-status');
+        if (status === 'all' || rowStatus === status) {
           row.style.display = '';
         } else {
           row.style.display = 'none';

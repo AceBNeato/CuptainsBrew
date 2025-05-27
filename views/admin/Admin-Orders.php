@@ -1,9 +1,21 @@
 <?php
 require_once '../../config.php';
 
-// Fetch orders from the database
+// Fetch orders with product details from the database
 $orders = [];
-$sql = "SELECT id, name, description, image_path, order_date, order_time FROM orders";
+$sql = "SELECT 
+    o.id,
+    o.created_at,
+    DATE(o.created_at) AS order_date,
+    TIME(o.created_at) AS order_time,
+    p.item_name AS name,
+    p.item_description AS description,
+    p.item_image AS image_path
+FROM orders o
+LEFT JOIN order_items oi ON o.id = oi.order_id
+LEFT JOIN products p ON oi.product_id = p.id
+WHERE o.status = 'Pending'"; // Only fetch pending orders for admin action
+
 $result = $conn->query($sql);
 
 if ($result && $result->num_rows > 0) {
@@ -16,6 +28,11 @@ if ($result && $result->num_rows > 0) {
             'date' => $row['order_date'],
             'time' => $row['order_time']
         ];
+    }
+} else {
+    // Log error if query fails
+    if ($conn->error) {
+        error_log("Query failed: " . $conn->error, 3, __DIR__ . '/error.log');
     }
 }
 
@@ -30,6 +47,10 @@ $conn->close();
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Admin Orders - Captain's Brew Cafe</title>
   <link rel="icon" href="/images/LOGO.png" sizes="any" />
+  <!-- Add SweetAlert2 CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- Add SweetAlert2 JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     * {
       margin: 0;
@@ -45,7 +66,9 @@ $conn->close();
 
     /* Header */
     .header {
-      display: flex;
+      display
+
+: flex;
       align-items: center;
       padding: 1rem 2rem;
       background: linear-gradient(135deg, #FFFAEE, #FFDBB5);
@@ -121,7 +144,7 @@ $conn->close();
 
     th {
       background: #87BFD1;
-      color:rgb(57, 46, 32);
+      color: #2C6E8A;
       font-weight: 600;
       text-transform: uppercase;
       font-size: 0.9rem;
@@ -258,11 +281,9 @@ $conn->close();
       <button class="nav-button active" onclick="gotoOrders()">Orders</button>
       <button class="nav-button" onclick="gotoReports()">Reports</button>
       <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
-      <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
+      <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
     </nav>
-    <div class="profile-section">
-      <span class="vertical-text">Do</span>
-    </div>
+    
   </header>
 
   <div class="orders-container">
@@ -283,12 +304,16 @@ $conn->close();
           </tr>
         <?php else: ?>
           <?php foreach ($orders as $order): ?>
-            <tr id="order-<?= $order['id'] ?>">
+            <tr id="order-<?= htmlspecialchars($order['id']) ?>">
               <td><?= htmlspecialchars($order['id']) ?></td>
               <td class="order-item">
-                <img src="<?= htmlspecialchars($order['image']) ?>" class="item-img" width="100"
-                     onclick="openModal('<?= htmlspecialchars($order['name']) ?>', '<?= htmlspecialchars($order['desc']) ?>', '<?= htmlspecialchars($order['image']) ?>')">
-                <?= htmlspecialchars($order['name']) ?>
+                <?php if ($order['image']): ?>
+                  <img src="<?= htmlspecialchars($order['image']) ?>" class="item-img" width="100"
+                       onclick="openModal('<?= htmlspecialchars($order['name'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['desc'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['image'] ?? '') ?>')">
+                <?php else: ?>
+                  <span>No Image</span>
+                <?php endif; ?>
+                <?= htmlspecialchars($order['name'] ?? 'N/A') ?>
               </td>
               <td><?= htmlspecialchars($order['date']) ?></td>
               <td><?= htmlspecialchars(date("g:i A", strtotime($order['time']))) ?></td>
@@ -326,19 +351,19 @@ $conn->close();
     }
 
     function gotoMenu() {
-      window.location.href = '/views/admin/admin-menu.php';
+      window.location.href = '/views/admin/Admin-Menu.php';
     }
 
     function gotoOrders() {
-      window.location.href = '/views/admin/admin-orders.php';
+      window.location.href = '/views/admin/Admin-Orders.php';
     }
 
     function gotoReports() {
-      window.location.href = '/views/admin/admin-reports.php';
+      window.location.href = '/views/admin/Admin-Reports.php';
     }
 
     function gotoAccounts() {
-      window.location.href = '/views/admin/admin-accounts.php';
+      window.location.href = '/views/admin/Admin-Accounts.php';
     }
 
     async function handleOrder(orderId, action) {
@@ -375,5 +400,6 @@ $conn->close();
       }
     };
   </script>
+  <script src="/public/js/auth.js"></script>
 </body>
 </html>

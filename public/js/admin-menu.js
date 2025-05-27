@@ -60,22 +60,6 @@ function loadDefaultMenuItem() {
 }
 
 
-  function gotoMenu() {
-  window.location.href = '/views/admin/Admin-Menu.php';
-  }
-
-  function gotoReports(){
-  window.location.href = '/views/admin/Admin-Reports.php';
-  }
-
-  function gotoOrders() {
-  window.location.href = '/views/admin/Admin-Orders.php';
-  }
-
-  function gotoAccounts(){
-  window.location.href = '/views/admin/Admin-Reports.php';
-  }
-
 
 
 
