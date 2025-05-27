@@ -382,8 +382,8 @@ require_once __DIR__ . '/../../config.php';
                 padding: 0.75rem 1.5rem;
                 margin: 0.25rem 0;
                 text-align: left;
+            
             }
-
             
 
             .about-us {

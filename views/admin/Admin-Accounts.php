@@ -1,5 +1,11 @@
 <?php
-require_once '../../config.php';
+// Include the database configuration
+require_once __DIR__ . '/../../config.php';
+
+// Ensure session is started
+if (!isset($_SESSION)) {
+    session_start();
+}
 
 // Initialize arrays and variables
 $users = [];
@@ -366,18 +372,7 @@ $conn->close();
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo-section">
-            <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Cafe Logo" />
-        </div>
-        <nav class="button-container" id="nav-menu">
-            <button class="nav-button" onclick="gotoMenu()">Menu</button>
-            <button class="nav-button" onclick="gotoOrders()">Orders</button>
-            <button class="nav-button" onclick="gotoReports()">Reports</button>
-            <button class="nav-button active" onclick="gotoAccounts()">Accounts</button>
-            <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
-        </nav>
-    </header>
+    <?php require_once __DIR__ . '/partials/header.php'; ?>
 
     <div class="accounts-container">
         <div class="account-filter">

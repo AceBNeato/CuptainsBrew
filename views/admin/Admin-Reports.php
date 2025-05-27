@@ -1,5 +1,10 @@
 <?php
-require_once '../../config.php';
+require_once __DIR__ . '/../../config.php';
+
+// Ensure session is started
+if (!isset($_SESSION)) {
+    session_start();
+}
 
 // Initialize arrays and fetch orders with joined user and product details
 $allOrders = [];
@@ -212,18 +217,7 @@ $conn->close();
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo-section">
-      <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Cafe Logo" />
-    </div>
-    <nav class="button-container" id="nav-menu">
-      <button class="nav-button" onclick="gotoMenu()">Menu</button>
-      <button class="nav-button" onclick="gotoOrders()">Orders</button>
-      <button class="nav-button active" onclick="gotoReports()">Reports</button>
-      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
-      <a id="logout-button" class="nav-button" href="/logout.php">Logout</a>
-    </nav>
-  </header>
+  <?php require_once __DIR__ . '/partials/header.php'; ?>
 
   <div class="reports-container">
     <Canceled class="report-filter">
@@ -292,21 +286,7 @@ $conn->close();
   </div>
 
   <script>
-    function gotoMenu() {
-      window.location.href = '/views/admin/admin-menu.php';
-    }
-
-    function gotoOrders() {
-      window.location.href = '/views/admin/admin-orders.php';
-    }
-
-    function gotoReports() {
-      window.location.href = '/views/admin/admin-reports.php';
-    }
-
-    function gotoAccounts() {
-      window.location.href = '/views/admin/admin-accounts.php';
-    }
+    
 
     function filterOrders(status) {
       const rows = document.querySelectorAll('.order-row');

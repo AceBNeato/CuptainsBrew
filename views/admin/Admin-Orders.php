@@ -1,6 +1,13 @@
 <?php
 require_once '../../config.php';
 
+// Ensure session is started
+if (!isset($_SESSION)) {
+    session_start();
+}
+
+
+
 // Fetch orders with product and user details from the database
 $orders = [];
 $sql = "SELECT 
@@ -368,18 +375,7 @@ $conn->close();
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo-section">
-      <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Cafe Logo" />
-    </div>
-    <nav class="button-container" id="nav-menu">
-      <button class="nav-button" onclick="gotoMenu()">Menu</button>
-      <button class="nav-button active" onclick="gotoOrders()">Orders</button>
-      <button class="nav-button" onclick="gotoReports()">Reports</button>
-      <button class="nav-button" onclick="gotoAccounts()">Accounts</button>
-      <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
-    </nav>
-  </header>
+  <?php require_once __DIR__ . '/partials/header.php'; ?>
 
   <div class="orders-container">
     <table>

@@ -418,15 +418,6 @@ session_start();
         </div>
     </div>
 
-    <!-- Menu Section -->
-    <div class="menu-image-container">
-        <img src="/public/images/background/menu.jpg" alt="Menu" id="gsmenu">
-        <div class="centered-menu">
-            <h1>Explore Our Menu</h1>
-            <p>Indulge in our curated selection of beverages and treats.</p>
-            <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button">Discover Now</button>
-        </div>
-    </div>
 
     <!-- Carousel -->
     <div class="carousel-container">
