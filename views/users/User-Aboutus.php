@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/partials/header.php';
+session_start();
+global $conn;
+require_once __DIR__ . '/../../config.php';
+
 ?>
 
 
@@ -446,7 +449,7 @@ require_once __DIR__ . '/partials/header.php';
         }
     </style>
 
-    
+        <?php require_once __DIR__ . '/partials/header.php'; ?>
     
     <section class="about-us">
         <div class="container">

@@ -120,185 +120,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             color: inherit;
         }
 
-        /* Header */
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
-            box-shadow: var(--shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        #logo {
-            height: 60px;
-            margin-right: 2rem;
-            transition: var(--transition);
-        }
-
-        #logo:hover {
-            transform: scale(1.08);
-            filter: brightness(1.1);
-        }
-
-        .hamburger {
-            display: none;
-            font-size: 1.75rem;
-            cursor: pointer;
-            color: var(--secondary);
-            transition: var(--transition);
-        }
-
-        .hamburger:hover {
-            color: var(--primary);
-        }
-
-        .button-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex: 1;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-button {
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-weight: 500;
-            font-size: 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-            justify-self: center;
-        }
-
-        .nav-button:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .nav-button.active {
-            background: var(--primary);
-            color: var(--white);
-            font-weight: 600;
-        }
-
-        /* Icons and Profile */
-        .icon-profile-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .icon-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .nav-icon {
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .nav-icon img {
-            width: 28px;
-            height: 28px;
-            transition: var(--transition);
-        }
-
-        .nav-icon:hover img {
-            transform: scale(1.15);
-            filter: brightness(1.2);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .profile:hover {
-            background: var(--primary-light);
-        }
-
-        .profile img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: 0.75rem;
-            border: 2px solid var(--primary-light);
-        }
-
-        .profile span {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--secondary);
-        }
-
-        .profile .dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--white);
-            min-width: 180px;
-            box-shadow: var(--shadow-medium);
-            border-radius: var(--border-radius);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 100;
-            padding: 0.75rem 0;
-            margin-top: 0.5rem;
-            border: 1px solid var(--primary-light);
-        }
-
-        .profile:hover .dropdown,
-        .profile:focus-within .dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile .dropdown::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 16px;
-            width: 14px;
-            height: 14px;
-            background: var(--white);
-            transform: rotate(45deg);
-            border-top: 1px solid var(--primary-light);
-            border-left: 1px solid var(--primary-light);
-            box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .profile .dropdown a {
-            display: block;
-            padding: 0.75rem 1.25rem;
-            color: var(--secondary);
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
-
-        .profile .dropdown a:hover {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-        }
-
         /* Menu Bar */
         .menu-bar {
             display: flex;
@@ -699,106 +520,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .header {
-                padding: 0.75rem 1rem;
-            }
-
-            #logo {
-                height: 48px;
-                margin-right: 1rem;
-            }
-
-            .hamburger {
-                display: block;
-                margin-left: auto;
-            }
-
             .add-to-cart-btn {
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
-            font-size: 2.5vw;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-            .button-container {
-                position: fixed;
-                top: 64px;
-                left: 0;
-                width: 100%;
-                flex-direction: column;
-                background: var(--white);
-                box-shadow: var(--shadow-medium);
-                padding: 1rem 0;
-                transform: translateY(-100%);
-                opacity: 0;
-                visibility: hidden;
-                transition: var(--transition);
-                z-index: 999;
-                align-items: flex-start;
-            }
-
-            .button-container.active {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .nav-links {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .nav-button {
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                margin: 0.25rem 0;
-                text-align: left;
-            }
-
-            .icon-profile-container {
-                width: 100%;
-                justify-content: flex-end;
-                padding: 0 1.5rem;
-                margin: 0.5rem 0;
-            }
-
-            .profile {
-                width: 100%;
-                padding: 0.75rem 1.5rem;
-                margin: 0;
-                justify-content: space-between;
-            }
-
-            .profile .dropdown {
-                position: static;
-                width: 100%;
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
+                background: var(--primary);
+                color: var(--white);
                 border: none;
-            }
-
-            .profile.active .dropdown {
-                max-height: 300px;
-            }
-
-            .profile .dropdown::before {
-                display: none;
-            }
-
-            .profile .dropdown a {
-                padding: 0.75rem 2.5rem;
+                padding: 1rem 2rem;
+                border-radius: var(--border-radius);
+                font-size: 2.5vw;
+                font-weight: 500;
+                cursor: pointer;
+                transition: var(--transition);
             }
 
             .main-content {
@@ -912,7 +643,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 flex-direction: column;
             }
 
-            .modal-content{
+            .modal-content {
                 width: 300px;
             }
 
@@ -925,34 +656,30 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 padding: 2vw;
             }
 
-
             .quantity-btn {
-            background: var(--primary-light);
-            border: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 1.4rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
+                background: var(--primary-light);
+                border: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                font-size: 1.4rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: var(--transition);
+            }
 
-        .quantity-btn:hover {
-            background: var(--primary);
-            color: var(--white);
-            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
-        }
+            .quantity-btn:hover {
+                background: var(--primary);
+                color: var(--white);
+                box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
+            }
         }
 
         @media (min-width: 768px) {
             .modal-body {
                 flex-direction: row;
-            }
-
-            .modal-image {
             }
 
             .modal-details {
@@ -964,43 +691,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
     </style>
 </head>
 <body>
-    <!-- Header Section -->
-<header class="header">
-    <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Logo">
-    <div id="hamburger-menu" class="hamburger">☰</div>
-    <nav class="button-container" id="nav-menu">
-        <div class="nav-links">
-            <a href="/views/users/User-Home.php" class="nav-button">Home</a>
-            <a href="/views/users/User-Menu.php" class="nav-button active">Menu</a>
-            <a href="/views/users/User-Career.php" class="nav-button">Career</a>
-            <a href="/views/users/User-Aboutus.php" class="nav-button">About Us</a>
-        </div>
-        <div class="icon-profile-container">
-            <div class="icon-container">
-                <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
-                    <img src="/public/images/icons/cart-icon.png" alt="Cart">
-                </a>
-            </div>
-            <div class="profile">
-                <img src="/public/images/icons/profile-icon.png" alt="Profile">
-                <span>
-                    <?php 
-                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
-                    ?>
-                </span>
-                <div class="dropdown">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="/views/users/User-Account.php">My Account</a>
-                        <a href="/views/users/User-Purchase.php">My Purchase</a>
-                        <a onclick="showLogoutOverlay()">Logout</a>
-                    <?php else: ?>
-                        <a onclick="window.location.href='/views/auth/login.php'">Login</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </nav>
-</header>
+    <?php require_once __DIR__ . '/partials/header.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -1009,17 +700,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         <div id="menu-list-container">
             <!-- Menu Bar with Search -->
             <div class="menu-bar">
-                 <!-- Category Title -->
-
-           
                 <div class="search-box">
                     <input type="text" class="search-input" placeholder="🔍 Search for drinks..." 
                            id="search-input" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
                            onkeyup="handleSearch(event)"/>
                 </div>
             </div>
-
-           
 
             <!-- Menu Items -->
             <?php
@@ -1068,7 +754,7 @@ try {
                             <p class='menu-price'>₱ {$row['item_price']}</p>
                             <p class='menu-desc'>$desc</p>
                         </div>
-                        <button class='menu-manage' $buttonAttributes>+</button>
+                        <button class='menu-manage' $buttonAttributes>+ </button>
                       </div>";
             }
         } else {
@@ -1099,7 +785,6 @@ try {
                         <button class='quantity-btn plus'>+</button>
                         <button id='addToCartModal' class='add-to-cart-btn'>Add to Cart</button>
                     </div>
-                    
                 </div>
             </div>
         </div>
@@ -1107,27 +792,10 @@ try {
 
     <!-- JavaScript -->
     <script>
-        // Hamburger menu toggle
-        document.getElementById('hamburger-menu').addEventListener('click', function() {
-            document.getElementById('nav-menu').classList.toggle('active');
-        });
-
-        // Profile dropdown toggle for mobile
-        const profile = document.querySelector('.profile');
-        if (profile) {
-            profile.addEventListener('click', function(e) {
-                if (window.innerWidth <= 768) {
-                    this.classList.toggle('active');
-                }
-            });
-        }
-
-       
-
         // Search Functionality
         function handleSearch(event) {
             if (event.key === 'Enter') {
-                let category = '<?= htmlspecialchars($currentCategory) ?>';
+                let category = '<?php echo htmlspecialchars($category); ?>';
                 let searchQuery = document.getElementById('search-input').value;
                 let url = '/views/users/user-menu.php?category=' + encodeURIComponent(category);
                 
@@ -1148,7 +816,7 @@ try {
             // Set modal content
             document.getElementById('modalProductImage').src = '/public/' + product.image;
             document.getElementById('modalProductName').textContent = product.name;
-            document.getElementById('modalProductPrice').textContent = '₱' + product.price;
+            document.getElementById('modalProductPrice').textContent = '₹' + product.price;
             document.getElementById('modalProductDesc').textContent = product.desc || 'No description available';
             document.getElementById('productQuantity').value = 1;
             
@@ -1203,70 +871,70 @@ try {
 
         // Cart Functionality
         function addToCart(productId, name, price, image, quantity = 1) {
-    fetch('/views/users/user-menu.php?action=add_to_cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `product_id=${productId}&quantity=${quantity}`
-    })
-    .then(response => {
-        console.log('Response Status:', response.status);
-        console.log('Response Headers:', response.headers.get('content-type'));
-        return response.text();
-    })
-    .then(text => {
-        console.log('Raw Response:', text);
-        try {
-            const data = JSON.parse(text);
-            if (data.success) {
-                showCartNotification(`${name} added to cart (${quantity}x)`);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: `${name} added to cart (${quantity}x)`,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else {
-                if (data.error === 'User not logged in') {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Login Required',
-                        text: 'Please log in to add items to your cart.',
-                        showConfirmButton: true,
-                        confirmButtonText: 'Go to Login',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/views/users/login.php';
+            fetch('/views/users/user-menu.php?action=add_to_cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `product_id=${productId}&quantity=${quantity}`
+            })
+            .then(response => {
+                console.log('Response Status:', response.status);
+                console.log('Response Headers:', response.headers.get('content-type'));
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw Response:', text);
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        showCartNotification(`${name} added to cart (${quantity}x)`);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: `${name} added to cart (${quantity}x)`,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        if (data.error === 'User not logged in') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Login Required',
+                                text: 'Please log in to add items to your cart.',
+                                showConfirmButton: true,
+                                confirmButtonText: 'Go to Login',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/views/users/login.php';
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to add to cart: ' + data.error,
+                            });
                         }
-                    });
-                } else {
+                    }
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to add to cart: ' + data.error,
+                        text: 'Invalid response from server: ' + e.message,
                     });
                 }
-            }
-        } catch (e) {
-            console.error('JSON Parse Error:', e);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Invalid response from server: ' + e.message,
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred: ' + error.message,
+                });
             });
         }
-    })
-    .catch(error => {
-        console.error('Fetch Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred: ' + error.message,
-        });
-    });
-}
 
         // Cart Notification
         function showCartNotification(message) {
@@ -1298,7 +966,7 @@ try {
                     const card = this.closest('.menu-card');
                     const productId = card.id.replace('menuCard-', '');
                     const productName = card.querySelector('.menu-title').textContent;
-                    const productPrice = parseFloat(card.querySelector('.menu-price').textContent.replace('₱ ', ''));
+                    const productPrice = parseFloat(card.querySelector('.menu-price').textContent.replace('₹ ', ''));
                     const productImage = card.querySelector('.menu-image').src.split('/public/')[1];
                     const productDesc = card.querySelector('.menu-desc').textContent;
                     
@@ -1314,6 +982,6 @@ try {
         });
     </script>
 
-<script src="/public/js/auth.js"></script>
+    <script src="/public/js/auth.js"></script>
 </body>
 </html>

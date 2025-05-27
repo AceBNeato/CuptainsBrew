@@ -1,10 +1,58 @@
 <?php
-require_once __DIR__ . '/partials/header.php';
+session_start();
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Captain's Brew Cafe - Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Captain's Brew Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Segoe+UI:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
+        :root {
+            --primary: #2C6E8A;
+            --primary-dark: #1B4A5E;
+            --primary-light: #B3E0F2;
+            --secondary: #4A3B2B;
+            --secondary-light: #FFF8E7;
+            --secondary-lighter: #FFE8C2;
+            --white: #FFFFFF;
+            --black: #1A1A1A;
+            --accent: #ffb74a;
+            --dark: #1a1310;
+            --shadow-light: 0 4px 12px rgba(74, 59, 43, 0.15);
+            --shadow-medium: 0 6px 16px rgba(44, 110, 138, 0.2);
+            --shadow-dark: 0 8px 24px rgba(74, 59, 43, 0.3);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--secondary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
         /* Hero Section */
         .image-container {
             position: relative;
@@ -86,6 +134,37 @@ require_once __DIR__ . '/partials/header.php';
             color: var(--white);
             box-shadow: var(--shadow-medium);
             transform: translateY(-2px);
+        }
+
+        /* Menu Section */
+        .menu-image-container {
+            position: relative;
+            margin-top: -10vw;
+        }
+
+        #gsmenu {
+            width: 100%;
+            filter: brightness(40%);
+        }
+
+        .centered-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--white);
+        }
+
+        .centered-menu h1 {
+            font-size: 3vw;
+            font-weight: 400;
+        }
+
+        .centered-menu p {
+            font-size: 1vw;
+            font-style: italic;
+            padding: 0.5vw 0;
         }
 
         /* Carousel */
@@ -282,6 +361,14 @@ require_once __DIR__ . '/partials/header.php';
                 border-radius: 3vw;
             }
 
+            .centered-menu h1 {
+                font-size: 5vw;
+            }
+
+            .centered-menu p {
+                font-size: 2vw;
+            }
+
             .carousel-item {
                 width: 60vw;
                 margin: 0 15px;
@@ -318,6 +405,8 @@ require_once __DIR__ . '/partials/header.php';
     </style>
 </head>
 <body>
+    <?php require_once __DIR__ . '/partials/header.php'; ?>
+
     <!-- Hero Section -->
     <div class="image-container">
         <img src="/public/images/background/home.jpg" alt="Get Started" id="getstarted">
@@ -326,6 +415,16 @@ require_once __DIR__ . '/partials/header.php';
             <p>Where every sip is an adventure. We've got your brew covered.<br>
                Drop anchor, relax, and let your coffee journey begin!</p>
             <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button" id="view-menu-button">View Menu</button>
+        </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="menu-image-container">
+        <img src="/public/images/background/menu.jpg" alt="Menu" id="gsmenu">
+        <div class="centered-menu">
+            <h1>Explore Our Menu</h1>
+            <p>Indulge in our curated selection of beverages and treats.</p>
+            <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button">Discover Now</button>
         </div>
     </div>
 
@@ -361,7 +460,7 @@ require_once __DIR__ . '/partials/header.php';
                 <ul class="footer-links">
                     <li><a href="/index.php">Home</a></li>
                     <li><a href="/views/users/user-menu.php">Menu</a></li>
-                    <li><a href="/views/users/user-career.php">Careers</a></li>
+                    <li><a href="/views/users/user-career.php">Careers</li>
                     <li><a href="/views/users/user-aboutus.php">About Us</a></li>
                 </ul>
             </div>
@@ -409,5 +508,6 @@ require_once __DIR__ . '/partials/header.php';
             });
         });
     </script>
+    <script src="/public/js/auth.js"></script>
 </body>
 </html>
