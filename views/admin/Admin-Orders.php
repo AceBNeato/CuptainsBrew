@@ -1,86 +1,114 @@
 <?php
-require_once '../../config.php';
+require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/auth_check.php';
+requireAdmin();
 
 // Ensure session is started
 if (!isset($_SESSION)) {
     session_start();
 }
 
-
+// Verify admin is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['loggedin'])) {
+    header('Location: /views/auth/login.php');
+    exit();
+}
 
 // Fetch orders with product and user details from the database
 $orders = [];
-$sql = "SELECT 
-    o.id,
-    o.created_at,
-    DATE(o.created_at) AS order_date,
-    TIME(o.created_at) AS order_time,
-    o.status,
-    p.item_name AS name,
-    p.item_description AS description,
-    p.item_image AS image_path,
-    u.username AS user_name,
-    u.email AS user_email,
-    u.address AS user_address,
-    u.contact AS user_contact,
-    o.total_amount,
-    o.delivery_address,
-    o.payment_method,
-    r.name AS rider_name
-FROM orders o
-LEFT JOIN order_items oi ON o.id = oi.order_id
-LEFT JOIN products p ON oi.product_id = p.id
-LEFT JOIN users u ON o.user_id = u.id
-LEFT JOIN riders r ON o.rider_id = r.id
-WHERE o.status IN ('Pending', 'Approved', 'Processing', 'Assigned', 'Out for Delivery')";
+$sql = "SELECT o.id, o.user_id, o.total_amount, o.status, o.delivery_address, o.payment_method, 
+               o.created_at, o.updated_at, o.rider_id, o.cancellation_reason,
+               u.username, u.email, u.contact, r.name as rider_name
+        FROM orders o 
+        LEFT JOIN users u ON o.user_id = u.id 
+        LEFT JOIN riders r ON o.rider_id = r.id 
+        WHERE o.status NOT IN ('Rejected', 'Cancelled', 'Delivered')
+        ORDER BY o.created_at DESC";
 
 $result = $conn->query($sql);
 
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $image_path = !empty($row['image_path']) ? '/public/' . ltrim($row['image_path'], '/') : '';
         $orders[$row['id']] = [
             'id' => $row['id'],
-            'name' => $row['name'],
-            'desc' => $row['description'],
-            'image' => $image_path,
-            'date' => $row['order_date'],
-            'time' => $row['order_time'],
+            'date' => $row['created_at'],
+            'time' => $row['created_at'],
             'status' => $row['status'],
-            'user_name' => $row['user_name'],
-            'user_email' => $row['user_email'],
-            'user_address' => $row['user_address'],
-            'user_contact' => $row['user_contact'],
+            'user_name' => $row['username'],
+            'user_email' => $row['email'],
+            'user_contact' => $row['contact'],
             'total_amount' => $row['total_amount'],
             'delivery_address' => $row['delivery_address'],
             'payment_method' => $row['payment_method'],
             'rider_name' => $row['rider_name'],
+            'cancellation_reason' => $row['cancellation_reason'],
             'items' => []
         ];
     }
 
-    $sql_items = "SELECT 
-        oi.order_id,
-        oi.quantity,
-        oi.price,
-        p.item_name
-    FROM order_items oi
-    LEFT JOIN products p ON oi.product_id = p.id
-    WHERE oi.order_id IN (" . implode(',', array_keys($orders)) . ")";
-    $items_result = $conn->query($sql_items);
-    
-    if ($items_result && $items_result->num_rows > 0) {
-        while ($item = $items_result->fetch_assoc()) {
-            $orders[$item['order_id']]['items'][] = [
-                'item_name' => $item['item_name'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price']
-            ];
+    // Check if order_cancellations table exists and fetch detailed cancellation info
+    $table_check = $conn->query("SHOW TABLES LIKE 'order_cancellations'");
+    if ($table_check && $table_check->num_rows > 0 && !empty($orders)) {
+        // Check if is_admin column exists
+        $column_check = $conn->query("SHOW COLUMNS FROM order_cancellations LIKE 'is_admin'");
+        $has_is_admin = $column_check && $column_check->num_rows > 0;
+        
+        $order_ids = implode(',', array_keys($orders));
+        
+        if ($has_is_admin) {
+            $cancel_sql = "SELECT order_id, reason, is_admin, created_at 
+                          FROM order_cancellations 
+                          WHERE order_id IN ($order_ids)";
+        } else {
+            $cancel_sql = "SELECT order_id, reason, created_at 
+                          FROM order_cancellations 
+                          WHERE order_id IN ($order_ids)";
+        }
+        
+        $cancel_result = $conn->query($cancel_sql);
+        
+        if ($cancel_result && $cancel_result->num_rows > 0) {
+            while ($cancel = $cancel_result->fetch_assoc()) {
+                $order_id = $cancel['order_id'];
+                if (isset($orders[$order_id])) {
+                    $orders[$order_id]['cancellation_reason'] = $cancel['reason'];
+                    $orders[$order_id]['cancelled_by'] = $has_is_admin && isset($cancel['is_admin']) && $cancel['is_admin'] ? 'Admin' : 'User';
+                    $orders[$order_id]['cancelled_at'] = $cancel['created_at'];
+                }
+            }
+        }
+    }
+
+    if (!empty($orders)) {
+        $sql_items = "SELECT 
+            oi.order_id,
+            oi.quantity,
+            oi.price,
+            oi.variation,
+            p.item_name,
+            p.item_image
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id IN (" . implode(',', array_keys($orders)) . ")";
+        
+        $items_result = $conn->query($sql_items);
+        
+        if ($items_result && $items_result->num_rows > 0) {
+            while ($item = $items_result->fetch_assoc()) {
+                $image_path = !empty($item['item_image']) ? '/public/' . ltrim($item['item_image'], '/') : '';
+                $orders[$item['order_id']]['items'][] = [
+                    'item_name' => $item['item_name'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'variation' => $item['variation'],
+                    'image' => $image_path
+                ];
+            }
         }
     }
 } else {
     if ($conn->error) {
-        error_log("Query failed: " . $conn->error, 3, __DIR__ . '/error.log');
+        error_log("Error fetching orders: " . $conn->error, 3, __DIR__ . '/error.log');
     }
 }
 
@@ -105,6 +133,7 @@ $conn->close();
   <title>Admin Orders - Captain's Brew Cafe</title>
   <link rel="icon" href="/public/images/LOGO.png" sizes="any" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     * {
@@ -372,6 +401,43 @@ $conn->close();
     .modal-content .reject-btn:hover {
       background: #3a2b1b;
     }
+    
+    .reason-tag {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 3px 8px;
+      background: #2C6E8A;
+      color: white;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .reason-tag:hover {
+      background: #235A73;
+    }
+    
+    .reason-tag i {
+      margin-right: 3px;
+    }
+    
+    .cancellation-details {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      border-left: 4px solid #2C6E8A;
+    }
+    
+    .cancellation-details p {
+      margin: 5px 0;
+    }
+    
+    .cancellation-details .reason-label {
+      font-weight: bold;
+      color: #2C6E8A;
+    }
   </style>
 </head>
 <body>
@@ -399,18 +465,25 @@ $conn->close();
             <tr id="order-<?= htmlspecialchars($order['id']) ?>">
               <td><?= htmlspecialchars($order['id']) ?></td>
               <td class="order-item">
-                <?php if ($order['image']): ?>
-                  <img src="<?= htmlspecialchars($order['image']) ?>" class="item-img" width="100"
+                <?php if ($order['items'] && !empty($order['items'][0]['image'])): ?>
+                  <img src="<?= htmlspecialchars($order['items'][0]['image']) ?>" class="item-img" width="100"
                        onerror="this.src='/public/images/placeholder.jpg';"
-                       onclick="openModal('<?= htmlspecialchars($order['name'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['desc'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['image'] ?? '') ?>')">
+                       onclick="openModal('<?= htmlspecialchars($order['items'][0]['item_name'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['items'][0]['variation'] ?? 'N/A') ?>', '<?= htmlspecialchars($order['items'][0]['image'] ?? '') ?>')">
                 <?php else: ?>
                   <img src="/public/images/placeholder.jpg" class="item-img" width="100">
                 <?php endif; ?>
-                <?= htmlspecialchars($order['name'] ?? 'N/A') ?>
+                <?= htmlspecialchars($order['items'][0]['item_name'] ?? 'N/A') ?>
               </td>
               <td><?= htmlspecialchars($order['date']) ?></td>
               <td><?= htmlspecialchars(date("g:i A", strtotime($order['time']))) ?></td>
-              <td><?= htmlspecialchars($order['status']) ?></td>
+              <td>
+                <?= htmlspecialchars($order['status']) ?>
+                <?php if (($order['status'] === 'Rejected' || $order['status'] === 'Cancelled') && !empty($order['cancellation_reason'])): ?>
+                  <div class="reason-tag" onclick="showCancellationDetails(<?= json_encode($order) ?>)">
+                    <i class="fas fa-info-circle"></i> View Reason
+                  </div>
+                <?php endif; ?>
+              </td>
               <td>
                 <?php if ($order['status'] === 'Pending'): ?>
                   <button class="review-btn" onclick='openReviewModal(<?= json_encode($order) ?>)'>Review</button>
@@ -461,6 +534,20 @@ $conn->close();
       <label for="rider-select">Select Rider:</label>
       <select id="rider-select"></select>
       <button onclick="assignRider()">Assign</button>
+    </div>
+  </div>
+
+  <div id="cancellationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeCancellationModal()">×</span>
+      <h2>Cancellation Details</h2>
+      <div class="cancellation-details">
+        <p><span class="reason-label">Order ID:</span> <span id="cancel-order-id"></span></p>
+        <p><span class="reason-label">Status:</span> <span id="cancel-status"></span></p>
+        <p><span class="reason-label">Cancelled By:</span> <span id="cancel-by"></span></p>
+        <p><span class="reason-label">Date:</span> <span id="cancel-date"></span></p>
+        <p><span class="reason-label">Reason:</span> <span id="cancel-reason"></span></p>
+      </div>
     </div>
   </div>
 
@@ -534,23 +621,104 @@ $conn->close();
 
     async function rejectOrder(orderId) {
       Swal.fire({
-        title: 'Are you sure?',
-        text: `Do you want to reject order #${orderId}?`,
+        title: 'Reject Order',
+        html: `
+          <div style="text-align: left;">
+            <p>Please provide a reason for rejecting order #${orderId}:</p>
+            <select id="reject-reason" class="swal2-select" style="width: 100%; margin-bottom: 10px;">
+              <option value="">-- Select a reason --</option>
+              <option value="Out of stock">Out of stock</option>
+              <option value="Invalid address">Invalid address</option>
+              <option value="Duplicate order">Duplicate order</option>
+              <option value="Payment issue">Payment issue</option>
+              <option value="Other">Other (specify below)</option>
+            </select>
+            <textarea id="custom-reason" class="swal2-textarea" placeholder="Additional details or custom reason..." style="display: none; width: 100%;"></textarea>
+          </div>
+        `,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, reject it!',
-        cancelButtonText: 'No, cancel'
+        confirmButtonText: 'Reject Order',
+        cancelButtonText: 'Cancel',
+        didOpen: () => {
+          const selectEl = document.getElementById('reject-reason');
+          const textareaEl = document.getElementById('custom-reason');
+          
+          selectEl.addEventListener('change', function() {
+            if (this.value === 'Other') {
+              textareaEl.style.display = 'block';
+            } else {
+              textareaEl.style.display = 'none';
+            }
+          });
+        },
+        preConfirm: () => {
+          const reason = document.getElementById('reject-reason').value;
+          const customReason = document.getElementById('custom-reason').value;
+          
+          if (!reason) {
+            Swal.showValidationMessage('Please select a reason');
+            return false;
+          }
+          
+          if (reason === 'Other' && !customReason) {
+            Swal.showValidationMessage('Please provide details for "Other" reason');
+            return false;
+          }
+          
+          return { reason, customReason };
+        }
       }).then((result) => {
         if (result.isConfirmed) {
-          updateOrderStatus(orderId, 'Rejected', () => {
-            const orderRow = document.getElementById(`order-${orderId}`);
-            if (orderRow) {
-              orderRow.remove();
-              const tbody = document.querySelector('tbody');
-              if (tbody.children.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="no-orders-message">No orders at the moment.</td></tr>';
-              }
+          const { reason, customReason } = result.value;
+          const finalReason = reason === 'Other' ? customReason : reason;
+          
+          // Call the cancel order endpoint
+          fetch('/controllers/handle-cancel-order.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              order_id: orderId,
+              reason: finalReason
+            }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Order Rejected',
+                text: data.message,
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                // Remove the row after rejection
+                const orderRow = document.getElementById(`order-${orderId}`);
+                if (orderRow) {
+                  orderRow.remove();
+                  const tbody = document.querySelector('tbody');
+                  if (tbody.children.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-orders-message">No orders at the moment.</td></tr>';
+                  }
+                }
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Failed to reject order'
+              });
             }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'An unexpected error occurred'
+            });
           });
         }
       });
@@ -558,8 +726,8 @@ $conn->close();
 
     async function rejectOrderFromModal() {
       if (!currentOrderId) return;
-      rejectOrder(currentOrderId);
       closeReviewModal();
+      rejectOrder(currentOrderId);
     }
 
     async function assignRider() {
@@ -596,7 +764,15 @@ $conn->close();
               timer: 2000,
               showConfirmButton: false
             });
-            window.location.reload();
+            // Remove the row after setting status to Out for Delivery
+            const orderRow = document.getElementById(`order-${orderId}`);
+            if (orderRow) {
+              orderRow.remove();
+              const tbody = document.querySelector('tbody');
+              if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-orders-message">No orders at the moment.</td></tr>';
+              }
+            }
           }, null, true);
         }
       });
@@ -616,7 +792,23 @@ $conn->close();
           body: JSON.stringify(payload),
         });
 
-        const result = await response.json();
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Get the raw text first to check for valid JSON
+        const responseText = await response.text();
+        let result;
+        
+        try {
+          // Try to parse the response as JSON
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("JSON Parse Error:", parseError);
+          throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
+        }
+
         if (result.success) {
           Swal.fire({
             icon: 'success',
@@ -633,6 +825,7 @@ $conn->close();
           });
         }
       } catch (error) {
+        console.error("Error in updateOrderStatus:", error);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -657,10 +850,29 @@ $conn->close();
       window.location.href = '/views/admin/Admin-Accounts.php';
     }
 
+    function showCancellationDetails(order) {
+      document.getElementById('cancel-order-id').textContent = order.id;
+      document.getElementById('cancel-status').textContent = order.status;
+      document.getElementById('cancel-by').textContent = order.cancelled_by || 'Unknown';
+      
+      const cancelDate = order.cancelled_at ? new Date(order.cancelled_at) : new Date(order.updated_at);
+      document.getElementById('cancel-date').textContent = cancelDate.toLocaleString();
+      
+      document.getElementById('cancel-reason').textContent = order.cancellation_reason || 'No reason provided';
+      
+      document.getElementById('cancellationModal').style.display = 'block';
+    }
+    
+    function closeCancellationModal() {
+      document.getElementById('cancellationModal').style.display = 'none';
+    }
+
     window.onclick = function(event) {
       const orderModal = document.getElementById('orderModal');
       const reviewModal = document.getElementById('reviewModal');
       const assignRiderModal = document.getElementById('assignRiderModal');
+      const cancellationModal = document.getElementById('cancellationModal');
+      
       if (event.target === orderModal) {
         closeModal();
       }
@@ -669,6 +881,9 @@ $conn->close();
       }
       if (event.target === assignRiderModal) {
         closeAssignRiderModal();
+      }
+      if (event.target === cancellationModal) {
+        closeCancellationModal();
       }
     };
   </script>

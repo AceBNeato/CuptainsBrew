@@ -1,10 +1,18 @@
 <?php
 // Include the database configuration
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/auth_check.php';
+requireAdmin();
 
 // Ensure session is started
 if (!isset($_SESSION)) {
     session_start();
+}
+
+// Verify admin is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['loggedin'])) {
+    header('Location: /views/auth/login.php');
+    exit();
 }
 
 // Fetch categories from the database
@@ -35,7 +43,7 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Admin Dashboard - Captain's Brew Cafe</title>
-    <link rel="icon" href="/public/images/logo.png" sizes="any" />
+    <link rel="icon" href="/public/images/LOGO.png" sizes="any" />
     <!-- SweetAlert2 CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- SweetAlert2 JS CDN -->
@@ -204,88 +212,157 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
         /* Edit Container */
         .edit-container {
             flex: 1;
-            background: #fff;
-            border-radius: 10px;
+            background: #FFFFFF;
+            border-radius: 12px;
             position: sticky;
             top: 110px;
             height: fit-content;
-            box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
+            box-shadow: 0 5px 15px rgba(74, 59, 43, 0.1);
+            overflow: hidden;
         }
 
         .edit-section {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
         }
 
         #view-mode {
-            display: flex;
+            display: none;
             flex-direction: column;
-            gap: 1rem;
+            background: #FFFFFF;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
         #view-image {
             width: 100%;
-            height: 150px;
+            height: 200px;
             object-fit: cover;
-            border-radius: 10px;
+            border-bottom: 2px solid #A9D6E5;
+        }
+
+        .view-content {
+            padding: 1.5rem;
         }
 
         #view-name {
             font-size: 1.5rem;
             color: #2C6E8A;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         #view-price {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: #4a3b2b;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        #view-variations {
+            display: none;
+            margin: 10px 0;
+        }
+
+        #view-variations h4 {
+            color: #2C6E8A;
+            margin-bottom: 5px;
+        }
+
+        .variation-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .variation-badge {
+            background: #ffcccb;
+            color: #e74c3c;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
         }
 
         #view-description {
-            font-size: 0.9rem;
-            color: #4a3b2b;
+            font-size: 0.875rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
         }
 
-        #view-mode button {
-            background: #2C6E8A;
-            color: #fff;
+        .view-buttons {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 0.75rem;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #view-mode button:hover {
-            background: rgb(2, 31, 45);
-        }
-
-        #view-mode button:first-of-type {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .view-btn-edit {
+            background: #2C6E8A;
+            color: #FFFFFF;
+        }
+
+        .view-btn-edit:hover {
+            background: #235A73;
+        }
+
+        .view-btn-delete {
+            background: #EF4444;
+            color: #FFFFFF;
+        }
+
+        .view-btn-delete:hover {
+            background: #DC2626;
         }
 
         .add-button {
             background: #2C6E8A;
-            color: #fff;
+            color: #FFFFFF;
             border: none;
-            padding: 0.75rem;
-            margin: 2rem 2rem 0rem;
-            border-radius: 5px;
+            padding: 0.875rem;
+            margin: 1.5rem;
+            border-radius: 8px;
             font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .add-button:hover {
             background: #235A73;
+            transform: translateY(-2px);
+        }
+
+        .add-button i {
+            font-size: 1.25rem;
+        }
+
+        #no-item-selected {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: #666;
+        }
+
+        #no-item-selected p {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
         }
 
         /* Overlay and Form */
@@ -373,86 +450,259 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
         }
 
         #edit-image-preview {
-            width: 150px;
             height: auto;
             border-radius: 10px;
             margin: 0 auto 1rem;
             display: block;
         }
 
-        /* Modal */
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 9999;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(44, 110, 138, 0.7);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        /* Add Item Modal Specific */
+        #addItemModal {
+            z-index: 9998;
+        }
+
+        #addItemModal .modal-content {
+            background: #FFFFFF;
+            border: 2px solid #A9D6E5;
+        }
+
+        #addItemModal .modal-form {
+            gap: 1rem;
+        }
+
+        /* Edit Item Modal Specific */
+        #editItemModal {
+            z-index: 9999;
+        }
+
+        #editItemModal .modal-content {
+            background: #FFFFFF;
+            border: 2px solid #2C6E8A;
+        }
+
+        #editItemModal .modal-form {
+            gap: 0.75rem;
         }
 
         .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 2rem;
-            border-radius: 10px;
-            width: 450px;
-            box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
+            background: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             position: relative;
+            margin: auto;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #2C6E8A;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #A9D6E5;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.25rem;
             color: #4a3b2b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid #A9D6E5;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: #FFFFFF;
+            color: #4a3b2b;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #2C6E8A;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 110, 138, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            max-height: 120px;
+            resize: vertical;
+        }
+
+        .image-preview-container {
+            width: 100%;
+            height: 120px;
+            border-radius: 6px;
+            border: 2px dashed #A9D6E5;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #FFFFFF;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview-placeholder {
+            text-align: center;
+            color: #2C6E8A;
+            font-size: 0.875rem;
+            padding: 1rem;
+        }
+
+        .image-preview-placeholder i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #A9D6E5;
+            display: block;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 0.625rem 1rem;
+            background: #A9D6E5;
+            color: #2C6E8A;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .file-input-label:hover {
+            background: #2C6E8A;
+            color: #FFFFFF;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.625rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: #2C6E8A;
+            color: #FFFFFF;
+        }
+
+        .modal-btn-primary:hover {
+            background: #235A73;
+        }
+
+        .modal-btn-secondary {
+            background: #A9D6E5;
+            color: #2C6E8A;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #8CC5D8;
+        }
+
+        .modal-btn-danger {
+            background: #EF4444;
+            color: #FFFFFF;
+        }
+
+        .modal-btn-danger:hover {
+            background: #DC2626;
         }
 
         .close-btn {
             position: absolute;
-            top: 10px;
-            right: 20px;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #A9D6E5;
             color: #2C6E8A;
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
             cursor: pointer;
-            transition: color 0.3s;
+            border: none;
+            transition: all 0.3s ease;
+            padding: 0;
+            line-height: 1;
         }
 
         .close-btn:hover {
-            color: rgb(1, 24, 35);
-        }
-
-        .modal-content h2 {
-            font-size: 1.5rem;
-            color: #2C6E8A;
-            margin-bottom: 1rem;
-        }
-
-        .modal-content label {
-            display: block;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            color: #4a3b2b;
-        }
-
-        .modal-content input,
-        .modal-content textarea,
-        .modal-content select {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.3rem;
-            border-color: #A9D6E5;
-            border-radius: 5px;
-            background: white;
-            color: #4a3b2b;
-            font-size: 0.9rem;
-        }
-
-        .modal-content textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .footer-bottom {
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-            padding: 10px;
+            background: #2C6E8A;
+            color: #FFFFFF;
+            transform: rotate(90deg);
         }
 
         /* Mobile Responsiveness */
@@ -508,39 +758,56 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
             }
 
             .modal-content {
-                width: 90%;
-                margin: 15% auto;
-                padding: 3vw;
+                margin: 5% auto;
+                padding: 1rem;
+                width: 95%;
             }
 
-            /* Adjust font sizes for mobile */
-            .menu-title {
-                font-size: 3.5vw;
+            .modal-content h2 {
+                font-size: 1.3rem;
             }
 
-            .menu-price {
-                font-size: 3vw;
+            .form-group label {
+                font-size: 0.85rem;
             }
 
-            .menu-desc {
-                font-size: 2.5vw;
+            .form-group input,
+            .form-group textarea,
+            .form-group select,
+            .modal-btn {
+                font-size: 0.85rem;
             }
 
-            #view-name {
-                font-size: 4vw;
+            .image-preview-container {
+                height: 120px;
             }
+        }
 
-            #view-price {
-                font-size: 3.5vw;
-            }
+        .variation-group {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
 
-            #view-description {
-                font-size: 3vw;
-            }
+        .variation-price {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: #f0f8ff;
+        }
 
-            .add-button {
-                font-size: 3vw;
-            }
+        .variations-container {
+            border: 1px solid #A9D6E5;
+            border-radius: 6px;
+            padding: 0.75rem;
+            background: #f8f9fa;
+        }
+
+        #variation-prices, #add-variation-prices {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed #A9D6E5;
         }
     </style>
 </head>
@@ -589,14 +856,32 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
                 
                 <div id="edit-form-container" style="display: none;">
                     <div id="view-mode">
-                        <button onclick="closeModal()" class="close-btn">X</button>
+                        <button onclick="closeModal()" class="close-btn">×</button>
                         <img id="view-image" src="" alt="Item Image">
-                        <input type="hidden" name="existing_image" id="edit-existing-image">
+                        <div class="view-content">
                         <h3 id="view-name"></h3>
                         <p id="view-price"></p>
+                        <div id="view-variations" style="display: none; margin: 10px 0;">
+                            <h4 style="color: #2C6E8A; margin-bottom: 5px;">Variations:</h4>
+                            <div class="variation-badges" style="display: flex; gap: 10px;">
+                                <span id="hot-badge" class="variation-badge" style="background: #ffcccb; color: #e74c3c; padding: 5px 10px; border-radius: 5px; font-size: 0.9rem;">
+                                    Hot: ₱<span id="hot-price-display"></span>
+                                </span>
+                                <span id="iced-badge" class="variation-badge" style="background: #cce5ff; color: #0056b3; padding: 5px 10px; border-radius: 5px; font-size: 0.9rem;">
+                                    Iced: ₱<span id="iced-price-display"></span>
+                                </span>
+                            </div>
+                        </div>
                         <p id="view-description"></p>
-                        <button onclick="enableEditMode()">Edit</button>
-                        <button onclick="deleteItem()">Delete</button>
+                        </div>
+                        <div class="view-buttons">
+                            <button onclick="enableEditMode()" class="view-btn view-btn-edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteItem()" class="view-btn view-btn-delete">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -605,48 +890,142 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
 
     <div id="overlay"></div>
 
-    <div class="form-container">
-        <form class="edit-form" action="/controllers/update-item.php" method="POST" id="edit-item-form" enctype="multipart/form-data">
+    <div id="editItemModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="cancelEditMode()">×</button>
+            <h2>Edit Item</h2>
+            <form class="modal-form" id="edit-item-form" action="/controllers/update-item.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
             <input type="hidden" name="id" id="edit-id">
-            <img id="edit-image-preview" src="" alt="Current Image">
-            <label>Change Image:</label>
-            <input type="file" name="item_image" accept="image/*">
-            <label>Name:</label>
-            <input type="text" name="item_name" id="edit-name">
-            <label>Price:</label>
-            <input type="number" name="item_price" id="edit-price" step="0.01" required />
-            <label>Description:</label>
-            <textarea name="item_description" id="edit-description"></textarea>
+                
+                <div class="image-preview-container">
+                    <img id="edit-image-preview" class="image-preview" src="" alt="Current Image">
+                </div>
+
+                <div class="file-input-container">
+                    <label class="file-input-label" for="edit-item-image">
+                        <i class="fas fa-upload"></i> Change Image
+                    </label>
+                    <input type="file" id="edit-item-image" name="item_image" class="file-input" accept="image/*" onchange="previewEditImage(this)">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-name">Item Name</label>
+                    <input type="text" name="item_name" id="edit-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-price">Base Price (₱)</label>
+                    <input type="number" name="item_price" id="edit-price" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                   
+                    <div class="variations-container">
+                        <div class="variation-group" style="display: flex; align-items: center;">
+                            
+                        <label for="has-variations">Enable Hot/Iced variations</label>
+                        <input type="checkbox"  id="has-variations" name="has_variations">
+                        
+                        </div>
+                        <div id="variation-prices" style="display: none;">
+                            <div class="variation-price">
+                                <label for="hot-price">Hot Price (₱)</label>
+                                <input type="number" name="hot_price" id="hot-price" step="0.01" min="0">
+                            </div>
+                            <div class="variation-price">
+                                <label for="iced-price">Iced Price (₱)</label>
+                                <input type="number" name="iced_price" id="iced-price" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-description">Description</label>
+                    <textarea name="item_description" id="edit-description" required></textarea>
+                </div>
+
             <input type="hidden" name="category_id" id="edit-category" value="">
-            <button type="submit">Update Item</button>
-            <button type="button" onclick="cancelEditMode()">Cancel</button>
+
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="cancelEditMode()">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Update Item</button>
+                    
+                </div>
         </form>
+        </div>
     </div>
 
     <div id="addItemModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeAddItemModal()">×</span>
+            <button class="close-btn" onclick="closeAddItemModal()">×</button>
             <h2>Add New Item</h2>
-            <form action="/controllers/add-item.php" method="POST" enctype="multipart/form-data" id="add-item-form">
-                <label for="item-name">Item Name</label>
-                <input type="text" id="item-name" name="item_name" required />
+            <form id="add-item-form" class="modal-form" method="POST" action="/controllers/add-item.php" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+                
+                <div class="image-preview-container">
+                    <img id="add-image-preview" class="image-preview" src="" style="display: none;">
+                    <div id="add-image-placeholder" class="image-preview-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>Click below to choose an image</p>
+                    </div>
+                </div>
 
-                <label for="item-price">Price</label>
-                <input type="number" id="item-price" name="item_price" step="0.01" required />
+                <div class="file-input-container">
+                    <label class="file-input-label" for="add-item-image">
+                        <i class="fas fa-upload"></i> Choose Image
+                    </label>
+                    <input type="file" id="add-item-image" name="item_image" class="file-input" accept="image/*" required onchange="previewAddImage(this)">
+                </div>
+
+                <div class="form-group">
+                    <label for="add-name">Item Name</label>
+                    <input type="text" id="add-name" name="item_name" required placeholder="Enter item name">
+                </div>
+
+                <div class="form-group">
+                    <label for="add-price">Price (₱)</label>
+                    <input type="number" id="add-price" name="item_price" step="0.01" min="0" required placeholder="0.00">
+                </div>
                 
-                <label for="item-description">Description</label>
-                <textarea id="item-description" name="item_description" required></textarea>
+                <div class="form-group">
+                    <div class="variations-container">
+                        <div class="variation-group" style="display: flex; align-items: center;">
+                            <label for="add-has-variations">Enable Hot/Iced variations</label>
+                            <input type="checkbox" id="add-has-variations" name="has_variations">
+                        </div>
+                        <div id="add-variation-prices" style="display: none;">
+                            <div class="variation-price">
+                                <label for="add-hot-price">Hot Price (₱)</label>
+                                <input type="number" name="hot_price" id="add-hot-price" step="0.01" min="">
+                            </div>
+                            <div class="variation-price">
+                                <label for="add-iced-price">Iced Price (₱)</label>
+                                <input type="number" name="iced_price" id="add-iced-price" step="0.01" min="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-                <label for="item-category">Category</label>
-                <select id="item-category" name="category_id" required>
+                <div class="form-group">
+                    <label for="add-description">Description</label>
+                    <textarea id="add-description" name="item_description" required placeholder="Enter item description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="add-category">Category</label>
+                    <select id="add-category" name="category_id" required>
                     <?php foreach ($drinks as $id => $name): ?>
                         <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                     <?php endforeach; ?>
                 </select>
-                
-                <label for="item-image">Image</label>
-                <input type="file" id="item-image" name="item_image" accept="image/*" required />
-                <button class="add-button" type="submit">Add Item</button>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeAddItemModal()">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Add Item</button>
+                </div>
             </form>
         </div>
     </div>
@@ -697,6 +1076,75 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
                     text: errorMessage,
                     confirmButtonColor: '#2C6E8A',
                     confirmButtonText: 'OK'
+                });
+            }
+        });
+
+        // Image preview for new items
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('imagePlaceholder');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Image preview for edit form
+        function previewEditImage(input) {
+            const preview = document.getElementById('edit-image-preview');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Delete item confirmation
+        function deleteItem() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#4A3B2B',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const itemId = document.getElementById('edit-id').value;
+                    window.location.href = `/controllers/delete-item.php?id=${itemId}`;
+                }
+            });
+        }
+
+        // Handle variations checkbox for add item form
+        document.addEventListener('DOMContentLoaded', function() {
+            const addHasVariations = document.getElementById('add-has-variations');
+            if (addHasVariations) {
+                addHasVariations.addEventListener('change', function(e) {
+                    const variationPrices = document.getElementById('add-variation-prices');
+                    variationPrices.style.display = e.target.checked ? 'block' : 'none';
+                    
+                    // Set required attribute based on checkbox state
+                    const hotPrice = document.getElementById('add-hot-price');
+                    const icedPrice = document.getElementById('add-iced-price');
+                    hotPrice.required = e.target.checked;
+                    icedPrice.required = e.target.checked;
                 });
             }
         });

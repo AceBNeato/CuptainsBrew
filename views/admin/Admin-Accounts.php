@@ -1,10 +1,18 @@
 <?php
 // Include the database configuration
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/auth_check.php';
+requireAdmin();
 
 // Ensure session is started
 if (!isset($_SESSION)) {
     session_start();
+}
+
+// Verify admin is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['loggedin'])) {
+    header('Location: /views/auth/login.php');
+    exit();
 }
 
 // Initialize arrays and variables
@@ -16,92 +24,175 @@ $success_message = '';
 // Handle form submissions for add/edit/delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        if (isset($_POST['action']) && $_POST['action'] === 'add_rider') {
-            $name = trim($_POST['name'] ?? '');
-            $contact = trim($_POST['contact'] ?? '');
-            
-            if (empty($name) || empty($contact)) {
-                $error_message = 'Name and contact are required.';
-            } elseif (!preg_match('/^[0-9]{10,15}$/', $contact)) {
-                $error_message = 'Contact must be a valid phone number (10-15 digits).';
-            } else {
-                $stmt = $conn->prepare("INSERT INTO riders (name, contact) VALUES (?, ?)");
-                $stmt->bind_param("ss", $name, $contact);
-                if ($stmt->execute()) {
-                    $success_message = 'Rider added successfully.';
-                } else {
-                    $error_message = 'Failed to add rider.';
-                }
-                $stmt->close();
+        // Validate CSRF token
+        if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+            throw new Exception('Invalid security token. Please refresh the page and try again.');
+        }
+
+        if (isset($_POST['action'])) {
+            switch ($_POST['action']) {
+                case 'add_rider':
+                    handleAddRider($conn);
+                    break;
+                case 'edit_rider':
+                    handleEditRider($conn);
+                    break;
+                case 'delete_rider':
+                    handleDeleteRider($conn);
+                    break;
+                default:
+                    throw new Exception('Invalid action specified.');
             }
-        } elseif (isset($_POST['action']) && $_POST['action'] === 'edit_rider') {
-            $id = intval($_POST['id'] ?? 0);
-            $name = trim($_POST['name'] ?? '');
-            $contact = trim($_POST['contact'] ?? '');
-            
-            if (empty($name) || empty($contact)) {
-                $error_message = 'Name and contact are required.';
-            } elseif (!preg_match('/^[0-9]{10,15}$/', $contact)) {
-                $error_message = 'Contact must be a valid phone number (10-15 digits).';
-            } else {
-                $stmt = $conn->prepare("UPDATE riders SET name = ?, contact = ? WHERE id = ?");
-                $stmt->bind_param("ssi", $name, $contact, $id);
-                if ($stmt->execute()) {
-                    $success_message = 'Rider updated successfully.';
-                } else {
-                    $error_message = 'Failed to update rider.';
-                }
-                $stmt->close();
-            }
-        } elseif (isset($_POST['action']) && $_POST['action'] === 'delete_rider') {
-            $id = intval($_POST['id'] ?? 0);
-            $stmt = $conn->prepare("DELETE FROM riders WHERE id = ?");
-            $stmt->bind_param("i", $id);
-            if ($stmt->execute()) {
-                $success_message = 'Rider deleted successfully.';
-            } else {
-                $error_message = 'Failed to delete rider.';
-            }
-            $stmt->close();
         }
     } catch (Exception $e) {
         error_log("Error processing rider action: " . $e->getMessage(), 3, __DIR__ . '/error.log');
-        $error_message = 'An error occurred. Please try again later.';
+        $error_message = $e->getMessage();
     }
 }
 
-// Fetch users
+// Function to handle adding a rider
+function handleAddRider($conn) {
+    global $success_message, $error_message;
+    
+            $name = trim($_POST['name'] ?? '');
+            $contact = trim($_POST['contact'] ?? '');
+            
+    validateRiderData($name, $contact);
+    
+                $stmt = $conn->prepare("INSERT INTO riders (name, contact) VALUES (?, ?)");
+                $stmt->bind_param("ss", $name, $contact);
+    
+                if ($stmt->execute()) {
+        $success_message = "Rider '$name' added successfully.";
+                } else {
+        throw new Exception("Failed to add rider: " . $stmt->error);
+                }
+    
+                $stmt->close();
+            }
+
+// Function to handle editing a rider
+function handleEditRider($conn) {
+    global $success_message, $error_message;
+    
+            $id = intval($_POST['id'] ?? 0);
+            $name = trim($_POST['name'] ?? '');
+            $contact = trim($_POST['contact'] ?? '');
+            
+    if ($id <= 0) {
+        throw new Exception('Invalid rider ID.');
+    }
+    
+    validateRiderData($name, $contact);
+    
+                $stmt = $conn->prepare("UPDATE riders SET name = ?, contact = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $name, $contact, $id);
+    
+                if ($stmt->execute()) {
+        $success_message = "Rider '$name' updated successfully.";
+                } else {
+        throw new Exception("Failed to update rider: " . $stmt->error);
+                }
+    
+                $stmt->close();
+            }
+
+// Function to handle deleting a rider
+function handleDeleteRider($conn) {
+    global $success_message, $error_message;
+    
+            $id = intval($_POST['id'] ?? 0);
+    
+    if ($id <= 0) {
+        throw new Exception('Invalid rider ID.');
+    }
+    
+    // Check if rider has any active orders
+    $active_orders = 0; // Initialize the variable
+    $check_stmt = $conn->prepare("SELECT COUNT(*) FROM orders WHERE rider_id = ? AND status IN ('Assigned', 'Out for Delivery')");
+    $check_stmt->bind_param("i", $id);
+    $check_stmt->execute();
+    $check_stmt->bind_result($active_orders);
+    $check_stmt->fetch();
+    $check_stmt->close();
+    
+    if ($active_orders > 0) {
+        throw new Exception('Cannot delete rider with active orders.');
+    }
+    
+            $stmt = $conn->prepare("DELETE FROM riders WHERE id = ?");
+            $stmt->bind_param("i", $id);
+    
+            if ($stmt->execute()) {
+        $success_message = "Rider deleted successfully.";
+            } else {
+        throw new Exception("Failed to delete rider: " . $stmt->error);
+            }
+    
+            $stmt->close();
+        }
+
+// Function to validate rider data
+function validateRiderData($name, $contact) {
+    if (empty($name)) {
+        throw new Exception('Rider name is required.');
+    }
+    
+    if (strlen($name) < 2 || strlen($name) > 50) {
+        throw new Exception('Rider name must be between 2 and 50 characters.');
+    }
+    
+    if (empty($contact)) {
+        throw new Exception('Contact number is required.');
+    }
+    
+    if (!preg_match('/^[0-9]{10,15}$/', $contact)) {
+        throw new Exception('Contact must be a valid phone number (10-15 digits).');
+    }
+}
+
+// Fetch users with proper error handling
 try {
-    $sql_users = "SELECT id, username, email, is_verified, created_at 
-                  FROM users 
-                  ORDER BY created_at DESC";
+    $sql_users = "SELECT u.id, u.username, u.email, u.is_verified, u.created_at, r.name as role 
+                  FROM users u
+                  JOIN roles r ON u.role_id = r.id
+                  ORDER BY r.name = 'admin' DESC, u.created_at DESC";
     $result_users = $conn->query($sql_users);
     
-    if ($result_users && $result_users->num_rows > 0) {
+    if ($result_users === false) {
+        throw new Exception("Error fetching users: " . $conn->error);
+    }
+    
+    if ($result_users->num_rows > 0) {
         while ($row = $result_users->fetch_assoc()) {
             $users[] = [
                 'id' => $row['id'],
                 'username' => $row['username'],
                 'email' => $row['email'],
+                'role' => $row['role'],
                 'is_verified' => $row['is_verified'] ? 'Yes' : 'No',
-                'created_at' => $row['created_at']
+                'created_at' => date('M d, Y h:i A', strtotime($row['created_at']))
             ];
         }
     }
 
-    // Fetch riders
+    // Fetch riders with proper error handling
     $sql_riders = "SELECT id, name, contact, created_at 
                    FROM riders 
                    ORDER BY created_at DESC";
     $result_riders = $conn->query($sql_riders);
     
-    if ($result_riders && $result_riders->num_rows > 0) {
+    if ($result_riders === false) {
+        throw new Exception("Error fetching riders: " . $conn->error);
+    }
+    
+    if ($result_riders->num_rows > 0) {
         while ($row = $result_riders->fetch_assoc()) {
             $riders[] = [
                 'id' => $row['id'],
                 'name' => $row['name'],
                 'contact' => $row['contact'],
-                'created_at' => $row['created_at']
+                'created_at' => date('M d, Y h:i A', strtotime($row['created_at']))
             ];
         }
     }
@@ -120,11 +211,38 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Admin Accounts - Captain's Brew Cafe</title>
-    <link rel="icon" href="/images/LOGO.png" sizes="any" />
+    <link rel="icon" href="/public/images/LOGO.png" sizes="any" />
     <!-- Add SweetAlert2 CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- Add SweetAlert2 JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <?php if ($success_message): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: <?php echo json_encode($success_message); ?>,
+                confirmButtonColor: '#2C6E8A'
+            });
+        });
+    </script>
+    <?php endif; ?>
+
+    <?php if ($error_message): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: <?php echo json_encode($error_message); ?>,
+                confirmButtonColor: '#2C6E8A'
+            });
+        });
+    </script>
+    <?php endif; ?>
+
     <style>
         * {
             margin: 0;
@@ -185,19 +303,20 @@ $conn->close();
         /* Accounts Container */
         .accounts-container {
             padding: 2rem;
-            display: flex;
         }
 
         .account-filter {
-            background: #D7B9A9;
+            display: flex;
+            background: transparent;
             padding: 1rem;
             border-radius: 10px;
-            margin-right: 2rem;
             min-width: 200px;
         }
 
         .filter-item {
-            padding: 0.5rem;
+            padding: 1rem;
+            margin-right: 1rem;
+            border-radius: 10px;
             cursor: pointer;
             color: #4a3b2b;
             font-size: 1rem;
@@ -369,6 +488,27 @@ $conn->close();
         .modal-content .cancel-btn:hover {
             background-color: #5a6268;
         }
+
+        /* Admin row highlighting */
+        .admin-row {
+            background-color: rgba(44, 110, 138, 0.1);
+            font-weight: 500;
+        }
+        
+        .admin-role {
+            background-color: #2C6E8A;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .user-role {
+            background-color: #A9D6E5;
+            color: #2C6E8A;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -377,7 +517,7 @@ $conn->close();
     <div class="accounts-container">
         <div class="account-filter">
             <div class="filter-item active" onclick="showAccounts('users')">Users</div>
-            <div class="filter-item" onclick="showAccounts('riders')">Riders</div>
+            <a href="/views/admin/Admin-Riders.php" class="filter-item" style="text-decoration: none;">Riders</a>
         </div>
         <div class="account-table">
             <h2 class="account-title">Account Management</h2>
@@ -399,59 +539,20 @@ $conn->close();
                                     <th>User ID</th>
                                     <th>Username</th>
                                     <th>Email</th>
+                                    <th>Role</th>
                                     <th>Verified</th>
                                     <th>Created At</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($users as $user): ?>
-                                    <tr class="account-row" data-type="users" data-id="<?= htmlspecialchars($user['id']) ?>">
+                                    <tr class="account-row <?= $user['role'] === 'admin' ? 'admin-row' : '' ?>" data-type="users" data-id="<?= htmlspecialchars($user['id']) ?>">
                                         <td><?= htmlspecialchars($user['id']) ?></td>
                                         <td><?= htmlspecialchars($user['username']) ?></td>
                                         <td><?= htmlspecialchars($user['email']) ?></td>
+                                        <td><span class="<?= $user['role'] === 'admin' ? 'admin-role' : 'user-role' ?>"><?= htmlspecialchars($user['role']) ?></span></td>
                                         <td><?= htmlspecialchars($user['is_verified']) ?></td>
                                         <td><?= htmlspecialchars($user['created_at']) ?></td>
-                                        <td>
-                                            <button class="action-btn delete-btn" 
-                                                    onclick="deleteAccount('users', <?= $user['id'] ?>)">Delete</button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Riders Table -->
-                <div id="riders-table" class="account-section" style="display: none;">
-                    <button class="add-btn" onclick="openAddRiderModal()">Add Rider</button>
-                    <?php if (empty($riders)): ?>
-                        <p class="no-accounts-message">No rider accounts available.</p>
-                    <?php else: ?>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Rider ID</th>
-                                    <th>Name</th>
-                                    <th>Contact</th>
-                                    <th>Created At</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($riders as $rider): ?>
-                                    <tr class="account-row" data-type="riders" data-id="<?= htmlspecialchars($rider['id']) ?>">
-                                        <td><?= htmlspecialchars($rider['id']) ?></td>
-                                        <td><?= htmlspecialchars($rider['name']) ?></td>
-                                        <td><?= htmlspecialchars($rider['contact']) ?></td>
-                                        <td><?= htmlspecialchars($rider['created_at']) ?></td>
-                                        <td>
-                                            <button class="action-btn edit-btn" 
-                                                    onclick="openEditRiderModal(<?= $rider['id'] ?>, '<?= htmlspecialchars($rider['name']) ?>', '<?= htmlspecialchars($rider['contact']) ?>')">Edit</button>
-                                            <button class="action-btn delete-btn" 
-                                                    onclick="deleteAccount('riders', <?= $rider['id'] ?>)">Delete</button>
-                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -468,6 +569,7 @@ $conn->close();
             <h2>Add Rider</h2>
             <form id="add-rider-form" method="POST">
                 <input type="hidden" name="action" value="add_rider">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                 <label for="add-name">Name:</label>
                 <input type="text" id="add-name" name="name" required>
                 <label for="add-contact">Contact:</label>
@@ -486,6 +588,7 @@ $conn->close();
             <h2>Edit Rider</h2>
             <form id="edit-rider-form" method="POST">
                 <input type="hidden" name="action" value="edit_rider">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
                 <input type="hidden" id="edit-id" name="id">
                 <label for="edit-name">Name:</label>
                 <input type="text" id="edit-name" name="name" required>
@@ -500,21 +603,7 @@ $conn->close();
     </div>
 
     <script>
-        function gotoMenu() {
-            window.location.href = '/views/admin/admin-menu.php';
-        }
-
-        function gotoOrders() {
-            window.location.href = '/views/admin/admin-orders.php';
-        }
-
-        function gotoReports() {
-            window.location.href = '/views/admin/admin-reports.php';
-        }
-
-        function gotoAccounts() {
-            window.location.href = '/views/admin/admin-accounts.php';
-        }
+        
 
         function showAccounts(type) {
             const usersTable = document.getElementById('users-table');
@@ -552,7 +641,12 @@ $conn->close();
         }
 
         function deleteAccount(type, id) {
-            if (confirm(`Are you sure you want to delete this ${type.slice(0, -1)} account?`)) {
+            if (type !== 'riders') {
+                console.error("Only rider accounts can be deleted");
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete this rider?`)) {
                 const formData = new FormData();
                 formData.append('action', `delete_${type.slice(0, -1)}`);
                 formData.append('id', id);
@@ -568,10 +662,10 @@ $conn->close();
                         if (row) row.remove();
                         showMessage('success', data.message);
                     } else {
-                        showMessage('error', data.message || 'Failed to delete account.');
+                        showMessage('error', data.message || 'Failed to delete rider.');
                     }
                 })
-                .catch(error => showMessage('error', 'Error deleting account: ' + error));
+                .catch(error => showMessage('error', 'Error deleting rider: ' + error));
             }
         }
 
@@ -627,5 +721,6 @@ $conn->close();
     </script>
     
 <script src="/public/js/auth.js"></script>
+
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 ob_start();
 session_start();
+require_once __DIR__ . '/../../config.php';
 
 $db_host = 'localhost';
 $db_user = 'root'; 
@@ -23,34 +24,32 @@ if ($conn->connect_error) {
 if (empty($_SESSION['user_id']) && !empty($_COOKIE['remember_token'])) {
     $token = $_COOKIE['remember_token'];
     
-    // Get token from database
+    // Get token from database using prepared statement helper
     $sql = "SELECT user_id, token FROM remember_tokens WHERE token = ? AND expires_at > NOW()";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = prepareAndExecute($sql, [$token]);
     
-    if ($result->num_rows == 1) {
-        $tokenData = $result->fetch_assoc();
-        
-        // Get user data
-        $userSql = "SELECT id, username FROM users WHERE id = ?";
-        $userStmt = $conn->prepare($userSql);
-        $userStmt->bind_param("i", $tokenData['user_id']);
-        $userStmt->execute();
-        $userResult = $userStmt->get_result();
-        
-        if ($userResult->num_rows == 1) {
-            $user = $userResult->fetch_assoc();
+    if ($stmt && $result = $stmt->get_result()) {
+        if ($result->num_rows == 1) {
+            $tokenData = $result->fetch_assoc();
             
-            // Log user in
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['loggedin'] = true;
+            // Get user data
+            $userSql = "SELECT id, username FROM users WHERE id = ?";
+            $userStmt = prepareAndExecute($userSql, [$tokenData['user_id']], 'i');
             
-            // Redirect to home page
-            header("Location: /views/users/User-Home.php");
-            exit();
+            if ($userStmt && $userResult = $userStmt->get_result()) {
+                if ($userResult->num_rows == 1) {
+                    $user = $userResult->fetch_assoc();
+                    
+                    // Log user in
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['loggedin'] = true;
+                    
+                    // Redirect to home page
+                    header("Location: /views/users/User-Home.php");
+                    exit();
+                }
+            }
         }
     }
     
@@ -60,92 +59,89 @@ if (empty($_SESSION['user_id']) && !empty($_COOKIE['remember_token'])) {
 
 // Process form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate and sanitize inputs
-    $email = trim($conn->real_escape_string($_POST['email'] ?? ''));
-    $password = trim($_POST['password'] ?? '');
-    $remember = isset($_POST['remember']);
-    
-    // Simple validation
-    if (empty($email)) {
-        $errors[] = "Email is required";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format";
-    }
-    
-    if (empty($password)) {
-        $errors[] = "Password is required";
-    }
-    
-    // If no errors, proceed with login
-    if (empty($errors)) {
-        // Prepare SQL to get user data
-        $sql = "SELECT id, username, password FROM users WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errors[] = "Invalid request";
+    } else {
+        // Validate and sanitize inputs
+        $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
+        $password = $_POST['password'] ?? '';
+        $remember = isset($_POST['remember']);
         
-        if ($result->num_rows == 1) {
-            $user = $result->fetch_assoc();
-            
-            // Verify password
-            if (password_verify($password, $user['password'])) {
-                // Password is correct, start session
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['loggedin'] = true;
-                
-                // Handle remember me
-                if ($remember) {
-                    // Generate random token
-                    $token = bin2hex(random_bytes(64));
-                    $expires = time() + 60 * 60 * 24 * 30; // 30 days
-                    
-                    // Store token in database
-                    $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
-                    $tokenStmt = $conn->prepare($insertToken);
-                    $tokenStmt->bind_param("is", $user['id'], $token);
-                    $tokenStmt->execute();
-                    $tokenStmt->close();
-                    
-                    // Set cookie
-                    setcookie('remember_token', $token, $expires, '/', '', true, true);
-                }
-                
-                // PHP redirect as fallback
-                header("Location: /views/users/User-Home.php");
-                
-                // Show SweetAlert and attempt JavaScript redirect
-                echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Login Successful!',
-                            text: 'Welcome back, {$user['username']}!',
-                            showConfirmButton: false,
-                            timer: 2000,
-                            customClass: {
-                                confirmButton: 'swal2-confirm'
-                            }
-                        }).then(() => {
-                            try {
-                                window.location.href = '/views/users/User-Home.php';
-                            } catch (e) {
-                                console.error('Redirect failed:', e);
-                            }
-                        }).catch(e => {
-                            console.error('SweetAlert2 error:', e);
-                        });
-                    });
-                </script>";
-                exit();
-            } else {
-                $errors[] = "Incorrect password";
-            }
-        } else {
-            $errors[] = "No account found with that email";
+        // Validation
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email format";
         }
-        $stmt->close();
+        
+        if (empty($password)) {
+            $errors[] = "Password is required";
+        }
+        
+        // If no errors, proceed with login
+        if (empty($errors)) {
+            // Use prepared statement helper to get user with role
+            $sql = "SELECT u.id, u.username, u.password, u.is_verified, r.name as role 
+                   FROM users u 
+                   JOIN roles r ON u.role_id = r.id 
+                   WHERE u.email = ?";
+            $stmt = prepareAndExecute($sql, [$email]);
+            
+            if ($stmt && $result = $stmt->get_result()) {
+                if ($result->num_rows == 1) {
+                    $user = $result->fetch_assoc();
+                    
+                    // Verify password
+                    if (password_verify($password, $user['password'])) {
+                        // Check if user is verified
+                        if (!$user['is_verified']) {
+                            $_SESSION['unverified_user_id'] = $user['id'];
+                            header("Location: /views/auth/verify.php");
+                            exit();
+                        }
+
+                        // Password is correct, start session
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['role'] = $user['role'];
+                        $_SESSION['loggedin'] = true;
+                        
+                        // Handle remember me
+                        if ($remember) {
+                            $token = bin2hex(random_bytes(64));
+                            $expires = time() + 60 * 60 * 24 * 30; // 30 days
+                            
+                            // Store token using prepared statement
+                            $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
+                            prepareAndExecute($insertToken, [$user['id'], $token], 'is');
+                            
+                            // Set secure cookie
+                            setcookie('remember_token', $token, [
+                                'expires' => $expires,
+                                'path' => '/',
+                                'secure' => true,
+                                'httponly' => true,
+                                'samesite' => 'Strict'
+                            ]);
+                        }
+                        
+                        // Regenerate session ID for security
+                        session_regenerate_id(true);
+                        
+                        // Redirect based on role
+                        if ($user['role'] === 'admin') {
+                            header("Location: /views/admin/Admin-Menu.php");
+                        } else {
+                            header("Location: /views/users/User-Home.php");
+                        }
+                        exit();
+                    } else {
+                        $errors[] = "Invalid credentials";
+                    }
+                } else {
+                    $errors[] = "Invalid credentials";
+                }
+            }
+        }
     }
 }
 
@@ -208,552 +204,321 @@ if (isset($_GET['forgot'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captain's Brew | Login</title>
-    <!-- SweetAlert2 CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Font Awesome CDN for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="/public/images/LOGO.png" sizes="any">
     <style>
-    :root {
-        --primary: #2C6E8A;
-        --primary-dark: #1B4A5E;
-        --primary-light: #B3E0F2;
-        --secondary: #4A3B2B;
-        --secondary-light: #FFF8E7;
-        --secondary-lighter: #FFE8C2;
-        --white: #FFFFFF;
-        --black: #1A1A1A;
-        --accent: #ffb74a;
-        --dark: #1a1310;
-        --shadow-light: 0 4px 12px rgba(74, 59, 43, 0.15);
-        --shadow-medium: 0 6px 16px rgba(44, 110, 138, 0.2);
-        --shadow-dark: 0 8px 24px rgba(74, 59, 43, 0.3);
-        --border-radius: 12px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Poppins', sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-
-    body {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        overflow-x: hidden;
-    }
-
-    /* Background Image */
-    .image-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 120%;
-        z-index: -1;
-    }
-
-    #getstarted {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(60%); /* Slightly darker for better contrast */
-    }
-
-    /* Overlay for better text readability */
-    .image-container::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.3); /* Subtle dark overlay */
-    }
-
-    /* Header */
-    .header {
-        display: flex;
-        justify-content: center;
-        padding: 1rem 2rem;
-        background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
-        box-shadow: var(--shadow-light);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
-
-    .logo-section img {
-        width: 200px;
-        transition: var(--transition);
-    }
-
-    .logo-section img:hover {
-        transform: scale(1.1);
-    }
-.back-button {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--primary);
-    color: var(--white);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-light);
-    z-index: 1001; /* Above header and background */
-    transition: var(--transition);
-}
-
-.back-button:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
-
-.back-button i {
-    font-size: 1rem;
-}
-
-.image-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 120%;
-    z-index: -1;
-}
-
-#getstarted {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(60%); /* Slightly darker for better contrast */
-}
-
-/* Overlay for better text readability */
-.image-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3); /* Subtle dark overlay */
-}
-
-/* Header */
-.header {
-    display: flex;
-    justify-content: center;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, var(--secondary-light), var(--secondary-lighter));
-    box-shadow: var(--shadow-light);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.logo-section img {
-    width: 200px;
-    transition: var(--transition);
-}
-
-.logo-section img:hover {
-    transform: scale(1.1);
-}
-
-/* Main Content */
-main {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    min-height: calc(100vh - 60px); /* Adjust for header height */
-}
-
-/* Login Container */
-.login-container {
-    width: 100%;
-    max-width: 450px;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
-    backdrop-filter: blur(10px); /* Glassmorphism effect */
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-dark);
-    margin: 2rem 0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.login-container h2 {
-    font-size: 1.8rem;
-    color: var(--primary);
-    margin-bottom: 1.5rem;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-weight: 600;
-}
-
-.edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.edit-form label {
-    font-size: 0.9rem;
-    color: var(--secondary);
-    font-weight: 500;
-}
-
-.input-wrapper {
-    position: relative;
-}
-
-.edit-form input[type="email"],
-.edit-form input[type="password"] {
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--primary-light);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.8);
-    color: var(--secondary);
-    font-size: 0.95rem;
-    width: 100%;
-    transition: var(--transition);
-}
-
-.edit-form input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(44, 110, 138, 0.2);
-    background: var(--white);
-}
-
-.password-toggle {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--secondary);
-    cursor: pointer;
-    font-size: 1rem;
-    opacity: 0.7;
-    transition: var(--transition);
-}
-
-.password-toggle:hover {
-    opacity: 1;
-    color: var(--primary);
-}
-
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0.5rem 0;
-}
-
-.remember-me {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--secondary);
-}
-
-.remember-me input {
-    cursor: pointer;
-    accent-color: var(--primary);
-}
-
-.forgot-password {
-    color: var(--primary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.forgot-password:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-}
-
-.edit-form button {
-    padding: 0.9rem;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: var(--transition);
-    background: var(--primary);
-    color: var(--white);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.edit-form button:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
-
-.create-account {
-    text-align: center;
-    margin-top: 1.5rem;
-}
-
-.create-account p {
-    font-size: 0.9rem;
-    color: var(--secondary);
-}
-
-.create-account a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
-    transition: var(--transition);
-}
-
-.create-account a:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-}
-
-/* SweetAlert Custom Styles */
-.swal2-confirm {
-    background-color: var(--primary) !important;
-    color: var(--white) !important;
-    border-radius: var(--border-radius) !important;
-    padding: 0.5rem 1.5rem !important;
-}
-
-.swal2-confirm:hover {
-    background-color: var(--primary-dark) !important;
-}
-
-.swal2-cancel {
-    margin-right: 10px !important;
-}
-
-.swal2-input {
-    border: 1px solid var(--primary-light) !important;
-    box-shadow: none !important;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .header {
-        padding: 0.75rem 1rem;
-    }
-
-    .logo-section img {
-        width: 150px;
-    }
-
-    main {
-        padding: 1rem;
-    }
-
-    .login-container {
-        padding: 1.5rem;
-        max-width: 90%;
-    }
-
-    .login-container h2 {
-        font-size: 1.5rem;
-    }
-
-    .edit-form input[type="email"],
-    .edit-form input[type="password"] {
-        padding: 0.7rem 1rem;
-        font-size: 0.9rem;
-    }
-
-    .edit-form button {
-        padding: 0.8rem;
-        font-size: 0.95rem;
-    }
-
-    .back-button {
-        top: 0.75rem;
-        left: 0.75rem;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-    }
-
-    .back-button i {
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .logo-section img {
-        width: 120px;
-    }
-
-    .login-container {
-        padding: 1rem;
-        max-width: 95%;
-    }
-
-    .login-container h2 {
-        font-size: 1.3rem;
-    }
-
-    .edit-form input[type="email"],
-    .edit-form input[type="password"] {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.85rem;
-    }
-
-    .edit-form button {
-        padding: 0.7rem;
-        font-size: 0.9rem;
-    }
-
-    .form-options {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .remember-me, .forgot-password {
-        font-size: 0.85rem;
-    }
-
-    .create-account p {
-        font-size: 0.85rem;
-    }
-
-    .back-button {
-        top: 0.5rem;
-        left: 0.5rem;
-        padding: 0.3rem 0.6rem;
-        font-size: 0.8rem;
-    }
-
-    .back-button i {
-        font-size: 0.8rem;
-    }
-}
-</style>
-    <script>
-        // Toggle Password Visibility
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const toggle = document.getElementById('togglePassword');
-            const type = password.type === 'password' ? 'text' : 'password';
-            password.type = type;
-            toggle.classList.toggle('fa-eye');
-            toggle.classList.toggle('fa-eye-slash');
+        :root {
+            --primary: #2C6E8A;
+            --primary-dark: #235A73;
+            --primary-light: #A9D6E5;
+            --secondary: #4A3B2B;
+            --accent: #ffb74a;
+            --white: #fff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --error: #ef4444;
         }
 
-        // Forgot password handler
-        function handleForgotPassword(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            
-            Swal.fire({
-                title: 'Reset Password',
-                html: `Enter your email to receive a reset link:<br><br>
-                       <input id="swal-email" class="swal2-input" placeholder="Email" value="${email}">`,
-                showCancelButton: true,
-                confirmButtonText: 'Send Link',
-                cancelButtonText: 'Cancel',
-                focusConfirm: false,
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                },
-                preConfirm: () => {
-                    const email = document.getElementById('swal-email').value.trim();
-                    if (!email) {
-                        Swal.showValidationMessage('Email is required');
-                    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-                        Swal.showValidationMessage('Enter a valid email');
-                    }
-                    return { email: email };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `login.php?forgot=1&email=${encodeURIComponent(result.value.email)}`;
-                }
-            });
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
 
-        // Client-side validation with SweetAlert
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('.edit-form');
-            form.addEventListener('submit', function(e) {
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 1rem;
+        }
 
-                if (!email) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Email is required!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-                if (!password) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Password is required!',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                    return;
-                }
-            });
+        /* Background Image */
+        .image-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
 
-            // Display server-side errors with SweetAlert
-            <?php if (!empty($errors)): ?>
-                Swal.fire({
-                    icon: 'error',
-                    title: '<?php echo isset($_GET['forgot']) ? "Password Reset Failed" : "Login Failed" ?>',
-                    html: '<?php echo implode("<br>", array_map("htmlspecialchars", $errors)); ?>',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-            <?php endif; ?>
+        #getstarted {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(50%);
+        }
 
-            // Add click handler to forgot password link
-            document.querySelector('.forgot-password').addEventListener('click', function(e) {
-                e.preventDefault();
-                handleForgotPassword(e);
-            });
-        });
-    </script>
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: var(--white);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .back-button i {
+            font-size: 1rem;
+        }
+
+
+        .rider-button{
+            position: fixed;
+            top: .8rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: var(--white);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+
+
+        }
+
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 110, 138, 0.1);
+            background: var(--white);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 1.25rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .remember-me label {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .create-account {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .create-account a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .create-account a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--white);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .login-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .back-button {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .login-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .form-group label {
+                font-size: 0.875rem;
+            }
+
+            .form-group input {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Background Image -->
@@ -764,49 +529,113 @@ main {
     <!-- Back Button -->
     <a href="/views/index.php" class="back-button">
         <i class="fas fa-arrow-left"></i> Back
+        
     </a>
 
-    <!-- Main Content -->
-    <main>
-        <div class="login-container">
-            <h2>LOGIN</h2>
+        
+    <a href="/views/riders/login.php" class="rider-button">Rider Login</a>
 
-            <form class="edit-form" method="POST" action="login.php">
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-wrapper">
-                        <input type="email" name="email" id="email" placeholder="Enter Email" value="<?php echo htmlspecialchars($email); ?>" required>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-wrapper">
-                        <input type="password" name="password" id="password" placeholder="Enter Password" required>
-                        <i class="fas fa-eye password-toggle" id="togglePassword" onclick="togglePassword()"></i>
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <div class="remember-me">
-                        <input type="checkbox" id="remember" name="remember" <?php echo $remember ? 'checked' : ''; ?>>
-                        <label for="remember">Remember me</label>
-                    </div>
-                    <a href="#" class="forgot-password">Forgot password?</a>
-                </div>
-
-                <button type="submit">Login</button>
-
-                <div class="create-account">
-                    <p>Don't have an account? <a href="/views/auth/register.php">Create one</a></p>
-                </div>
-            </form>
+    <div class="login-card">
+        <div class="login-header">
+            <h1>LOGIN</h1>
         </div>
-    </main>
 
-    <?php
-    // Close database connection
-    $conn->close();
-    ob_end_flush();
-    ?>
+        <form id="login-form" method="POST" action="">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value="<?php echo htmlspecialchars($email); ?>" 
+                    placeholder="Enter your email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-field">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input 
+                        type="checkbox" 
+                        id="remember" 
+                        name="remember"
+                        <?php echo $remember ? 'checked' : ''; ?>
+                    >
+                    <label for="remember">Remember me</label>
+                </div>
+                <a href="/views/auth/forgot-password.php" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="login-button">Login</button>
+
+            <div class="create-account">
+                <p>Don't have an account? <a href="/views/auth/register.php">Create one</a></p>
+            </div>
+        </form>
+    </div>
+
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form submission handling
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please fill in all fields',
+                    confirmButtonColor: '#2C6E8A'
+                });
+                return;
+            }
+
+            // Show loading overlay
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        });
+
+        // Display error messages if any
+        <?php if (!empty($errors)): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: '<?php echo htmlspecialchars($errors[0]); ?>',
+            confirmButtonColor: '#2C6E8A'
+        });
+        <?php endif; ?>
+    </script>
 </body>
+</html>

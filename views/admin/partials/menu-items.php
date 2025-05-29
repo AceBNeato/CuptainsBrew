@@ -38,12 +38,38 @@ try {
                 $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
                 $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
                 
+                // Check if item has variations
+                $hasVariations = $row['has_variation'] == 1;
+                $variationsHtml = '';
+                
+                if ($hasVariations) {
+                    // Get variations
+                    $varQuery = "SELECT * FROM product_variations WHERE product_id = {$row['id']}";
+                    $variations = $conn->query($varQuery);
+                    
+                    if ($variations && $variations->num_rows > 0) {
+                        $variationsHtml = '<div class="variation-tags" style="display: flex; gap: 8px; margin-top: 8px;">';
+                        
+                        while ($var = $variations->fetch_assoc()) {
+                            $varType = htmlspecialchars($var['variation_type'], ENT_QUOTES);
+                            $varPrice = number_format($var['price'], 2);
+                            $bgColor = $varType === 'Hot' ? '#ffcccb' : '#cce5ff';
+                            $textColor = $varType === 'Hot' ? '#e74c3c' : '#0056b3';
+                            
+                            $variationsHtml .= "<span style='background: $bgColor; color: $textColor; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;'>$varType: ₱$varPrice</span>";
+                        }
+                        
+                        $variationsHtml .= '</div>';
+                    }
+                }
+                
                 echo "<div class='menu-card' id='menuCard-{$row['id']}'>
-                        <img src='/public/{$row['item_image']}' alt='$name' class='menu-image' style='width: 150px; height:auto; margin: 0px 40px 0px 0px;'>
+                        <img src='/public/{$row['item_image']}' alt='$name' class='menu-image' style='width: 150px; height: 150px; margin: 0px 40px 0px 0px; object-fit: cover; border-radius: 8px;'>
                         <div class='menu-content'>
                             <h2 class='menu-title'>$name</h2>
                             <p class='menu-price'>₱ {$row['item_price']}</p>
                             <p class='menu-desc'>$desc</p>
+                            $variationsHtml
                         </div>
                         <button class='menu-manage' onclick='openManageModal(
                             \"$name\", 

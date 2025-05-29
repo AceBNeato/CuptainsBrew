@@ -2,6 +2,8 @@
 session_start();
 global $conn;
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/auth_check.php';
+requireUser();
 
 // Handle add_to_cart action directly
 if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
@@ -19,6 +21,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
     $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
     $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+    $variation = isset($_POST['variation']) ? $conn->real_escape_string($_POST['variation']) : null;
 
     if ($product_id <= 0 || $quantity <= 0) {
         echo json_encode(['success' => false, 'error' => 'Invalid product ID or quantity']);
@@ -27,12 +30,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
     $user_id = $_SESSION['user_id'];
 
-    $check_query = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+    // Check if this product with the same variation is already in cart
+    $check_query = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND (variation = ? OR (variation IS NULL AND ? IS NULL))");
     if ($check_query === false) {
         echo json_encode(['success' => false, 'error' => 'Database query preparation failed']);
         exit;
     }
-    $check_query->bind_param("ii", $user_id, $product_id);
+    $check_query->bind_param("iiss", $user_id, $product_id, $variation, $variation);
     $check_query->execute();
     $check_result = $check_query->get_result();
 
@@ -42,6 +46,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
     }
 
     if ($check_result->num_rows > 0) {
+        // Update existing cart item
         $row = $check_result->fetch_assoc();
         $new_quantity = $row['quantity'] + $quantity;
         $update_query = $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
@@ -53,12 +58,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
         $success = $update_query->execute();
         $update_query->close();
     } else {
-        $insert_query = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
+        // Insert new cart item with variation
+        $insert_query = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, variation) VALUES (?, ?, ?, ?)");
         if ($insert_query === false) {
             echo json_encode(['success' => false, 'error' => 'Database query preparation failed']);
             exit;
         }
-        $insert_query->bind_param("iii", $user_id, $product_id, $quantity);
+        $insert_query->bind_param("iiis", $user_id, $product_id, $quantity, $variation);
         $success = $insert_query->execute();
         $insert_query->close();
     }
@@ -688,6 +694,72 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
                 padding: 1vw;
             }
         }
+
+        /* Add new styles */
+        .variation-options {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: var(--secondary-light);
+            border-radius: var(--border-radius);
+        }
+
+        .variation-options label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            text-align: center;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .variation-options label:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .variation-options input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .variation-options input[type="radio"] + span {
+            display: block;
+            width: 100%;
+            font-weight: 500;
+            color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .variation-options input[type="radio"]:checked + span {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .variation-options input[type="radio"]:checked + span::before {
+            content: '✓ ';
+        }
+
+        .variation-options label.selected {
+            background: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(44, 110, 138, 0.2);
+        }
+
+        .variation-price {
+            display: block;
+            font-weight: 600;
+            margin-top: 0.25rem;
+            color: var(--primary-dark);
+        }
     </style>
 </head>
 <body>
@@ -714,25 +786,38 @@ $searchTerm = $_GET['search'] ?? '';
 
 try {
     $categoryName = str_replace(' ', ' ', $category);
-    $categoryQuery = $conn->query("SELECT id FROM categories WHERE name = '" . $conn->real_escape_string($categoryName) . "'");
-
-    if (!$categoryQuery) {
+    
+    // Use prepared statement instead of string concatenation
+    $categoryQuery = $conn->prepare("SELECT id FROM categories WHERE name = ?");
+    $categoryQuery->bind_param("s", $categoryName);
+    $categoryQuery->execute();
+    $result = $categoryQuery->get_result();
+    
+    if (!$result) {
         throw new Exception("Category query failed: " . $conn->error);
     }
 
-    $categoryRow = $categoryQuery->fetch_assoc();
+    $categoryRow = $result->fetch_assoc();
+    $categoryQuery->close();
 
     if (!$categoryRow) {
         echo "<div class='no-items'>Category not found.</div>";
     } else {
         $categoryId = $categoryRow['id'];
-        $query = "SELECT * FROM products WHERE category_id = $categoryId";
+        $query = "SELECT p.*, 
+                        (SELECT COUNT(*) FROM product_variations WHERE product_id = p.id) as variation_count,
+                        MIN(pv.price) as min_variation_price,
+                        MAX(pv.price) as max_variation_price
+                 FROM products p
+                 LEFT JOIN product_variations pv ON p.id = pv.product_id
+                 WHERE p.category_id = $categoryId";
 
         if (!empty($searchTerm)) {
             $searchTerm = $conn->real_escape_string($searchTerm);
-            $query .= " AND item_name LIKE '%$searchTerm%'";
+            $query .= " AND p.item_name LIKE '%$searchTerm%'";
         }
 
+        $query .= " GROUP BY p.id";
         $products = $conn->query($query);
 
         if (!$products) {
@@ -747,14 +832,31 @@ try {
                 $isLoggedIn = isset($_SESSION['user_id']);
                 $buttonAttributes = $isLoggedIn ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;" title="Please log in to add to cart"';
 
+                // Handle price display based on variations
+                $priceDisplay = "₱ {$row['item_price']}"; // Default price display
+                if ($row['has_variation'] && $row['variation_count'] > 0) {
+                    if ($row['min_variation_price'] == $row['max_variation_price']) {
+                        $priceDisplay = "₱ {$row['min_variation_price']}";
+                    } else {
+                        $priceDisplay = "₱ {$row['min_variation_price']} - ₱ {$row['max_variation_price']}";
+                    }
+                }
+
                 echo "<div class='menu-card' id='menuCard-{$row['id']}'>
                         <img src='/public/{$image}' alt='$name' class='menu-image'>
                         <div class='menu-content'>
                             <h2 class='menu-title'>$name</h2>
-                            <p class='menu-price'>₱ {$row['item_price']}</p>
+                            <p class='menu-price'>{$priceDisplay}</p>
                             <p class='menu-desc'>$desc</p>
                         </div>
-                        <button class='menu-manage' $buttonAttributes>+ </button>
+                        <button class='menu-manage' $buttonAttributes onclick='showProductModal({
+                            id: {$row['id']},
+                            name: \"$name\",
+                            price: {$row['item_price']},
+                            desc: \"$desc\",
+                            image: \"$image\",
+                            hasVariation: " . ($row['has_variation'] ? 'true' : 'false') . "
+                        })'>+</button>
                       </div>";
             }
         } else {
@@ -777,6 +879,18 @@ try {
                 <img id="modalProductImage" src="" alt="Product Image" class='modal-image'>
                 <div class='modal-details'>
                     <h2 id='modalProductName'></h2>
+                    <div id="variation-selector" style="display: none;">
+                        <div class="variation-options">
+                            <label id="hot-option">
+                                <input type="radio" name="variation" value="Hot" checked>
+                                <span>Hot <span class="variation-price">₱<span id="hot-variation-price">0</span></span></span>
+                            </label>
+                            <label id="iced-option">
+                                <input type="radio" name="variation" value="Iced">
+                                <span>Iced <span class="variation-price">₱<span id="iced-variation-price">0</span></span></span>
+                            </label>
+                        </div>
+                    </div>
                     <p id='modalProductPrice' class='price'></p>
                     <p id='modalProductDesc' class='description'></p>
                     <div class='quantity-control'>
@@ -810,13 +924,61 @@ try {
         // Product Modal Functionality
         let currentProduct = null;
 
-        function showProductModal(product) {
+        async function showProductModal(product) {
             currentProduct = product;
             
-            // Set modal content
+            // Fetch variations if available
+            try {
+                const response = await fetch(`/controllers/get-variations.php?product_id=${product.id}`);
+                const data = await response.json();
+                
+                const variationSelector = document.getElementById('variation-selector');
+                const modalProductPrice = document.getElementById('modalProductPrice');
+                
+                if (data.success && data.variations.length > 0) {
+                    // Show variation selector
+                    variationSelector.style.display = 'block';
+                    
+                    // Update variation prices
+                    const hotVariation = data.variations.find(v => v.variation_type === 'Hot');
+                    const icedVariation = data.variations.find(v => v.variation_type === 'Iced');
+                    
+                    document.getElementById('hot-variation-price').textContent = hotVariation ? hotVariation.price : product.price;
+                    document.getElementById('iced-variation-price').textContent = icedVariation ? icedVariation.price : product.price;
+                    
+                    // Update price based on selected variation
+                    const updatePrice = () => {
+                        const selectedVariation = document.querySelector('input[name="variation"]:checked').value;
+                        const variation = data.variations.find(v => v.variation_type === selectedVariation);
+                        modalProductPrice.textContent = '₱' + (variation ? variation.price : product.price);
+                        
+                        // Update visual selection
+                        document.getElementById('hot-option').classList.toggle('selected', selectedVariation === 'Hot');
+                        document.getElementById('iced-option').classList.toggle('selected', selectedVariation === 'Iced');
+                    };
+                    
+                    // Add change event listeners
+                    document.querySelectorAll('input[name="variation"]').forEach(radio => {
+                        radio.addEventListener('change', updatePrice);
+                    });
+                    
+                    // Set initial price and selection
+                    updatePrice();
+                } else {
+                    // Hide variation selector and show base price
+                    variationSelector.style.display = 'none';
+                    modalProductPrice.textContent = '₱' + product.price;
+                }
+            } catch (error) {
+                console.error('Error fetching variations:', error);
+                // Show base price if variations fetch fails
+                document.getElementById('variation-selector').style.display = 'none';
+                document.getElementById('modalProductPrice').textContent = '₱' + product.price;
+            }
+            
+            // Set other modal content
             document.getElementById('modalProductImage').src = '/public/' + product.image;
             document.getElementById('modalProductName').textContent = product.name;
-            document.getElementById('modalProductPrice').textContent = '₹' + product.price;
             document.getElementById('modalProductDesc').textContent = product.desc || 'No description available';
             document.getElementById('productQuantity').value = 1;
             
@@ -871,28 +1033,27 @@ try {
 
         // Cart Functionality
         function addToCart(productId, name, price, image, quantity = 1) {
+            const variation = document.querySelector('input[name="variation"]:checked')?.value;
+            const formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('quantity', quantity);
+            if (variation) {
+                formData.append('variation', variation);
+            }
+            
             fetch('/views/users/user-menu.php?action=add_to_cart', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `product_id=${productId}&quantity=${quantity}`
+                body: formData
             })
-            .then(response => {
-                console.log('Response Status:', response.status);
-                console.log('Response Headers:', response.headers.get('content-type'));
-                return response.text();
-            })
-            .then(text => {
-                console.log('Raw Response:', text);
-                try {
-                    const data = JSON.parse(text);
+            .then(response => response.json())
+            .then(data => {
                     if (data.success) {
-                        showCartNotification(`${name} added to cart (${quantity}x)`);
+                    const variationText = variation ? ` (${variation})` : '';
+                    showCartNotification(`${name}${variationText} added to cart (${quantity}x)`);
                         Swal.fire({
                             icon: 'success',
-                            title: 'Success',
-                            text: `${name} added to cart (${quantity}x)`,
+                        title: 'Added to Cart',
+                        text: `${name}${variationText} added to cart (${quantity}x)`,
                             timer: 1500,
                             showConfirmButton: false
                         });
@@ -906,7 +1067,7 @@ try {
                                 confirmButtonText: 'Go to Login',
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = '/views/users/login.php';
+                                    window.location.href = '/views/auth/login.php';
                                 }
                             });
                         } else {
@@ -916,14 +1077,6 @@ try {
                                 text: 'Failed to add to cart: ' + data.error,
                             });
                         }
-                    }
-                } catch (e) {
-                    console.error('JSON Parse Error:', e);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Invalid response from server: ' + e.message,
-                    });
                 }
             })
             .catch(error => {
@@ -961,22 +1114,16 @@ try {
             
             // Add click event to all + buttons
             document.querySelectorAll('.menu-manage').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
+                button.addEventListener('click', function() {
                     const card = this.closest('.menu-card');
-                    const productId = card.id.replace('menuCard-', '');
-                    const productName = card.querySelector('.menu-title').textContent;
-                    const productPrice = parseFloat(card.querySelector('.menu-price').textContent.replace('₹ ', ''));
-                    const productImage = card.querySelector('.menu-image').src.split('/public/')[1];
-                    const productDesc = card.querySelector('.menu-desc').textContent;
-                    
-                    showProductModal({
-                        id: productId,
-                        name: productName,
-                        price: productPrice,
-                        image: productImage,
-                        desc: productDesc
-                    });
+                    const product = {
+                        id: card.id.split('-')[1],
+                        name: card.querySelector('.menu-title').textContent,
+                        price: card.querySelector('.menu-price').textContent.replace('₱', '').trim(),
+                        desc: card.querySelector('.menu-desc').textContent,
+                        image: card.querySelector('.menu-image').getAttribute('src').replace('/public/', '')
+                    };
+                    showProductModal(product);
                 });
             });
         });

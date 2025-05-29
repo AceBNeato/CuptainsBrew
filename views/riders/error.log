@@ -1,0 +1,48 @@
+Rider error log file created on <?= date('Y-m-d H:i:s') ?> [2025-05-28 16:18:30] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-28 16:20:11] Rider ID: 1 logged out successfully
+[2025-05-28 16:27:52] Rider ID: 3 accessed items for Order ID: 2
+[2025-05-28 16:28:08] Rider ID: 3 accessed items for Order ID: 2
+[2025-05-28 16:28:19] Order ID: 2 status updated to Out for Delivery by rider ID: 3
+[2025-05-28 16:28:48] Order ID: 2 status updated to Delivered by rider ID: 3
+[2025-05-28 16:29:32] Rider ID: 3 logged out successfully
+[2025-05-28 16:43:50] Rider ID: 1 accessed items for Order ID: 4
+[2025-05-28 16:43:55] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-28 16:43:58] Order ID: 4 status updated to Delivered by rider ID: 1
+[2025-05-28 16:44:01] Rider ID: 1 logged out successfully
+[2025-05-28 17:03:11] Order ID: 5 status updated to Delivered by rider ID: 1
+[2025-05-28 17:03:47] Rider ID: 1 accessed items for Order ID: 4
+[2025-05-28 17:03:48] Rider ID: 1 accessed items for Order ID: 5
+[2025-05-29 06:22:13] Rider ID: 1 logged out successfully
+[2025-05-29 06:22:21] Rider ID: 3 accessed items for Order ID: 6
+[2025-05-29 06:22:27] Rider ID: 3 logged out successfully
+[2025-05-29 06:22:34] Order ID: 6 status updated to Delivered by rider ID: 3
+[2025-05-29 06:22:37] Rider ID: 3 logged out successfully
+[2025-05-29 16:47:20] Rider ID: 1 accessed items for Order ID: 2
+[2025-05-29 16:57:19] Rider ID: 1 logged out successfully
+[2025-05-29 18:28:40] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-29 18:28:44] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-29 18:28:47] Error updating order ID: 1 - Table 'cafe_db.order_status_logs' doesn't exist
+[2025-05-29 18:28:55] Error updating order ID: 1 - Order must be in Out for Delivery status to mark as delivered
+[2025-05-29 18:29:04] Error updating order ID: 1 - Order must be in Out for Delivery status to mark as delivered
+[2025-05-29 18:31:52] Error updating order ID: 1 - Order must be in Out for Delivery status to mark as delivered
+[2025-05-29 18:31:54] Error updating order ID: 1 - Order must be in Out for Delivery status to mark as delivered
+[2025-05-29 18:31:58] Error updating order ID: 1 - Order must be in Out for Delivery status to mark as delivered
+[2025-05-29 18:32:11] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-29 18:32:14] Rider ID: 1 logged out successfully
+[2025-05-29 18:33:51] Rider ID: 1 accessed items for Order ID: 3
+[2025-05-29 18:33:53] Rider ID: 1 accessed items for Order ID: 3
+[2025-05-29 18:34:02] Rider ID: 1 logged out successfully
+[2025-05-29 18:34:19] Rider ID: 1 accessed items for Order ID: 3
+[2025-05-29 18:34:25] Error updating order ID: 3 - Table 'cafe_db.order_status_logs' doesn't exist
+[2025-05-29 18:36:48] Rider ID: 1 logged out successfully
+[2025-05-29 18:38:12] Rider ID: 1 accessed items for Order ID: 4
+[2025-05-29 18:38:27] Order ID: 4 status updated to Delivered by rider ID: 1
+[2025-05-29 18:38:32] Rider ID: 1 logged out successfully
+[2025-05-29 18:39:54] Rider ID: 1 accessed items for Order ID: 5
+[2025-05-29 18:39:55] Order ID: 5 status updated to Delivered by rider ID: 1
+[2025-05-29 18:40:07] Rider ID: 1 logged out successfully
+[2025-05-29 18:40:48] Rider ID: 1 logged out successfully
+[2025-05-29 18:42:56] Order ID: 6 status updated to Delivered by rider ID: 1
+[2025-05-29 18:42:59] Rider ID: 1 logged out successfully
+[2025-05-29 20:25:34] Order ID: 10 status updated to Delivered by rider ID: 1
+[2025-05-29 20:26:07] Rider ID: 1 logged out successfully

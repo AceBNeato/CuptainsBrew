@@ -1,22 +1,33 @@
 <?php
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../includes/auth_check.php';
+requireAdmin();
 
 // Ensure session is started
 if (!isset($_SESSION)) {
     session_start();
 }
 
+// Verify admin is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['loggedin'])) {
+    header('Location: /views/auth/login.php');
+    exit();
+}
+
 // Initialize arrays and fetch orders with joined user and product details
 $allOrders = [];
 try {
-    $sql = "SELECT o.id AS order_id, o.user_id, u.username, u.email, 
-                   o.status, o.created_at, o.updated_at,
-                   oi.product_id, p.item_name, p.item_image, oi.quantity, oi.price
+    $sql = "SELECT o.id AS order_id, o.user_id, u.username, u.email, u.contact,
+                   o.status, o.created_at, o.updated_at, o.cancellation_reason,
+                   o.total_amount, o.payment_method, o.delivery_address, o.rider_id,
+                   r.name as rider_name, r.contact as rider_contact,
+                   oi.product_id, p.item_name, p.item_image, oi.quantity, oi.price, oi.variation
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN riders r ON o.rider_id = r.id
             LEFT JOIN order_items oi ON o.id = oi.order_id
             LEFT JOIN products p ON oi.product_id = p.id
-            WHERE o.status IN ('Rejected', 'Pending', 'Approved', 'Out for Delivery', 'Delivered', 'Canceled')
+            WHERE o.status IN ('Rejected', 'Pending', 'Approved', 'Out for Delivery', 'Delivered', 'Cancelled')
             ORDER BY o.created_at DESC";
     
     $result = $conn->query($sql);
@@ -31,8 +42,17 @@ try {
                     'user_id' => $row['user_id'],
                     'username' => $row['username'] ?? 'Guest',
                     'email' => $row['email'] ?? 'N/A',
+                    'contact' => $row['contact'] ?? 'N/A',
                     'status' => $row['status'],
                     'created_at' => $row['created_at'],
+                    'updated_at' => $row['updated_at'],
+                    'cancellation_reason' => $row['cancellation_reason'],
+                    'total_amount' => $row['total_amount'] ?? 0,
+                    'payment_method' => $row['payment_method'] ?? 'N/A',
+                    'delivery_address' => $row['delivery_address'] ?? 'N/A',
+                    'rider_id' => $row['rider_id'],
+                    'rider_name' => $row['rider_name'] ?? 'Not Assigned',
+                    'rider_contact' => $row['rider_contact'] ?? 'N/A',
                     'items' => []
                 ];
             }
@@ -41,8 +61,42 @@ try {
                     'item_name' => $row['item_name'] ?? 'Unknown Item',
                     'item_image' => $row['item_image'] ?? '/public/images/default-item.jpg',
                     'quantity' => $row['quantity'],
-                    'price' => $row['price']
+                    'price' => $row['price'],
+                    'variation' => $row['variation'] ?? ''
                 ];
+            }
+        }
+    }
+    
+    // Check if order_cancellations table exists and fetch detailed cancellation info
+    $table_check = $conn->query("SHOW TABLES LIKE 'order_cancellations'");
+    if ($table_check && $table_check->num_rows > 0 && !empty($allOrders)) {
+        // Check if is_admin column exists
+        $column_check = $conn->query("SHOW COLUMNS FROM order_cancellations LIKE 'is_admin'");
+        $has_is_admin = $column_check && $column_check->num_rows > 0;
+        
+        $order_ids = implode(',', array_keys($allOrders));
+        
+        if ($has_is_admin) {
+            $cancel_sql = "SELECT order_id, reason, is_admin, created_at 
+                          FROM order_cancellations 
+                          WHERE order_id IN ($order_ids)";
+        } else {
+            $cancel_sql = "SELECT order_id, reason, created_at 
+                          FROM order_cancellations 
+                          WHERE order_id IN ($order_ids)";
+        }
+        
+        $cancel_result = $conn->query($cancel_sql);
+        
+        if ($cancel_result && $cancel_result->num_rows > 0) {
+            while ($cancel = $cancel_result->fetch_assoc()) {
+                $order_id = $cancel['order_id'];
+                if (isset($allOrders[$order_id])) {
+                    $allOrders[$order_id]['cancellation_reason'] = $cancel['reason'];
+                    $allOrders[$order_id]['cancelled_by'] = $has_is_admin && isset($cancel['is_admin']) && $cancel['is_admin'] ? 'Admin' : 'User';
+                    $allOrders[$order_id]['cancelled_at'] = $cancel['created_at'];
+                }
             }
         }
     }
@@ -61,7 +115,9 @@ $conn->close();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Admin Reports - Captain's Brew Cafe</title>
-  <link rel="icon" href="/images/LOGO.png" sizes="any" />
+  <link rel="icon" href="/public/images/LOGO.png" sizes="any" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     * {
       margin: 0;
@@ -214,32 +270,101 @@ $conn->close();
       background: #87BFD1;
       border-radius: 8px;
     }
+
+    .view-reason-btn {
+      background: #2C6E8A;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background-color 0.3s;
+    }
+    
+    .view-reason-btn:hover {
+      background: #235A73;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(44, 110, 138, 0.7);
+    }
+
+    .modal-content {
+      background: #A9D6E5;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
+      position: relative;
+      color: #4a3b2b;
+      text-align: left;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      color: #2C6E8A;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-btn:hover {
+      color: #235A73;
+    }
+    
+    .cancellation-details {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      border-left: 4px solid #2C6E8A;
+    }
+    
+    .cancellation-details p {
+      margin: 5px 0;
+    }
+    
+    .reason-label {
+      font-weight: bold;
+      color: #2C6E8A;
+    }
   </style>
 </head>
 <body>
   <?php require_once __DIR__ . '/partials/header.php'; ?>
 
   <div class="reports-container">
-    <Canceled class="report-filter">
-      <div class="filter-item active" onclick="filterOrders('all')">All Orders</div>
-      <div class="filter-item" onclick="filterOrders('Pending')">Pending Orders</div>
-      <div class="filter-item" onclick="filterOrders('Approved')">Approved Orders</div>
-      <div class="filter-item" onclick="filterOrders('Out for Delivery')">Out for Delivery</div>
-      <div class="filter-item" onclick="filterOrders('Delivered')">Delivered Orders</div>
-      <div class="filter-item" onclick="filterOrders('Rejected')">Rejected Orders</div>
-      <div class="filter-item" onclick="filterOrders('Canceled')">Canceled Orders</div>
-      
-    </Canceled>
+    <div class="report-filter">
+      <div class="filter-item active" data-status="all">All Orders</div>
+      <div class="filter-item" data-status="Pending">Pending Orders</div>
+      <div class="filter-item" data-status="Approved">Approved Orders</div>
+      <div class="filter-item" data-status="Out for Delivery">Out for Delivery</div>
+      <div class="filter-item" data-status="Delivered">Delivered Orders</div>
+      <div class="filter-item" data-status="Rejected">Rejected Orders</div>
+      <div class="filter-item" data-status="Cancelled">Cancelled Orders</div>
+    </div>
+
     <div class="report-table">
       <h2 class="report-title">Order Reports</h2>
       <div id="orders-table">
-        <?php
-        if (isset($error_message)) {
-            echo '<p class="error-message">' . htmlspecialchars($error_message) . '</p>';
-        } elseif (empty($allOrders)) {
-            echo '<p class="no-reports-message">No orders available for reporting.</p>';
-        } else {
-            ?>
+        <?php if (isset($error_message)): ?>
+            <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
+        <?php elseif (empty($allOrders)): ?>
+            <p class="no-reports-message">No orders available for reporting.</p>
+        <?php else: ?>
             <table>
               <thead>
                 <tr>
@@ -248,62 +373,177 @@ $conn->close();
                   <th>Ordered Items</th>
                   <th>Order Date</th>
                   <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
-              <tbody id="orders-body">
+              <tbody>
                 <?php foreach ($allOrders as $order): ?>
-                  <tr class="order-row" data-status="<?= htmlspecialchars($order['status']) ?>">
-                    <td><?= htmlspecialchars($order['order_id']) ?></td>
+                  <tr class="order-row" data-status="<?php echo htmlspecialchars($order['status']); ?>">
+                    <td>#<?php echo htmlspecialchars($order['order_id']); ?></td>
                     <td>
-                      <?= htmlspecialchars($order['username']) ?><br>
-                      <small><?= htmlspecialchars($order['email']) ?></small>
+                      <?php echo htmlspecialchars($order['username']); ?><br>
+                      <small><?php echo htmlspecialchars($order['email']); ?></small>
                     </td>
                     <td>
                       <div class="items-list">
                         <?php foreach ($order['items'] as $item): ?>
                           <div class="item-row">
-                            <img src="<?= htmlspecialchars($item['item_image']) ?>" class="item-img" alt="Item Image">
+                            <img src="/public/<?php echo htmlspecialchars($item['item_image']); ?>" 
+                                 alt="<?php echo htmlspecialchars($item['item_name']); ?>" 
+                                 class="item-img">
                             <span>
-                              <?= htmlspecialchars($item['item_name']) ?> 
-                              (Qty: <?= htmlspecialchars($item['quantity']) ?>, 
-                              Price: $<?= number_format($item['price'], 2) ?>)
+                              <?php echo htmlspecialchars($item['item_name']); ?> x 
+                              <?php echo htmlspecialchars($item['quantity']); ?>
+                              (₱<?php echo number_format($item['price'], 2); ?>)
                             </span>
                           </div>
                         <?php endforeach; ?>
                       </div>
                     </td>
-                    <td><?= htmlspecialchars(date('Y-m-d g:i A', strtotime($order['created_at']))) ?></td>
-                    <td><?= htmlspecialchars($order['status']) ?></td>
+                    <td><?php echo date('M d, Y h:i A', strtotime($order['created_at'])); ?></td>
+                    <td><?php echo htmlspecialchars($order['status']); ?></td>
+                    <td>
+                      <?php if (($order['status'] === 'Rejected' || $order['status'] === 'Cancelled') && !empty($order['cancellation_reason'])): ?>
+                        <button class="view-reason-btn" onclick='showCancellationDetails(<?= json_encode($order) ?>)'>
+                          View Reason
+                        </button>
+                      <?php elseif ($order['status'] === 'Delivered'): ?>
+                        <button class="view-reason-btn" onclick='showDeliveryDetails(<?= json_encode($order) ?>)'>
+                          View Details
+                        </button>
+                      <?php endif; ?>
+                    </td>
                   </tr>
                 <?php endforeach; ?>
               </tbody>
             </table>
-            <?php
-        }
-        ?>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  <div id="cancellationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeCancellationModal()">×</span>
+      <h2>Cancellation Details</h2>
+      <div class="cancellation-details">
+        <p><span class="reason-label">Order ID:</span> <span id="cancel-order-id"></span></p>
+        <p><span class="reason-label">Status:</span> <span id="cancel-status"></span></p>
+        <p><span class="reason-label">Cancelled By:</span> <span id="cancel-by"></span></p>
+        <p><span class="reason-label">Date:</span> <span id="cancel-date"></span></p>
+        <p><span class="reason-label">Reason:</span> <span id="cancel-reason"></span></p>
+      </div>
+    </div>
+  </div>
+  
+  <div id="deliveryModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeDeliveryModal()">×</span>
+      <h2>Delivery Details</h2>
+      <div class="cancellation-details">
+        <p><span class="reason-label">Order ID:</span> <span id="delivery-order-id"></span></p>
+        <p><span class="reason-label">Status:</span> <span id="delivery-status"></span></p>
+        <p><span class="reason-label">Completed On:</span> <span id="delivery-date"></span></p>
+        <p><span class="reason-label">Total Amount:</span> <span id="delivery-amount"></span></p>
+        <p><span class="reason-label">Payment Method:</span> <span id="delivery-payment"></span></p>
+        <p><span class="reason-label">Customer:</span> <span id="delivery-customer"></span></p>
+        <p><span class="reason-label">Contact:</span> <span id="delivery-contact"></span></p>
+        <p><span class="reason-label">Delivery Address:</span> <span id="delivery-address"></span></p>
+        <p><span class="reason-label">Delivered By:</span> <span id="delivery-rider"></span></p>
+        <p><span class="reason-label">Rider Contact:</span> <span id="delivery-rider-contact"></span></p>
+        <p><span class="reason-label">Items:</span> <span id="delivery-items"></span></p>
       </div>
     </div>
   </div>
 
   <script>
-    
-
-    function filterOrders(status) {
-      const rows = document.querySelectorAll('.order-row');
+    document.addEventListener('DOMContentLoaded', function() {
       const filterItems = document.querySelectorAll('.filter-item');
-      
-      filterItems.forEach(item => item.classList.remove('active'));
-      document.querySelector(`.filter-item[onclick="filterOrders('${status}')"]`).classList.add('active');
+      const orderRows = document.querySelectorAll('.order-row');
 
-      rows.forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-        if (status === 'all' || rowStatus === status) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
+      filterItems.forEach(item => {
+        item.addEventListener('click', function() {
+          // Remove active class from all filters
+          filterItems.forEach(fi => fi.classList.remove('active'));
+          // Add active class to clicked filter
+          this.classList.add('active');
+
+          const status = this.getAttribute('data-status');
+          
+          // Show/hide rows based on filter
+          orderRows.forEach(row => {
+            if (status === 'all' || row.getAttribute('data-status') === status) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
       });
+    });
+    
+    function showCancellationDetails(order) {
+      document.getElementById('cancel-order-id').textContent = order.order_id;
+      document.getElementById('cancel-status').textContent = order.status;
+      document.getElementById('cancel-by').textContent = order.cancelled_by || 'Unknown';
+      
+      const cancelDate = order.cancelled_at ? new Date(order.cancelled_at) : new Date(order.created_at);
+      document.getElementById('cancel-date').textContent = cancelDate.toLocaleString();
+      
+      document.getElementById('cancel-reason').textContent = order.cancellation_reason || 'No reason provided';
+      
+      document.getElementById('cancellationModal').style.display = 'block';
     }
+    
+    function closeCancellationModal() {
+      document.getElementById('cancellationModal').style.display = 'none';
+    }
+    
+    function showDeliveryDetails(order) {
+      document.getElementById('delivery-order-id').textContent = order.order_id;
+      document.getElementById('delivery-status').textContent = order.status;
+      document.getElementById('delivery-date').textContent = new Date(order.updated_at || order.created_at).toLocaleString();
+      document.getElementById('delivery-amount').textContent = '₱' + parseFloat(order.total_amount).toFixed(2);
+      document.getElementById('delivery-payment').textContent = order.payment_method;
+      document.getElementById('delivery-customer').textContent = order.username;
+      document.getElementById('delivery-contact').textContent = order.contact;
+      document.getElementById('delivery-address').textContent = order.delivery_address;
+      document.getElementById('delivery-rider').textContent = order.rider_name || 'Not Assigned';
+      document.getElementById('delivery-rider-contact').textContent = order.rider_contact || 'N/A';
+      
+      // Format items list
+      let itemsList = '';
+      if (order.items && order.items.length > 0) {
+        itemsList = order.items.map(item => {
+          const variation = item.variation ? ` (${item.variation})` : '';
+          return `${item.item_name}${variation} x ${item.quantity} (₱${parseFloat(item.price).toFixed(2)})`;
+        }).join(', ');
+      } else {
+        itemsList = 'No items available';
+      }
+      document.getElementById('delivery-items').textContent = itemsList;
+      
+      document.getElementById('deliveryModal').style.display = 'block';
+    }
+    
+    function closeDeliveryModal() {
+      document.getElementById('deliveryModal').style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+      const cancellationModal = document.getElementById('cancellationModal');
+      const deliveryModal = document.getElementById('deliveryModal');
+      
+      if (event.target === cancellationModal) {
+        closeCancellationModal();
+      }
+      
+      if (event.target === deliveryModal) {
+        closeDeliveryModal();
+      }
+    };
   </script>
+  
+<script src="/public/js/auth.js"></script>
 </body>
 </html>

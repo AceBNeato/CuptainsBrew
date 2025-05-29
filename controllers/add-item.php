@@ -1,61 +1,163 @@
 <?php
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../includes/auth_check.php';
+requireAdmin();
 
-$config_path = __DIR__ . '..\..\config.php';
+// Set JSON response header
+header('Content-Type: application/json');
 
-if (!file_exists($config_path)) {
-    die("Error: config.php not found at $config_path. Please check the file path.");
-}
+try {
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        throw new Exception('Invalid CSRF token');
+    }
 
-require_once $config_path;
+    // Validate required fields
+    if (!isset($_POST['item_name']) || !isset($_POST['item_price']) || 
+        !isset($_POST['item_description']) || !isset($_POST['category_id'])) {
+        throw new Exception('Missing required fields');
+    }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // Sanitize inputs
-        $item_name = $conn->real_escape_string($_POST['item_name']);
-        $item_price = (float)$_POST['item_price'];
-        $item_description = $conn->real_escape_string($_POST['item_description']);
-        $category_id = (int)$_POST['category_id'];
+    // Sanitize and validate input
+    $itemName = trim($_POST['item_name']);
+    $itemPrice = floatval($_POST['item_price']);
+    $itemDescription = trim($_POST['item_description']);
+    $categoryId = intval($_POST['category_id']);
+    $hasVariations = isset($_POST['has_variations']) ? 1 : 0;
 
-        // Handle file upload
-        $item_image = '';
-        if (isset($_FILES['item_image']) && $_FILES['item_image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = __DIR__ . '/../../public/assets/uploads/';
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
+    if (empty($itemName) || empty($itemDescription) || $itemPrice <= 0 || $categoryId <= 0) {
+        throw new Exception('Invalid input data');
+    }
 
-            $file_name = uniqid() . '_' . basename($_FILES['item_image']['name']);
-            $file_path = $upload_dir . $file_name;
-
-            if (move_uploaded_file($_FILES['item_image']['tmp_name'], $file_path)) {
-                $item_image = 'images/' . $file_name;
-            } else {
-                throw new Exception("Failed to upload image.");
-            }
-        } else {
-            throw new Exception("Image upload failed or no image provided.");
+    // Validate variation prices if variations are enabled
+    if ($hasVariations) {
+        if (!isset($_POST['hot_price']) || !isset($_POST['iced_price'])) {
+            throw new Exception('Variation prices are required when variations are enabled');
         }
-
-        // Insert into the database
-        $query = "INSERT INTO products (category_id, item_name, item_description, item_price, item_image) 
-                  VALUES ($category_id, '$item_name', '$item_description', $item_price, '$item_image')";
         
-        if (!$conn->query($query)) {
-            throw new Exception("Failed to add item: " . $conn->error);
+        $hotPrice = floatval($_POST['hot_price']);
+        $icedPrice = floatval($_POST['iced_price']);
+        
+        if ($hotPrice <= 0 || $icedPrice <= 0) {
+            throw new Exception('Variation prices must be greater than zero');
+        }
+    }
+
+    // Handle image upload
+    if (!isset($_FILES['item_image']) || $_FILES['item_image']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Image upload failed');
+    }
+
+    $file = $_FILES['item_image'];
+    $fileName = $file['name'];
+    $fileTmpName = $file['tmp_name'];
+    $fileSize = $file['size'];
+    $fileError = $file['error'];
+    $fileType = $file['type'];
+
+    // Get file extension
+    $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (!in_array($fileExt, $allowedExtensions)) {
+        throw new Exception('Invalid file type. Only JPG, JPEG, PNG & GIF files are allowed.');
+    }
+
+    if ($fileSize > 5000000) { // 5MB max
+        throw new Exception('File is too large. Maximum size is 5MB.');
+    }
+
+    // Generate unique filename
+    $newFileName = uniqid('item_', true) . '.' . $fileExt;
+    $uploadPath = __DIR__ . '/../public/uploads/' . $newFileName;
+
+    // Create uploads directory if it doesn't exist
+    if (!file_exists(__DIR__ . '/../public/uploads/')) {
+        mkdir(__DIR__ . '/../public/uploads/', 0777, true);
+    }
+
+    // Move uploaded file
+    if (!move_uploaded_file($fileTmpName, $uploadPath)) {
+        throw new Exception('Failed to move uploaded file');
+    }
+
+    // Begin transaction
+    $conn->begin_transaction();
+
+    try {
+        // Insert into products table
+        $stmt = $conn->prepare("INSERT INTO products (category_id, item_name, item_description, item_price, item_image, has_variation) VALUES (?, ?, ?, ?, ?, ?)");
+        $imageUrl = 'uploads/' . $newFileName;
+        
+        if (!$stmt->bind_param("issdsi", $categoryId, $itemName, $itemDescription, $itemPrice, $imageUrl, $hasVariations)) {
+            throw new Exception('Failed to bind parameters');
         }
 
-        // Redirect back to admin-menu.php with success message
-        header("Location: /views/admin/admin-menu.php?tab=" . ($_POST['category_id'] <= 2 ? 'drinks' : 'foods') . "&category_id=$category_id&success=Item added successfully");
-        exit();
+        if (!$stmt->execute()) {
+            throw new Exception('Failed to add item to database: ' . $stmt->error);
+        }
+
+        $productId = $conn->insert_id;
+        $stmt->close();
+
+        // Add variations if enabled
+        if ($hasVariations) {
+            $stmt = $conn->prepare("INSERT INTO product_variations (product_id, variation_type, price) VALUES (?, ?, ?)");
+            
+            // Insert Hot variation
+            $type = 'Hot';
+            $stmt->bind_param("isd", $productId, $type, $hotPrice);
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to add Hot variation: ' . $stmt->error);
+            }
+
+            // Insert Iced variation
+            $type = 'Iced';
+            $stmt->bind_param("isd", $productId, $type, $icedPrice);
+            if (!$stmt->execute()) {
+                throw new Exception('Failed to add Iced variation: ' . $stmt->error);
+            }
+            
+            $stmt->close();
+        }
+
+        $conn->commit();
+
+        // Return success response
+        echo json_encode([
+            'success' => true,
+            'message' => 'Item added successfully',
+            'item' => [
+                'id' => $productId,
+                'item_name' => $itemName,
+                'item_price' => $itemPrice,
+                'item_description' => $itemDescription,
+                'item_image' => $imageUrl,
+                'category_id' => $categoryId,
+                'has_variations' => $hasVariations
+            ]
+        ]);
+    } catch (Exception $e) {
+        $conn->rollback();
+        // Delete uploaded file if database insert fails
+        if (file_exists($uploadPath)) {
+            unlink($uploadPath);
+        }
+        throw $e;
+    }
 
     } catch (Exception $e) {
-        // Redirect with error message
-        header("Location: /views/admin/admin-menu.php?tab=" . ($_POST['category_id'] <= 2 ? 'drinks' : 'foods') . "&category_id=$category_id&error=" . urlencode($e->getMessage()));
-        exit();
+    // Clean up uploaded file if it exists and there was an error
+    if (isset($uploadPath) && file_exists($uploadPath)) {
+        unlink($uploadPath);
     }
-} else {
-    // If not a POST request, redirect back
-    header("Location: /views/admin/admin-menu.php");
-    exit();
+    
+    // Return error response
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
-?>
+
+$conn->close();

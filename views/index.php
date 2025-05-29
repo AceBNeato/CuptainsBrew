@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+// Clear any potentially problematic session variables if user is not properly logged in
+if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
+    unset($_SESSION['loggedin']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -614,7 +619,7 @@ session_start();
             <h1>Welcome to Captain's Brew Cafe</h1>
             <p>Embark on a coffee adventure with us! Enjoy handcrafted beverages and delightful treats in a cozy atmosphere. Sign in to start your journey or explore our menu as a guest.</p>
             <div class="hero-buttons">
-                <?php if (isset($_SESSION['username'])): ?>
+                <?php if (isset($_SESSION['user_id']) && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
                     <button class="hero-button" onclick="window.location.href = '/views/users/User-Menu.php'">Explore Menu</button>
                 <?php else: ?>
                     <button class="hero-button" onclick="window.location.href = '/views/auth/login.php'">Login</button>
@@ -662,6 +667,25 @@ session_start();
                 top: 0,
                 behavior: 'smooth'
             });
+        });
+
+        // Add this to the cart.php file
+        const searchInput = document.getElementById('map-search');
+        let autocompleteTimeout;
+        
+        searchInput.addEventListener('input', function() {
+          clearTimeout(autocompleteTimeout);
+          autocompleteTimeout = setTimeout(function() {
+            const query = searchInput.value;
+            if (query.length > 2) {
+              fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                  // Show suggestions
+                  showSuggestions(data.features);
+                });
+            }
+          }, 300);
         });
     </script>
 

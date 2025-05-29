@@ -7,7 +7,7 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; // Hardcoded 
 
 // Fetch user data
 $user = null;
-$sql = "SELECT id, username, email, address, contact FROM users WHERE id = ?";
+$sql = "SELECT id, username, email, contact FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
@@ -234,11 +234,6 @@ $conn->close();
             <span class="error-message" id="password-error"></span>
           </div>
           <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" name="address" value="<?= htmlspecialchars($user['address'] ?? '') ?>" />
-            <span class="error-message" id="address-error"></span>
-          </div>
-          <div class="form-group">
             <label for="contact">Contact Number</label>
             <input type="text" id="contact" name="contact" value="<?= htmlspecialchars($user['contact'] ?? '') ?>" />
             <span class="error-message" id="contact-error"></span>
@@ -308,13 +303,6 @@ $conn->close();
       const password = document.getElementById('password').value;
       if (password && password.length < 8) {
         showError('password', 'Password must be at least 8 characters.');
-        hasErrors = true;
-      }
-
-      // Validate address (if provided)
-      const address = document.getElementById('address').value.trim();
-      if (address && address.length > 255) {
-        showError('address', 'Address cannot exceed 255 characters.');
         hasErrors = true;
       }
 
