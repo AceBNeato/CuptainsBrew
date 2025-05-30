@@ -2,6 +2,7 @@
 session_start();
 
 require '../../vendor/autoload.php';
+require_once '../../config/mail.php'; // Include mail configuration
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -48,27 +49,29 @@ function generateUsername($email, $conn) {
 
 // Function to send verification email using PHPMailer
 function sendVerificationEmail($email, $verification_code) {
+    global $mail_config; // Access the mail configuration
+    
     $mail = new PHPMailer(true);
     try {
-        // Enable debug output (set to 0 in production)
-        $mail->SMTPDebug = 2;
+        // Enable debug output
+        $mail->SMTPDebug = $mail_config['debug_level'];
         $mail->Debugoutput = function($str, $level) {
             error_log("PHPMailer Debug [$level]: $str\n", 3, '../../logs/phpmailer_debug.log');
         };
 
         // Server settings
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'gdgarcia00410@usep.edu.ph';
-        $mail->Password = 'lkhwwwsvuygopoxs';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
+        $mail->Host = $mail_config['smtp_host'];
+        $mail->SMTPAuth = $mail_config['smtp_auth'];
+        $mail->Username = $mail_config['smtp_username'];
+        $mail->Password = $mail_config['smtp_password'];
+        $mail->SMTPSecure = $mail_config['smtp_secure'];
+        $mail->Port = $mail_config['smtp_port'];
 
         // Recipients
-        $mail->setFrom('gdgarcia00410@usep.edu.ph', "Cuptain's Brew");
+        $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
         $mail->addAddress($email);
-        $mail->addReplyTo('gdgarcia00410@usep.edu.ph', "Cuptain's Brew Support");
+        $mail->addReplyTo($mail_config['from_email'], $mail_config['from_name'] . " Support");
 
         // Content
         $mail->isHTML(true);
@@ -148,7 +151,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_code'])) {
             $sent_at = strtotime($user['verification_sent_at']);
             
             if (time() - $sent_at > 1800) {
-                $errors[] = "Verification code has expired. Please request a new one.";
+                $errors[] = "Verification code has expired.";
+                echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Code Expired',
+                            text: 'Your verification code has expired. Would you like to request a new one?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, send new code',
+                            cancelButtonText: 'No, cancel',
+                            customClass: {
+                                confirmButton: 'swal2-confirm',
+                                cancelButton: 'swal2-cancel'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Send AJAX request to resend code
+                                fetch('/views/auth/resend-code.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: 'email=' + encodeURIComponent('$email')
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Code Sent!',
+                                            text: 'A new verification code has been sent to your email.',
+                                            customClass: {
+                                                confirmButton: 'swal2-confirm'
+                                            }
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: data.message || 'Failed to send new code. Please try again.',
+                                            customClass: {
+                                                confirmButton: 'swal2-confirm'
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Failed to send new code. Please try again.',
+                                        customClass: {
+                                            confirmButton: 'swal2-confirm'
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    });
+                </script>";
             } elseif ($submitted_code !== $stored_code) {
                 $errors[] = "Invalid verification code";
             } else {
@@ -350,8 +413,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuptain's Brew | Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" href="/public/images/LOGO.png" sizes="any">
     <style>
+        :root {
+            --primary: #2C6E8A;
+            --primary-dark: #235A73;
+            --primary-light: #A9D6E5;
+            --secondary: #4A3B2B;
+            --accent: #ffb74a;
+            --white: #fff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --error: #ef4444;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -360,169 +440,179 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         }
 
         body {
-            background: #fff;
-            color: #4a3b2b;
-        }
-
-        /* Header */
-        .header {
+            min-height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #FFFAEE, #FFDBB5);
-            box-shadow: 0 2px 5px rgba(74, 59, 43, 0.3);
-            position: sticky;
+            position: relative;
+            padding: 1rem;
+        }
+
+        /* Background Image */
+        .image-container {
+            position: fixed;
             top: 0;
-            z-index: 1000;
-        }
-
-        .logo-section img {
-            width: 200px;
-            margin: 0px 100px 0px 100px;
-            transition: transform 0.3s;
-        }
-
-        .logo-section img:hover {
-            transform: scale(1.1);
-        }
-
-        .nav-menu {
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-button {
-            background: none;
-            border: none;
-            color: #4a3b2b;
-            font-size: 1rem;
-            padding: 1rem 2rem;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .nav-button:hover, .nav-button.active {
-            background-color: #2C6E8A;
-            color: #fff;
-        }
-
-        /* Form Container */
-        .register-container {
-            max-width: 450px;
-            margin: 4rem auto;
-            padding: 3rem;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(74, 59, 43, 0.5);
-        }
-
-        .register-container h2 {
-            font-size: 1.5rem;
-            color: #2C6E8A;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .edit-form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .edit-form label {
-            font-size: 0.9rem;
-            color: #4a3b2b;
-        }
-
-        .edit-form input[type="email"],
-        .edit-form input[type="password"] {
-            padding: 0.5rem;
-            border: none;
-            border-radius: 5px;
-            background: #A9D6E5;
-            color: #4a3b2b;
-            font-size: 0.9rem;
+            left: 0;
             width: 100%;
-            
-            transition: all 0.3s;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
 
-
-        .edit-form input[type="text"] {
-            padding: 0.5rem;
-            border: none;
-            border-radius: 5px;
-            background: #A9D6E5;
-            color: #4a3b2b;
-            font-size: 0.9rem;
+        #getstarted {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(50%) blur(8px);
+            transform: scale(1.1); /* Prevent blur edges from showing */
         }
 
-
-
-        .edit-form input:focus {
-            outline: none;
-            border-color: #2C6E8A;
-            box-shadow: 0 0 0 2px rgba(44, 110, 138, 0.2);
-            background: #fff;
-        }
-
-
-        .edit-form button {
-            padding: 0.5rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s;
-            background: #2C6E8A;
-            color: #fff;
-        }
-
-        .edit-form button:hover {
-            background: #235A73;
-        }
-
-        .options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 1rem 0;
-        }
-
-        .options-container {
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .options a {
-            color: #2C6E8A;
+            padding: 0.75rem 1.5rem;
+            background: rgba(44, 110, 138, 0.9);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            color: var(--white);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .options a:hover {
-            text-decoration: underline;
+        .back-button:hover {
+            background: rgba(35, 90, 115, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .back-button i {
+            font-size: 1rem;
+        }
+
+        .register-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin: 2rem auto;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .register-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 110, 138, 0.1);
+            background: var(--white);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 1.25rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        .register-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .login-link {
             text-align: center;
-            margin-top: 1rem;
-        }
-
-        .login-link p {
-            font-size: 0.9rem;
-            color: #4a3b2b;
+            margin-top: 1.5rem;
+            color: var(--gray-600);
+            font-size: 0.95rem;
         }
 
         .login-link a {
-            color: #2C6E8A;
+            color: var(--primary);
             text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
 
         .login-link a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
@@ -534,6 +624,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
 
         .verification-container {
             text-align: center;
+            margin-top: 2rem;
         }
 
         .verification-instructions {
@@ -554,7 +645,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         .verification-inputs {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 0.5rem;
             margin: 1.5rem 0;
         }
 
@@ -563,16 +654,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             height: 50px;
             text-align: center;
             font-size: 1.2rem;
-            border: none;
-            border-radius: 5px;
-            background: #A9D6E5;
-            color: #4a3b2b;
-            transition: all 0.3s;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
         }
 
         .verification-inputs input:focus {
             outline: none;
-            background: #e9f7fe;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(44, 110, 138, 0.1);
+            background: var(--white);
             transform: scale(1.05);
         }
 
@@ -581,44 +673,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         }
 
         #verify-button {
-            padding: 0.5rem 2rem;
-            font-size: 0.9rem;
-            background: #2C6E8A;
-            color: #fff;
+            padding: 0.75rem 2rem;
+            background: var(--primary);
+            color: var(--white);
             border: none;
-            border-radius: 5px;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #verify-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .resend-code {
             margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #4a3b2b;
+            font-size: 0.95rem;
+            color: var(--gray-600);
         }
 
         .resend-code a {
-            color: #2C6E8A;
+            color: var(--primary);
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
+            transition: color 0.3s ease;
         }
 
         .resend-code a:hover {
-            text-decoration: underline;
-        }
-
-        .back-to-register {
-            margin-top: 1rem;
-        }
-
-        .back-to-register a {
-            color: #2C6E8A;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .back-to-register a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
@@ -627,84 +716,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             to { opacity: 1; }
         }
 
-        /* Footer */
-        .footer-container {
-            background-color: #2C6E8A;
-            color: white;
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            .register-card {
             padding: 2rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .footer-links a, .footer-contact p {
-            color: white;
-            text-decoration: none;
-        }
-
-        .footer-social img {
-            width: 30px;
-            margin-right: 10px;
-        }
-
-        .footer-bottom {
-            background-color: #FFFAEE;
-            display: flex;
-            flex-direction: column;
-            text-align: center;
-            padding: 10px;
-        }
-
-        /* SweetAlert2 Custom Styling */
-        .swal2-confirm {
-            background-color: #2C6E8A !important;
-            color: #fff !important;
-            border-radius: 5px !important;
-        }
-
-        .swal2-confirm:hover {
-            background-color: #235A73 !important;
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                padding: 2vw;
-                text-align: center;
+                margin: 1rem;
             }
 
-            .logo-section img {
-                width: 40vw;
+            .back-button {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
             }
 
-            .nav-menu {
-                flex-direction: column;
-                gap: 1vw;
-                width: 100%;
+            .register-header h1 {
+                font-size: 1.75rem;
             }
 
-            .nav-button {
-                padding: 1vw;
-                width: 100%;
-                font-size: 3vw;
+            .form-group label {
+                font-size: 0.875rem;
             }
 
-            .register-container {
-                width: 95%;
-                padding: 10vw;
-                margin: 2rem auto;
-            }
-
-            .edit-form label {
-                font-size: 2.5vw;
-            }
-
-            .edit-form input {
-                font-size: 2.5vw;
-            }
-
-            .edit-form button {
-                font-size: 2.5vw;
+            .form-group input {
+                padding: 0.75rem;
+                font-size: 0.95rem;
             }
 
             .verification-inputs input {
@@ -712,44 +748,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                 height: 40px;
                 font-size: 1rem;
             }
-
-            .footer-container {
-                flex-direction: column;
-                gap: 2rem;
-            }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo-section">
-            <img src="/public/images/LOGO.png" alt="Cuptain's Brew Logo">
+    <div class="image-container">
+        <img src="/public/images/background/login.jpg" alt="Background" id="getstarted">
         </div>
-    </header>
 
-    <div class="register-container">
-        <h2>REGISTER</h2>
+    <a href="/views/auth/login.php" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Back to Login
+    </a>
+
+    <div class="register-card">
+        <div class="register-header">
+            <h1>REGISTER</h1>
+        </div>
         
         <!-- Registration Form -->
         <form id="registration-form" class="edit-form" action="register.php" method="POST">
+            <div class="form-group">
             <label for="email">Email Address</label>
-            <input id="email" type="email" name="email" placeholder="Enter Email" value="<?php echo htmlspecialchars($email); ?>" required>
-
-            <label for="password">Password</label>
-            <input id="password" type="password" name="password" placeholder="Enter Password" required>
-
-            <label for="password-confirm">Confirm Password</label>
-            <input id="password-confirm" type="password" name="password_confirmation" placeholder="Confirm Password" required>
-            
-            <div class="options">
-                <div class="options-container">
-                    <input type="checkbox" id="showPassword" onclick="togglePassword()">
-                    <label for="showPassword">Show Password</label>
-                </div>
-                
+                <input id="email" type="email" name="email" placeholder="Enter your email" value="<?php echo htmlspecialchars($email); ?>" required>
             </div>
 
-            <button type="submit">Register</button>
+            <div class="form-group">
+            <label for="password">Password</label>
+                <div class="password-field">
+                    <input id="password" type="password" name="password" placeholder="Enter your password" required>
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('password')"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+            <label for="password-confirm">Confirm Password</label>
+                <div class="password-field">
+                    <input id="password-confirm" type="password" name="password_confirmation" placeholder="Confirm your password" required>
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword('password-confirm')"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="register-button">Register</button>
         </form>
         
         <!-- Verification Form -->
@@ -782,10 +822,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                 <div class="resend-code">
                     Didn't receive the code? <a href="#" onclick="resendVerificationCode()">Resend Code</a>
                 </div>
-                
-                <div class="back-to-register">
-                    <a href="#" onclick="backToRegistration()">← Back to registration</a>
-                </div>
             </div>
         </div>
         
@@ -793,46 +829,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             <p>Already have an account? <a href="/views/auth/login.php">Login here</a></p>
         </div>
     </div>
- 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-left">
-                <div class="footer-links">
-                    <ul class="space-y-2">
-                        <li><a href="/views/home.html">Home</a></li>
-                        <li><a href="/views/aboutus.html">About Us</a></li>
-                    </ul>
-                </div>
-                <div class="footer-social mt-4">
-                    <a href="#"><img src="/public/images/facebook.png" alt="facebook"></a>
-                    <a href="#"><img src="/public/images/twitter.png" alt="twitter"></a>
-                    <a href="#"><img src="/public/images/instagram.png" alt="instagram"></a>
-                </div>
-            </div>
-            
-            <div class="footer-right">
-                <div class="footer-contact">
-                    <h3 class="text-lg font-bold">CONTACT US</h3>
-                    <p>123 Coffee Street, City Name</p>
-                    <p><strong>Phone:</strong> +1 800 555 6789</p>
-                    <p><strong>E-mail:</strong> support@cuptainsbrew.com</p>
-                    <p><strong>Website:</strong> www.cuptainsbrew.com</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>© Copyright 2025 Cuptain's Brew Cafe. All Rights Reserved.</p>
-        </div>
-    </footer>
 
     <script>
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const confirm = document.getElementById('password-confirm');
-            const type = password.type === 'password' ? 'text' : 'password';
-            password.type = type;
-            confirm.type = type;
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
         
         function setupVerificationInputs() {
@@ -894,47 +905,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         }
         
         function resendVerificationCode() {
+            const email = '<?php echo $_SESSION['register_email'] ?? ''; ?>';
+            if (!email) {
             Swal.fire({
-                title: 'Resend Verification Code',
-                text: 'Sending a new verification code to your email...',
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No email address found in session. Please try registering again.',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Resending Code',
+                text: 'Please wait...',
                 allowOutsideClick: false,
-                didOpen: () => {
+                showConfirmButton: false,
+                willOpen: () => {
                     Swal.showLoading();
                     
-                    fetch('resend_verification.php', {
+                    fetch('/views/auth/resend-code.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: 'email=' + encodeURIComponent('<?php echo $_SESSION['register_email'] ?? ''; ?>')
+                        body: 'email=' + encodeURIComponent(email)
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
+                            // Clear existing inputs
+                            const inputs = document.querySelectorAll('.verification-inputs input');
+                            inputs.forEach(input => input.value = '');
+                            inputs[0].focus();
+                            
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Code Resent',
+                                title: 'Code Sent!',
                                 text: 'A new verification code has been sent to your email.',
                                 customClass: {
                                     confirmButton: 'swal2-confirm'
                                 }
                             });
                         } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Failed to Resend',
-                                text: data.message || 'Failed to resend verification code. Please try again.',
-                                customClass: {
-                                    confirmButton: 'swal2-confirm'
-                                }
-                            });
+                            throw new Error(data.message || 'Failed to send verification code');
                         }
                     })
                     .catch(error => {
+                        console.error('Error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'An error occurred while trying to resend the code.',
+                            text: error.message || 'Failed to send verification code. Please try again.',
                             customClass: {
                                 confirmButton: 'swal2-confirm'
                             }
@@ -942,11 +971,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                     });
                 }
             });
-        }
-        
-        function backToRegistration() {
-            document.getElementById('registration-form').style.display = 'block';
-            document.getElementById('verification-form').style.display = 'none';
         }
         
         document.addEventListener('DOMContentLoaded', function() {

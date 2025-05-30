@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    $address = trim($_POST['address'] ?? '');
     $contact = trim($_POST['contact'] ?? '');
 
     // Server-side validation
@@ -30,10 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($password && strlen($password) < 8) {
         $errors[] = ['field' => 'password', 'message' => 'Password must be at least 8 characters.'];
-    }
-
-    if ($address && strlen($address) > 255) {
-        $errors[] = ['field' => 'address', 'message' => 'Address cannot exceed 255 characters.'];
     }
 
     if ($contact && !preg_match('/^\+?\d{10,20}$/', $contact)) {
@@ -91,11 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $params[] = $hashed_password;
             $types .= 's';
         }
-
-        // Address (allow NULL)
-        $updates[] = 'address = ?';
-        $params[] = $address ?: null;
-        $types .= 's';
 
         // Contact (allow NULL)
         $updates[] = 'contact = ?';

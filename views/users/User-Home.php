@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+// Clear any potentially problematic session variables if user is not properly logged in
+if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
+    unset($_SESSION['loggedin']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +62,7 @@ session_start();
         .image-container {
             position: relative;
             width: 100%;
-            min-height: 650px; 
+            min-height: 700px; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -134,6 +139,105 @@ session_start();
             color: var(--white);
             box-shadow: var(--shadow-medium);
             transform: translateY(-2px);
+        }
+
+        /* Featured Section */
+        .featured-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/public/images/background/home1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        .featured-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .featured-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .featured-title h2 {
+            font-size: 2.5rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .featured-title p {
+            color: var(--secondary-lighter);
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .featured-item {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(5px);
+        }
+
+        .featured-item:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .featured-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .featured-icon img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .featured-item h3 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-item p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .featured-section {
+                padding: 3rem 1rem;
+            }
+
+            .featured-title h2 {
+                font-size: 2rem;
+            }
+
+            .featured-grid {
+                gap: 1.5rem;
+            }
         }
 
         /* Menu Section */
@@ -305,6 +409,7 @@ session_start();
             font-style: normal;
         }
 
+        
         .social-links {
             display: flex;
             gap: 15px;
@@ -373,6 +478,10 @@ session_start();
                 width: 60vw;
                 margin: 0 15px;
             }
+            .image-container{
+            min-height: 430px;
+            border-bottom: 5px solid #1a1310;
+            }
 
             .social-links img {
                 width: 5vw;
@@ -412,12 +521,52 @@ session_start();
         <img src="/public/images/background/home.jpg" alt="Get Started" id="getstarted">
         <div class="centered-home">
             <h1 class="glow">Captain's Brew Cafe</h1>
-            <p>Where every sip is an adventure. We've got your brew covered.<br>
+            <p>Coffee makes everything smooth sailing ⛵️
+                <br>
                Drop anchor, relax, and let your coffee journey begin!</p>
-            <button onclick="window.location.href = '/views/users/user-menu.php'" class="centered-button" id="view-menu-button">View Menu</button>
+            <button onclick="window.location.href = '/views/users/User-Menu.php'" class="centered-button" id="view-menu-button">View Menu</button>
         </div>
     </div>
 
+    <!-- Featured Section -->
+    <section class="featured-section">
+        <div class="featured-container">
+            <div class="featured-title">
+                <h2>We've got your brew covered.</h2>
+                <p>Experience the difference in every cup</p>
+            </div>
+            <div class="featured-grid">
+                <div class="featured-item">
+                    <div class="featured-icon">
+                        <img src="/public/images/icons/coffee-bean.png" alt="Premium Coffee">
+                    </div>
+                    <h3>Premium Coffee</h3>
+                    <p>Carefully selected beans from the finest coffee regions, roasted to perfection for exceptional flavor.</p>
+                </div>
+                <div class="featured-item">
+                    <div class="featured-icon">
+                        <img src="/public/images/icons/chef.png" alt="Expert Baristas">
+                    </div>
+                    <h3>Expert Baristas</h3>
+                    <p>Our skilled baristas craft each beverage with precision and passion, ensuring quality in every cup.</p>
+                </div>
+                <div class="featured-item">
+                    <div class="featured-icon">
+                        <img src="/public/images/icons/ambiance.png" alt="Cozy Ambiance">
+                    </div>
+                    <h3>Cozy Ambiance</h3>
+                    <p>A warm and inviting atmosphere perfect for work, meetings, or relaxing with friends.</p>
+                </div>
+                <div class="featured-item">
+                    <div class="featured-icon">
+                        <img src="/public/images/icons/food.png" alt="Fresh Food">
+                    </div>
+                    <h3>Fresh Food</h3>
+                    <p>Delicious pastries and meals made fresh daily to complement your coffee experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Carousel -->
     <div class="carousel-container">
@@ -436,45 +585,7 @@ session_start();
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h3>Captain's Brew</h3>
-                <p style="opacity: 0.8; margin-bottom: 20px;">Where every sip is an adventure. We've got your brew covered.</p>
-                <div class="social-links">
-                    <a href="#"><img src="/public/images/icons/facebook.png" alt="Facebook"></a>
-                    <a href="#"><img src="/public/images/icons/instagram.png" alt="Instagram"></a>
-                    <a href="#"><img src="/public/images/icons/twitter.png" alt="Twitter"></a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="/index.php">Home</a></li>
-                    <li><a href="/views/users/user-menu.php">Menu</a></li>
-                    <li><a href="/views/users/user-career.php">Careers</li>
-                    <li><a href="/views/users/user-aboutus.php">About Us</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h3>Contact Us</h3>
-                <div class="contact-info">
-                    <p><i>📍</i> 123 Coffee Street, City Name</p>
-                    <p><i>📞</i> +1 800 555 6789</p>
-                    <p><i>✉️</i> support@captainsbrew.com</p>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h3>Opening Hours</h3>
-                <div class="contact-info">
-                    <p><i>⏰</i> Monday - Friday: 7am - 8pm</p>
-                    <p><i>⏰</i> Saturday: 8am - 9pm</p>
-                    <p><i>⏰</i> Sunday: 8am - 6pm</p>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© <?php echo date('Y'); ?> Captain's Brew Cafe. All Rights Reserved.</p>
-        </div>
+    <?php include '../partials/footer.php'; ?>
     </footer>
 
     <!-- Back to Top Button -->

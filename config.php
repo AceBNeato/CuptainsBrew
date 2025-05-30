@@ -1,11 +1,13 @@
 <?php
 
-
-
 $db_host = 'localhost';
 $db_user = 'root';
 $db_pass = ''; // Default XAMPP/WAMP password (change if needed)
 $db_name = 'cafe_db';
+
+// Define cafe location constants
+define('CAFE_LOCATION_LAT', 7.4478); // Tagum City coordinates
+define('CAFE_LOCATION_LON', 125.8078); // Tagum City coordinates
 
 // Enable error reporting
 ini_set('display_errors', 1);
@@ -45,23 +47,47 @@ try {
             item_description TEXT NOT NULL,
             item_price DECIMAL(10, 2) NOT NULL,
             item_image VARCHAR(255) NOT NULL,
+            has_variation BOOLEAN DEFAULT FALSE,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
         ) ENGINE=InnoDB",
 
-        // Users (independent, fixed syntax)
+
+
+        "CREATE TABLE IF NOT EXISTS product_variations (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            product_id INT NOT NULL,
+            variation_type ENUM('Hot', 'Iced') NOT NULL,
+            price DECIMAL(10,2) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB",
+
+
+        // Roles table (for user role management)
+        "CREATE TABLE IF NOT EXISTS roles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(50) NOT NULL UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB",
+
+        // Users (independent, with role reference)
         "CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(255) NOT NULL UNIQUE,
             email VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
+            role_id INT NOT NULL DEFAULT 2, -- Default to regular user role
             verification_code VARCHAR(6),
             verification_sent_at DATETIME,
             is_verified BOOLEAN DEFAULT FALSE,
             address TEXT,
             contact VARCHAR(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            reset_token VARCHAR(64) DEFAULT NULL,
-            reset_expires DATETIME DEFAULT NULL
+            reset_token VARCHAR(255) NULL,
+            reset_expires DATETIME NULL,
+            FOREIGN KEY (role_id) REFERENCES roles(id)
         ) ENGINE=InnoDB",
 
         // Remember Tokens (depends on users)
@@ -82,31 +108,39 @@ try {
             product_id INT NOT NULL,
             quantity INT NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            variation VARCHAR(50) NULL,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-        ) ENGINE=InnoDB;",
+        ) ENGINE=InnoDB",
 
         // Riders (independent)
         "CREATE TABLE IF NOT EXISTS riders (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             contact VARCHAR(20) NOT NULL,
+            password VARCHAR(255) DEFAULT NULL,
+            last_login DATETIME DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB",
 
-        // Orders (depends on users and riders, fixed foreign key)
+        // Orders (depends on users and riders)
         "CREATE TABLE IF NOT EXISTS orders (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT,
             total_amount DECIMAL(10, 2) NOT NULL,
-            status ENUM('Pending', 'Approved', 'Processing', 'Assigned', 'Out for Delivery', 'Delivered', 'Rejected', 'Canceled') DEFAULT 'Pending',
+            status VARCHAR(50) DEFAULT 'Pending',
             delivery_address TEXT NOT NULL,
-            payment_method ENUM('Card', 'COD', 'Digital Wallet') NOT NULL,
+            customer_contact VARCHAR(20) NOT NULL,
+            payment_method VARCHAR(50) NOT NULL,
+            delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 30.00,
+            lat VARCHAR(20) NULL,
+            lon VARCHAR(20) NULL,
             rider_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-            FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL
+            FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
+            cancellation_reason VARCHAR(255) DEFAULT NULL
         ) ENGINE=InnoDB",
 
          // Order Cancellations (depends on orders and users)
@@ -122,6 +156,17 @@ try {
         ) ENGINE=InnoDB",
 
 
+        "CREATE TABLE IF NOT EXISTS order_status_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            order_id INT NOT NULL,
+            status VARCHAR(50) NOT NULL,
+            updated_by INT NOT NULL,
+            updated_by_type ENUM('admin', 'rider', 'system') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB",
+
+
         // Order_items (depends on orders and products)
         "CREATE TABLE IF NOT EXISTS order_items (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -129,6 +174,7 @@ try {
             product_id INT NOT NULL,
             quantity INT NOT NULL,
             price DECIMAL(10, 2) NOT NULL,
+            variation VARCHAR(50) NULL,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
         ) ENGINE=InnoDB",
@@ -138,8 +184,8 @@ try {
             id INT AUTO_INCREMENT PRIMARY KEY,
             order_id INT NOT NULL,
             amount DECIMAL(10, 2) NOT NULL,
-            method ENUM('Card', 'COD', 'Digital Wallet') NOT NULL,
-            status ENUM('Pending', 'Completed', 'Failed') DEFAULT 'Pending',
+            method VARCHAR(50) NOT NULL,
+            status VARCHAR(20) DEFAULT 'Pending',
             transaction_id VARCHAR(255),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
@@ -155,8 +201,33 @@ try {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        ) ENGINE=InnoDB"
+        ) ENGINE=InnoDB",
+
+        
+        // Create login attempts table
+        "CREATE TABLE IF NOT EXISTS login_attempts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ip_address VARCHAR(45) NOT NULL,
+            username VARCHAR(100) NOT NULL,
+            attempt_time DATETIME NOT NULL,
+            INDEX (ip_address),
+            INDEX (attempt_time)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+
+    "CREATE TABLE IF NOT EXISTS rider_activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        rider_id VARCHAR(50) NOT NULL, -- Can be rider ID or 'unknown'
+        activity VARCHAR(255) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        user_agent TEXT,
+        log_time DATETIME NOT NULL,
+        INDEX (rider_id),
+        INDEX (log_time)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+
     ];
+
 
     // Execute queries
     foreach ($queries as $query) {
@@ -165,20 +236,86 @@ try {
         }
     }
 
-    // Insert default categories with explicit IDs to match products
-    $conn->query("INSERT INTO categories (id, name) VALUES
+    // Insert default roles if they don't exist
+    $conn->query("INSERT IGNORE INTO roles (id, name) VALUES 
+        (1, 'admin'),
+        (2, 'user')");
+
+    // Insert default admin account if it doesn't exist
+    $admin_password = password_hash('admin123', PASSWORD_DEFAULT);
+    $conn->query("INSERT IGNORE INTO users (username, email, password, role_id, is_verified) 
+                 VALUES ('admin', 'admin@usep.edu.ph', '$admin_password', 1, 1)");
+
+    // Insert default categories
+    $conn->query("INSERT IGNORE INTO categories (id, name) VALUES
         (1, 'Coffee'),
         (2, 'Non-Coffee'),
         (3, 'Frappe'),
-        (4, 'Milktea')
-        ON DUPLICATE KEY UPDATE name = VALUES(name)");
-
-   
-    
+        (4, 'Milktea')");
 
     global $conn;
 } catch (Exception $e) {
     error_log($e->getMessage(), 3, __DIR__ . '/error.log');
     die("Database error. Check error.log for details.");
+}
+
+// CSRF Protection Functions
+function generateCSRFToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validateCSRFToken($token) {
+    if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+        error_log("CSRF token validation failed", 3, __DIR__ . '/error.log');
+        header('Location: /views/auth/access-denied.php');
+        exit();
+    }
+    return true;
+}
+
+// SQL Injection Prevention - Prepared Statement Helper
+function prepareAndExecute($sql, $params = [], $types = '') {
+    global $conn;
+    
+    try {
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        if (!empty($params)) {
+            if (empty($types)) {
+                $types = str_repeat('s', count($params)); // Default all to string
+            }
+            $stmt->bind_param($types, ...$params);
+        }
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+        return $stmt;
+    } catch (Exception $e) {
+        error_log($e->getMessage(), 3, __DIR__ . '/error.log');
+        return false;
+    }
+}
+
+// Role checking helper function
+function isAdmin($userId) {
+    global $conn;
+    $stmt = prepareAndExecute(
+        "SELECT role_id FROM users WHERE id = ?", 
+        [$userId], 
+        'i'
+    );
+    if ($stmt && $result = $stmt->get_result()) {
+        $user = $result->fetch_assoc();
+        return $user && $user['role_id'] === 1;
+    }
+    return false;
 }
 ?>

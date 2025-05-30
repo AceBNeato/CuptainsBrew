@@ -10,7 +10,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <header class="header">
     <div class="logo-section">
-        <img src="/public/images/logo.png" id="logo" alt="Captain's Brew Cafe Logo" />
+        <img src="/public/images/LOGO.png" id="logo" alt="Captain's Brew Cafe Logo" />
     </div>
     <nav class="nav-menu" id="nav-menu">
         <button class="nav-button <?= $current_page === 'Admin-Menu.php' ? 'active' : '' ?>" onclick="gotoMenu()">Menu</button>
@@ -107,5 +107,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     function gotoAccounts() {
         window.location.href = '/views/admin/Admin-Accounts.php';
+    }
+
+    function showLogoutOverlay() {
+        Swal.fire({
+            title: 'Logout Confirmation',
+            text: 'Are you sure you want to logout?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2C6E8A',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/views/auth/logout.php';
+            }
+        });
     }
 </script>

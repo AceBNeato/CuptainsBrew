@@ -20,17 +20,17 @@
             <div class="footer-col">
                 <h3>Contact Us</h3>
                 <div class="contact-info">
-                    <p><i>📍</i> 5th Avenue, Tagum City</p>
-                    <p><i>📞</i> +1 800 555 6789</p>
-                    <p><i>✉️</i> support@captainsbrew.com</p>
+                    <p><i>📍</i> Purok Malinis 5th Avenue 8100 Tagum City, Philippines</p>
+                    <p><i>📞</i> +63 956 7558 553</p>
+                    <p><i>✉️</i> cuptainsbew@gmail.com</p>
                 </div>
             </div>
             <div class="footer-col">
                 <h3>Opening Hours</h3>
                 <div class="contact-info">
-                    <p><i>⏰</i> Monday - Friday: 7am - 8pm</p>
-                    <p><i>⏰</i> Saturday: 8am - 9pm</p>
-                    <p><i>⏰</i> Sunday: 8am - 6pm</p>
+                    <p><i>⏰</i> Sunday-Thursday: 1pm - 2am</p>
+                    <p><i>⏰</i> Saturday: 6pm - 2am</p>
+                    <p><i>⏰</i> Friday: Closed</p>
                 </div>
             </div>
         </div>

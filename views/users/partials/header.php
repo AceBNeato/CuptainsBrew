@@ -2,6 +2,11 @@
 if (!isset($_SESSION)) {
     session_start();
 }
+
+// Clear any potentially problematic session variables if user is not properly logged in
+if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
+    unset($_SESSION['loggedin']);
+}
 ?>
 
 <header class="header">
@@ -24,16 +29,17 @@ if (!isset($_SESSION)) {
                 <img src="/public/images/icons/profile-icon.png" alt="Profile">
                 <span>
                     <?php 
-                    echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
+                    echo isset($_SESSION['user_id']) && isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Guest'; 
                     ?>
                 </span>
                 <div class="dropdown">
-                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php if (isset($_SESSION['user_id']) && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
                         <a href="/views/users/User-Account.php">My Account</a>
                         <a href="/views/users/User-Purchase.php">My Purchase</a>
                         <a class="nav-button" onclick="showLogoutOverlay()">Logout</a>
                     <?php else: ?>
-                        <a class="nav-button" onclick="window.location.href='/views/auth/login.php'">Login</a>
+                        <a href="/views/auth/login.php">Login</a>
+                        <a href="/views/auth/register.php">Register</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -175,7 +181,6 @@ if (!isset($_SESSION)) {
         height: 36px;
         border-radius: 50%;
         margin-right: 0.75rem;
-        border: 2px solid var(--primary-light);
     }
 
     .profile span {

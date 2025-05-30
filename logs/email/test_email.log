@@ -1,0 +1,9 @@
+2025-05-29 22:01:53 - Starting email test
+Email Configuration Test:
+SMTP Host: smtp.gmail.com
+SMTP Port: 587
+SMTP Secure: tls
+SMTP Auth: Yes
+SMTP Username: gdgarcia00410@usep.edu.ph
+SMTP Password: Set (hidden)
+2025-05-29 22:01:58 - Test email sent successfully to test@example.com

@@ -1,4 +1,3 @@
-
 // LOAD PAGE
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -287,3 +286,145 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 });
+
+// Product Modal Functionality
+let currentProduct = null;
+
+async function showProductModal(product) {
+    currentProduct = product;
+    
+    // Fetch variations if available
+    try {
+        const response = await fetch(`/controllers/get-variations.php?product_id=${product.id}`);
+        const data = await response.json();
+        
+        const variationSelector = document.getElementById('variation-selector');
+        const modalProductPrice = document.getElementById('modalProductPrice');
+        
+        if (data.success && data.variations.length > 0) {
+            // Show variation selector
+            variationSelector.style.display = 'block';
+            
+            // Update variation prices
+            const hotVariation = data.variations.find(v => v.variation_type === 'Hot');
+            const icedVariation = data.variations.find(v => v.variation_type === 'Iced');
+            
+            document.getElementById('hot-variation-price').textContent = hotVariation ? hotVariation.price : product.price;
+            document.getElementById('iced-variation-price').textContent = icedVariation ? icedVariation.price : product.price;
+            
+            // Update price based on selected variation
+            const updatePrice = () => {
+                const selectedVariation = document.querySelector('input[name="variation"]:checked').value;
+                const variation = data.variations.find(v => v.variation_type === selectedVariation);
+                modalProductPrice.textContent = '₱' + (variation ? variation.price : product.price);
+            };
+            
+            // Add change event listeners
+            document.querySelectorAll('input[name="variation"]').forEach(radio => {
+                radio.addEventListener('change', updatePrice);
+            });
+            
+            // Set initial price
+            updatePrice();
+        } else {
+            // Hide variation selector and show base price
+            variationSelector.style.display = 'none';
+            modalProductPrice.textContent = '₱' + product.price;
+        }
+    } catch (error) {
+        console.error('Error fetching variations:', error);
+        // Show base price if variations fetch fails
+        document.getElementById('variation-selector').style.display = 'none';
+        document.getElementById('modalProductPrice').textContent = '₱' + product.price;
+    }
+    
+    // Set other modal content
+    document.getElementById('modalProductImage').src = '/public/' + product.image;
+    document.getElementById('modalProductName').textContent = product.name;
+    document.getElementById('modalProductDesc').textContent = product.desc || 'No description available';
+    document.getElementById('productQuantity').value = 1;
+    
+    // Show modal
+    document.getElementById('productModal').classList.add('active');
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').classList.remove('active');
+    currentProduct = null;
+}
+
+// Cart Functionality
+function addToCart(productId, name, price, image, quantity = 1) {
+    const variation = document.querySelector('input[name="variation"]:checked')?.value;
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+    if (variation) {
+        formData.append('variation', variation);
+    }
+    
+    fetch('/views/users/user-menu.php?action=add_to_cart', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showCartNotification(`${name} (${variation || 'Regular'}) added to cart (${quantity}x)`);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: `${name} (${variation || 'Regular'}) added to cart (${quantity}x)`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            if (data.error === 'User not logged in') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Required',
+                    text: 'Please log in to add items to your cart.',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Go to Login',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/views/auth/login.php';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to add to cart: ' + data.error,
+                });
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred: ' + error.message,
+        });
+    });
+}
+
+// Cart Notification
+function showCartNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'cart-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
