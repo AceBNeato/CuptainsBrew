@@ -17,13 +17,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['loggedin'])) {
 // Fetch orders with product and user details from the database
 $orders = [];
 $sql = "SELECT o.id, o.user_id, o.total_amount, o.status, o.delivery_address, o.payment_method, 
-               o.created_at, o.updated_at, o.rider_id, o.cancellation_reason,
+               o.created_at, o.updated_at, o.rider_id, o.cancellation_reason, o.contact_number,
                u.username, u.email, u.contact, r.name as rider_name
-        FROM orders o 
-        LEFT JOIN users u ON o.user_id = u.id 
-        LEFT JOIN riders r ON o.rider_id = r.id 
+FROM orders o
+LEFT JOIN users u ON o.user_id = u.id
+LEFT JOIN riders r ON o.rider_id = r.id
         WHERE o.status NOT IN ('Rejected', 'Cancelled', 'Delivered')
-        ORDER BY o.created_at DESC";
+ORDER BY o.created_at DESC";
 
 $result = $conn->query($sql);
 
@@ -36,7 +36,8 @@ if ($result && $result->num_rows > 0) {
             'status' => $row['status'],
             'user_name' => $row['username'],
             'user_email' => $row['email'],
-            'user_contact' => $row['contact'],
+            'user_contact' => $row['contact_number'] ? $row['contact_number'] : $row['contact'],
+            'contact_number' => $row['contact_number'],
             'total_amount' => $row['total_amount'],
             'delivery_address' => $row['delivery_address'],
             'payment_method' => $row['payment_method'],
@@ -523,7 +524,6 @@ $conn->close();
       <h3>Items</h3>
       <ul id="review-items"></ul>
       <button class="review-btn" onclick="approveOrder()">Approve</button>
-      <button class="reject-btn" onclick="rejectOrderFromModal()">Reject</button>
     </div>
   </div>
 
@@ -695,14 +695,14 @@ $conn->close();
                 showConfirmButton: false
               }).then(() => {
                 // Remove the row after rejection
-                const orderRow = document.getElementById(`order-${orderId}`);
-                if (orderRow) {
-                  orderRow.remove();
-                  const tbody = document.querySelector('tbody');
-                  if (tbody.children.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-orders-message">No orders at the moment.</td></tr>';
-                  }
-                }
+            const orderRow = document.getElementById(`order-${orderId}`);
+            if (orderRow) {
+              orderRow.remove();
+              const tbody = document.querySelector('tbody');
+              if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-orders-message">No orders at the moment.</td></tr>';
+              }
+            }
               });
             } else {
               Swal.fire({

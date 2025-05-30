@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        $orderId = $data['orderId'] ?? null;
-        $action = $data['action'] ?? null;
-        $status = $data['status'] ?? null;
-        $riderId = $data['riderId'] ?? null;
-        $notify = $data['notify'] ?? false;
+    $orderId = $data['orderId'] ?? null;
+    $action = $data['action'] ?? null;
+    $status = $data['status'] ?? null;
+    $riderId = $data['riderId'] ?? null;
+    $notify = $data['notify'] ?? false;
     }
 
     if (!$orderId || !$status) {
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode($response);
         exit;
     }
-    
+
     // Validate status - include all possible statuses
     $validStatuses = ['Pending', 'Approved', 'Processing', 'Assigned', 'Out for Delivery', 'Delivered', 'Rejected', 'Cancelled', 'Completed'];
     if (!in_array($status, $validStatuses)) {
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        $conn->begin_transaction();
+    $conn->begin_transaction();
         
         // Default action is update if not specified
         $action = $action ?? 'update';
@@ -137,12 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $response['message'] = 'Invalid action';
         }
-        
+
         $conn->commit();
     } catch (Exception $e) {
         if (isset($conn) && $conn instanceof mysqli) {
             try {
-                $conn->rollback();
+        $conn->rollback();
             } catch (Exception $rollbackError) {
                 // Silently ignore rollback errors
             }

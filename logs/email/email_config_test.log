@@ -1,0 +1,7 @@
+Email Configuration Test:
+SMTP Host: smtp.gmail.com
+SMTP Port: 587
+SMTP Secure: tls
+SMTP Auth: Yes
+SMTP Username: gdgarcia00410@usep.edu.ph
+SMTP Password: Set (hidden)

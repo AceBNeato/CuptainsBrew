@@ -118,6 +118,8 @@ try {
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             contact VARCHAR(20) NOT NULL,
+            password VARCHAR(255) DEFAULT NULL,
+            last_login DATETIME DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB",
 
@@ -128,6 +130,7 @@ try {
             total_amount DECIMAL(10, 2) NOT NULL,
             status VARCHAR(50) DEFAULT 'Pending',
             delivery_address TEXT NOT NULL,
+            customer_contact VARCHAR(20) NOT NULL,
             payment_method VARCHAR(50) NOT NULL,
             delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 30.00,
             lat VARCHAR(20) NULL,
@@ -136,7 +139,8 @@ try {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-            FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL
+            FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
+            cancellation_reason VARCHAR(255) DEFAULT NULL
         ) ENGINE=InnoDB",
 
          // Order Cancellations (depends on orders and users)
@@ -150,6 +154,18 @@ try {
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         ) ENGINE=InnoDB",
+
+
+        "CREATE TABLE IF NOT EXISTS order_status_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            order_id INT NOT NULL,
+            status VARCHAR(50) NOT NULL,
+            updated_by INT NOT NULL,
+            updated_by_type ENUM('admin', 'rider', 'system') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB",
+
 
         // Order_items (depends on orders and products)
         "CREATE TABLE IF NOT EXISTS order_items (
@@ -185,8 +201,33 @@ try {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        ) ENGINE=InnoDB"
+        ) ENGINE=InnoDB",
+
+        
+        // Create login attempts table
+        "CREATE TABLE IF NOT EXISTS login_attempts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ip_address VARCHAR(45) NOT NULL,
+            username VARCHAR(100) NOT NULL,
+            attempt_time DATETIME NOT NULL,
+            INDEX (ip_address),
+            INDEX (attempt_time)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+
+    "CREATE TABLE IF NOT EXISTS rider_activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        rider_id VARCHAR(50) NOT NULL, -- Can be rider ID or 'unknown'
+        activity VARCHAR(255) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        user_agent TEXT,
+        log_time DATETIME NOT NULL,
+        INDEX (rider_id),
+        INDEX (log_time)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+
     ];
+
 
     // Execute queries
     foreach ($queries as $query) {

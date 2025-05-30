@@ -93,12 +93,12 @@ try {
     
     if ($table_check && $table_check->num_rows > 0) {
         // Log the status change if table exists
-        $log_query = "INSERT INTO order_status_logs (order_id, status, updated_by, updated_by_type, created_at)
-                     VALUES ($order_id, '$status', $rider_id, 'rider', NOW())";
-        $log_result = $conn->query($log_query);
-        
-        if (!$log_result) {
-            logRiderError("Failed to insert into order_status_logs: " . $conn->error);
+    $log_query = "INSERT INTO order_status_logs (order_id, status, updated_by, updated_by_type, created_at)
+                 VALUES ($order_id, '$status', $rider_id, 'rider', NOW())";
+    $log_result = $conn->query($log_query);
+    
+    if (!$log_result) {
+        logRiderError("Failed to insert into order_status_logs: " . $conn->error);
         }
     } else {
         // Create the table if it doesn't exist

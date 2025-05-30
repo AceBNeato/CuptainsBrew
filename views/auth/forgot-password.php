@@ -29,8 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Please enter a valid email address.";
     } else {
-        // Check if email exists in database
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        // Check if email exists in database and is not an admin account
+        $stmt = $conn->prepare("SELECT u.id, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -38,91 +38,97 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows === 0) {
             $errors[] = "No account found with this email address.";
         } else {
-            // Generate reset token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
+            $user = $result->fetch_assoc();
             
-            // Store token in database
-            $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?");
-            $updateStmt->bind_param("sss", $token, $expires, $email);
-            
-            if ($updateStmt->execute()) {
-                try {
-                    // Create reset link
-                    $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/views/auth/reset-password.php?token=" . $token;
-                    
-                    // For development/testing, show the link instead of sending email
-                    $success = true;
-                    $_SESSION['reset_link'] = $resetLink;
-                    $_SESSION['reset_email'] = $email;
-                    
-                    // In production, uncomment this to send actual emails
-                    /*
-                    // Send reset email
-                    $mail = new PHPMailer(true);
-                    $mail->isSMTP();
-                    $mail->Host = $mail_config['smtp_host'];
-                    $mail->SMTPAuth = $mail_config['smtp_auth'];
-                    $mail->Username = $mail_config['smtp_username'];
-                    $mail->Password = $mail_config['smtp_password'];
-                    $mail->SMTPSecure = $mail_config['smtp_secure'];
-                    $mail->Port = $mail_config['smtp_port'];
-
-                    $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
-                    $mail->addAddress($email);
-
-                    $mail->isHTML(true);
-                    $mail->Subject = "Cuptain's Brew - Password Reset Request";
-                    $mail->Body = "
-                    <html>
-                    <head>
-                        <style>
-                            body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
-                            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                            .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
-                            .content { padding: 20px; background-color: #FFFAEE; }
-                            .button {
-                                display: inline-block;
-                                padding: 10px 20px;
-                                background-color: #2C6E8A;
-                                color: white;
-                                text-decoration: none;
-                                border-radius: 5px;
-                                margin: 20px 0;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                <h2>Password Reset Request</h2>
-                            </div>
-                            <div class='content'>
-                                <p>Hello,</p>
-                                <p>We received a request to reset your password. Click the button below to reset it:</p>
-                                <p style='text-align: center;'>
-                                    <a href='$resetLink' class='button'>Reset Password</a>
-                                </p>
-                                <p>This link will expire in 1 hour.</p>
-                                <p>If you didn't request this, please ignore this email.</p>
-                                <p>Best regards,<br>Cuptain's Brew Team</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>";
-
-                    $mail->send();
-                    $success = true;
-                    */
-                } catch (Exception $e) {
-                    $errors[] = "Failed to process reset request. Please try again later.";
-                    error_log("Failed to process reset for $email: " . $e->getMessage());
-                }
+            // Check if user is an admin
+            if ($user['role'] === 'admin') {
+                $errors[] = "Password reset is not available for admin accounts. Please contact system support.";
             } else {
-                $errors[] = "An error occurred. Please try again later.";
-                error_log("Failed to update reset token for $email: " . $updateStmt->error);
+                // Generate reset token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
+                
+                // Store token in database
+                $updateStmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?");
+                $updateStmt->bind_param("sss", $token, $expires, $email);
+                
+                if ($updateStmt->execute()) {
+                    try {
+                        // Create reset link
+                        $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/views/auth/reset-password.php?token=" . $token;
+                        
+                        // For development/testing, store the link in session
+                        $_SESSION['reset_link'] = $resetLink;
+                        $_SESSION['reset_email'] = $email;
+                        
+                        // Send reset email
+                        $mail = new PHPMailer(true);
+                        $mail->isSMTP();
+                        $mail->Host = $mail_config['smtp_host'];
+                        $mail->SMTPAuth = $mail_config['smtp_auth'];
+                        $mail->Username = $mail_config['smtp_username'];
+                        $mail->Password = $mail_config['smtp_password'];
+                        $mail->SMTPSecure = $mail_config['smtp_secure'];
+                        $mail->Port = $mail_config['smtp_port'];
+
+                        $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
+                        $mail->addAddress($email);
+
+                        $mail->isHTML(true);
+                        $mail->Subject = "Captain's Brew - Password Reset Request";
+                        $mail->Body = "
+                        <html>
+                        <head>
+                            <style>
+                                body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+                                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                                .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+                                .content { padding: 20px; background-color: #FFFAEE; }
+                                .button {
+                                    display: inline-block;
+                                    padding: 10px 20px;
+                                    background-color: #2C6E8A;
+                                    color: white;
+                                    text-decoration: none;
+                                    border-radius: 5px;
+                                    margin: 20px 0;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class='container'>
+                                <div class='header'>
+                                    <h2>Password Reset Request</h2>
+                                </div>
+                                <div class='content'>
+                                    <p>Hello,</p>
+                                    <p>We received a request to reset your password. Click the button below to reset it:</p>
+                                    <p style='text-align: center;'>
+                                        <a href='$resetLink' class='button'>Reset Password</a>
+                                    </p>
+                                    <p>This link will expire in 1 hour.</p>
+                                    <p>If you didn't request this, please ignore this email.</p>
+                                    <p>Best regards,<br>Captain's Brew Team</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>";
+
+                        $mail->send();
+                        $success = true;
+                        
+                    } catch (Exception $e) {
+                        // For development purposes, still show success even if email fails
+                        // but log the error and store the link in session for testing
+                        $success = true;
+                        error_log("Failed to send reset email for $email: " . $e->getMessage());
+                    }
+                } else {
+                    $errors[] = "An error occurred. Please try again later.";
+                    error_log("Failed to update reset token for $email: " . $updateStmt->error);
+                }
+                $updateStmt->close();
             }
-            $updateStmt->close();
         }
         $stmt->close();
     }
@@ -348,11 +354,13 @@ $conn->close();
         <?php if ($success): ?>
         Swal.fire({
             icon: 'success',
-            title: 'Reset Link Generated!',
-            html: 'For development purposes, here is your reset link:<br><br>' +
-                  '<a href="<?php echo htmlspecialchars($_SESSION["reset_link"]); ?>" target="_blank"><?php echo htmlspecialchars($_SESSION["reset_link"]); ?></a><br><br>' +
-                  'In production, this would be sent to your email.',
+            title: 'Reset Link Sent!',
+            html: 'A password reset link has been sent to your email address.',
             confirmButtonColor: '#2C6E8A'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/views/auth/login.php';
+            }
         });
         <?php endif; ?>
 

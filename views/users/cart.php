@@ -73,7 +73,7 @@ function get_user_address($conn, $user_id) {
 }
 
 // Simple checkout function
-function simple_checkout($conn, $user_id, $subtotal, $delivery_address, $payment_method, $delivery_fee, $lat, $lon, $selected_cart_ids = []) {
+function simple_checkout($conn, $user_id, $subtotal, $delivery_address, $payment_method, $delivery_fee, $lat, $lon, $contact_number, $selected_cart_ids = []) {
     try {
         // Start transaction
         $conn->begin_transaction();
@@ -82,15 +82,15 @@ function simple_checkout($conn, $user_id, $subtotal, $delivery_address, $payment
     $total = $subtotal + $delivery_fee;
         $status = 'Pending';
         
-        $order_sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, payment_method, delivery_fee, lat, lon) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $order_sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, payment_method, delivery_fee, lat, lon, contact_number) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $order_stmt = $conn->prepare($order_sql);
         
         // Convert lat/lon to strings to avoid type issues
         $lat_str = strval($lat);
         $lon_str = strval($lon);
         
-        $order_stmt->bind_param("idsssdss", $user_id, $total, $status, $delivery_address, $payment_method, $delivery_fee, $lat_str, $lon_str);
+        $order_stmt->bind_param("idsssdsss", $user_id, $total, $status, $delivery_address, $payment_method, $delivery_fee, $lat_str, $lon_str, $contact_number);
         
         if (!$order_stmt->execute()) {
             throw new Exception("Failed to create order: " . $order_stmt->error);
@@ -213,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     $lat = $_POST['lat'] ?? CAFE_LOCATION_LAT;
     $lon = $_POST['lon'] ?? CAFE_LOCATION_LON;
     $selected_items_json = $_POST['selected_items'] ?? '';
+    $contact_number = $_POST['contact_number'] ?? $user_contact;
     
     // If payment method contains COD, standardize it
     if (stripos($payment_method, 'COD') !== false) {
@@ -245,7 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             }
             
             // Use the selected subtotal for checkout
-            $result = simple_checkout($conn, $user_id, $selected_subtotal, $delivery_address, $payment_method, $delivery_fee, $lat, $lon, $selected_cart_ids);
+            $result = simple_checkout($conn, $user_id, $selected_subtotal, $delivery_address, $payment_method, $delivery_fee, $lat, $lon, $contact_number, $selected_cart_ids);
             
         if ($result['success']) {
             header("Location: /views/users/User-Purchase.php?order_id=" . $result['order_id']);
@@ -522,6 +523,11 @@ $conn->close();
                                         <option value="Digital Wallet">Digital Wallet (GCash, PayMaya, etc.)</option>
                                         <option value="Card">Credit/Debit Card</option>
                                     </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="contact_number" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                                    <input type="text" name="contact_number" id="contact_number" value="<?= htmlspecialchars($user_contact) ?>" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#2C6E8A] focus:border-[#2C6E8A]" required placeholder="Enter your contact number">
                                 </div>
                                 
                                 <div class="border-t border-gray-200 pt-4">

@@ -2,6 +2,13 @@
 ob_start();
 session_start();
 require_once __DIR__ . '/../../config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../config/mail.php';
+
+// PHPMailer imports (will be used for password reset)
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 $db_host = 'localhost';
 $db_user = 'root'; 
@@ -94,46 +101,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if (password_verify($password, $user['password'])) {
                         // Check if user is verified
                         if (!$user['is_verified']) {
+                            // Instead of redirecting to verify.php, store user ID and show SweetAlert
                             $_SESSION['unverified_user_id'] = $user['id'];
-                            header("Location: /views/auth/verify.php");
+                            $_SESSION['unverified_email'] = $email;
+                            
+                            // Set a flag to show SweetAlert for unverified account
+                            $show_verification_alert = true;
+                            $unverified_email = $email;
+                        } else {
+                            // Password is correct, start session
+                            $_SESSION['user_id'] = $user['id'];
+                            $_SESSION['username'] = $user['username'];
+                            $_SESSION['role'] = $user['role'];
+                            $_SESSION['loggedin'] = true;
+                            
+                            // Handle remember me
+                            if ($remember) {
+                                $token = bin2hex(random_bytes(64));
+                                $expires = time() + 60 * 60 * 24 * 30; // 30 days
+                                
+                                // Store token using prepared statement
+                                $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
+                                prepareAndExecute($insertToken, [$user['id'], $token], 'is');
+                                
+                                // Set secure cookie
+                                setcookie('remember_token', $token, [
+                                    'expires' => $expires,
+                                    'path' => '/',
+                                    'secure' => true,
+                                    'httponly' => true,
+                                    'samesite' => 'Strict'
+                                ]);
+                            }
+                            
+                            // Regenerate session ID for security
+                            session_regenerate_id(true);
+                            
+                            // Redirect based on role
+                            if ($user['role'] === 'admin') {
+                                header("Location: /views/admin/Admin-Menu.php");
+                            } else {
+                                header("Location: /views/users/User-Home.php");
+                            }
                             exit();
                         }
-
-                        // Password is correct, start session
-                        $_SESSION['user_id'] = $user['id'];
-                        $_SESSION['username'] = $user['username'];
-                        $_SESSION['role'] = $user['role'];
-                        $_SESSION['loggedin'] = true;
-                        
-                        // Handle remember me
-                        if ($remember) {
-                            $token = bin2hex(random_bytes(64));
-                            $expires = time() + 60 * 60 * 24 * 30; // 30 days
-                            
-                            // Store token using prepared statement
-                            $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
-                            prepareAndExecute($insertToken, [$user['id'], $token], 'is');
-                            
-                            // Set secure cookie
-                            setcookie('remember_token', $token, [
-                                'expires' => $expires,
-                                'path' => '/',
-                                'secure' => true,
-                                'httponly' => true,
-                                'samesite' => 'Strict'
-                            ]);
-                        }
-                        
-                        // Regenerate session ID for security
-                        session_regenerate_id(true);
-                        
-                        // Redirect based on role
-                        if ($user['role'] === 'admin') {
-                            header("Location: /views/admin/Admin-Menu.php");
-                        } else {
-                            header("Location: /views/users/User-Home.php");
-                        }
-                        exit();
                     } else {
                         $errors[] = "Invalid credentials";
                     }
@@ -154,8 +165,8 @@ if (isset($_GET['forgot'])) {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Invalid email format";
     } else {
-        // Check if email exists
-        $sql = "SELECT id FROM users WHERE email = ?";
+        // Check if email exists and is not an admin account
+        $sql = "SELECT u.id, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -164,33 +175,115 @@ if (isset($_GET['forgot'])) {
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
             
-            // Generate reset token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
-            
-            // Store token in database
-            $updateSql = "UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?";
-            $updateStmt = $conn->prepare($updateSql);
-            $updateStmt->bind_param("ssi", $token, $expires, $user['id']);
-            $updateStmt->execute();
-            $updateStmt->close();
-            
-            // Send email (in a real implementation)
-            $resetLink = "http://yourdomain.com/views/auth/reset-password.php?token=$token";
-            
-            // For demo purposes, we'll just show the link
-            echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Password Reset Link',
-                        html: 'A password reset link has been generated:<br><br><a href=\"$resetLink\">$resetLink</a>',
-                        customClass: {
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
-                });
-            </script>";
+            // Check if user is an admin
+            if ($user['role'] === 'admin') {
+                $errors[] = "Password reset is not available for admin accounts. Please contact system support.";
+            } else {
+                // Generate reset token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
+                
+                // Store token in database
+                $updateSql = "UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?";
+                $updateStmt = $conn->prepare($updateSql);
+                $updateStmt->bind_param("ssi", $token, $expires, $user['id']);
+                $updateStmt->execute();
+                $updateStmt->close();
+                
+                // Create reset link
+                $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/views/auth/reset-password.php?token=" . $token;
+                
+                // For development purposes only - store the link in session
+                $_SESSION['reset_link'] = $resetLink;
+                
+                try {
+                    // Send email using PHPMailer
+                    $mail = new PHPMailer(true);
+                    $mail->isSMTP();
+                    $mail->Host = $mail_config['smtp_host'];
+                    $mail->SMTPAuth = $mail_config['smtp_auth'];
+                    $mail->Username = $mail_config['smtp_username'];
+                    $mail->Password = $mail_config['smtp_password'];
+                    $mail->SMTPSecure = $mail_config['smtp_secure'];
+                    $mail->Port = $mail_config['smtp_port'];
+                    
+                    $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
+                    $mail->addAddress($email);
+                    
+                    $mail->isHTML(true);
+                    $mail->Subject = "Captain's Brew - Password Reset Request";
+                    $mail->Body = "
+                    <html>
+                    <head>
+                        <style>
+                            body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+                            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                            .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
+                            .content { padding: 20px; background-color: #FFFAEE; }
+                            .button {
+                                display: inline-block;
+                                padding: 10px 20px;
+                                background-color: #2C6E8A;
+                                color: white;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                margin: 20px 0;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Password Reset Request</h2>
+                            </div>
+                            <div class='content'>
+                                <p>Hello,</p>
+                                <p>We received a request to reset your password. Click the button below to reset it:</p>
+                                <p style='text-align: center;'>
+                                    <a href='$resetLink' class='button'>Reset Password</a>
+                                </p>
+                                <p>This link will expire in 1 hour.</p>
+                                <p>If you didn't request this, please ignore this email.</p>
+                                <p>Best regards,<br>Captain's Brew Team</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>";
+                    
+                    $mail->send();
+                    
+                    // Show success message
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Reset Link Sent',
+                                text: 'A password reset link has been sent to your email address.',
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            });
+                        });
+                    </script>";
+                    
+                } catch (Exception $e) {
+                    // For development purposes, show the link in SweetAlert if email sending fails
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Reset Link Generated',
+                                
+                                customClass: {
+                                    confirmButton: 'swal2-confirm'
+                                }
+                            });
+                        });
+                    </script>";
+                    
+                    error_log("Failed to send password reset email to $email: " . $e->getMessage());
+                }
+            }
         } else {
             $errors[] = "No account found with that email";
         }
@@ -422,6 +515,14 @@ if (isset($_GET['forgot'])) {
             text-decoration: underline;
         }
 
+
+
+        .input-field{
+            height: 2.625rem;
+            margin: 0;
+            padding: 1rem;
+        }
+
         .login-button {
             width: 100%;
             padding: 0.875rem;
@@ -635,6 +736,152 @@ if (isset($_GET['forgot'])) {
             text: '<?php echo htmlspecialchars($errors[0]); ?>',
             confirmButtonColor: '#2C6E8A'
         });
+        <?php endif; ?>
+
+        // Show verification alert for unverified users
+        <?php if (isset($show_verification_alert) && $show_verification_alert): ?>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Email Not Verified',
+            html: `
+                <p>Your email address has not been verified yet.</p>
+                <p>Please enter the verification code sent to your email:</p>
+                <input type="text" id="verification-code" class="input-field" placeholder="Enter 6-digit code">
+                <p class="mt-3 text-sm">Didn't receive a code? Click "Resend Code" below.</p>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Verify Email',
+            cancelButtonText: 'Resend Code',
+            confirmButtonColor: '#2C6E8A',
+            cancelButtonColor: '#4a3b2b',
+            showCloseButton: true,
+            preConfirm: () => {
+                const code = Swal.getPopup().querySelector('#verification-code').value;
+                if (!code) {
+                    Swal.showValidationMessage('Please enter verification code');
+                    return false;
+                }
+                return { code };
+            },
+            allowOutsideClick: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { code } = result.value;
+                
+                // Show loading indicator
+                Swal.fire({
+                    title: 'Verifying...',
+                    html: 'Please wait while we verify your email',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Send AJAX request to verify code
+                const formData = new FormData();
+                formData.append('code', code);
+
+                fetch('/controllers/verify-user.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message and redirect
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Email Verified!',
+                            text: data.message,
+                            confirmButtonColor: '#2C6E8A',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = data.redirect;
+                        });
+                    } else {
+                        // Show error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Verification Failed',
+                            text: data.message || 'Invalid verification code.',
+                            confirmButtonColor: '#2C6E8A',
+                            showCancelButton: true,
+                            confirmButtonText: 'Try Again',
+                            cancelButtonText: 'Resend Code',
+                        }).then((result) => {
+                            if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                                // User clicked "Resend Code"
+                                handleResendCode();
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Verification Failed',
+                        text: 'An unexpected error occurred. Please try again later.',
+                        confirmButtonColor: '#2C6E8A'
+                    });
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // User clicked "Resend Code"
+                handleResendCode();
+            }
+        });
+
+        // Function to handle resending verification code
+        function handleResendCode() {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Sending...',
+                html: 'Please wait while we send a new verification code',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Send AJAX request to resend verification code
+            const formData = new FormData();
+            formData.append('email', '<?php echo htmlspecialchars($unverified_email); ?>');
+
+            fetch('/views/auth/resend-code.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Code Sent!',
+                        text: 'A new verification code has been sent to your email.',
+                        confirmButtonColor: '#2C6E8A'
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Send Code',
+                        text: data.message || 'An error occurred while sending the verification code.',
+                        confirmButtonColor: '#2C6E8A'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to Send Code',
+                    text: 'An unexpected error occurred. Please try again later.',
+                    confirmButtonColor: '#2C6E8A'
+                });
+            });
+        }
         <?php endif; ?>
     </script>
 </body>

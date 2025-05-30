@@ -27,7 +27,7 @@ if (empty($token)) {
     exit();
 }
 
-$stmt = $conn->prepare("SELECT email, reset_expires FROM users WHERE reset_token = ?");
+$stmt = $conn->prepare("SELECT u.email, u.reset_expires, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.reset_token = ?");
 $stmt->bind_param("s", $token);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -36,7 +36,13 @@ if ($result->num_rows === 0) {
     $errors[] = "Invalid or expired reset link.";
 } else {
     $user = $result->fetch_assoc();
-    if (strtotime($user['reset_expires']) < time()) {
+    
+    // Check if user is an admin
+    if ($user['role'] === 'admin') {
+        $errors[] = "Password reset is not available for admin accounts. Please contact system support.";
+    } 
+    // Check if token is expired
+    else if (strtotime($user['reset_expires']) < time()) {
         $errors[] = "This reset link has expired. Please request a new one.";
     }
 }

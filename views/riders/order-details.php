@@ -341,7 +341,7 @@ $conn->close();
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Contact:</div>
-                        <div class="detail-value"><?= htmlspecialchars($order['contact']) ?></div>
+                        <div class="detail-value"><?= htmlspecialchars($order['contact_number'] ? $order['contact_number'] : $order['contact']) ?></div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Delivery Address:</div>

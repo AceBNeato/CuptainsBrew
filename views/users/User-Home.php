@@ -479,10 +479,7 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
                 margin: 0 15px;
             }
             .image-container{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 550px;
+            min-height: 430px;
             border-bottom: 5px solid #1a1310;
             }
 

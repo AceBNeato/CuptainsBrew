@@ -26,9 +26,17 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit();
 }
 
-// Log the logout
-logRiderError("Rider ID: $rider_id logged out successfully");
+// Update last_login in database before logout
+if ($rider_id !== 'unknown') {
+    try {
+        $stmt = $conn->prepare("UPDATE riders SET last_login = NOW() WHERE id = ?");
+        $stmt->bind_param("i", $rider_id);
+        $stmt->execute();
+    } catch (Exception $e) {
+        logRiderError("Failed to update last_login for rider ID: $rider_id: " . $e->getMessage());
+    }
+}
 
-// Logout rider
+// Logout rider (this function now includes activity logging)
 logoutRider();
 ?> 

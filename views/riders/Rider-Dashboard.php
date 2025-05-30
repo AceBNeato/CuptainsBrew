@@ -60,7 +60,7 @@ try {
     }
 
     // Fetch completed orders (last 7 days)
-    $completed_query = "SELECT o.*, u.username as customer_name
+    $completed_query = "SELECT o.*, u.username as customer_name, u.contact as customer_contact
                        FROM orders o
                        LEFT JOIN users u ON o.user_id = u.id
                        WHERE o.rider_id = $rider_id
@@ -120,8 +120,12 @@ function getCSRFToken() {
     <link rel="icon" href="/public/images/logo.png" sizes="any" />
     <!-- SweetAlert2 CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Font Awesome CSS CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- SweetAlert2 JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom JS -->
+    <script src="/public/js/rider-password.js" defer></script>
     <style>
         * {
             margin: 0;
@@ -170,7 +174,7 @@ function getCSRFToken() {
             color: #4a3b2b;
         }
 
-        .logout-btn {
+        .logout-btn, .change-password-btn {
             background: #2C6E8A;
             color: #FFFFFF;
             border: none;
@@ -181,8 +185,17 @@ function getCSRFToken() {
             transition: all 0.3s ease;
         }
 
-        .logout-btn:hover {
+        .logout-btn:hover, .change-password-btn:hover {
             background: #235A73;
+        }
+        
+        .change-password-btn {
+            background: #4a3b2b;
+            margin-right: 0.5rem;
+        }
+        
+        .change-password-btn:hover {
+            background: #362c20;
         }
 
         .main-content {
@@ -410,7 +423,8 @@ function getCSRFToken() {
         </div>
         <div class="user-info">
             <span class="user-name"><?= htmlspecialchars($rider['name']) ?></span>
-            <form action="/controllers/rider-logout.php" method="POST">
+            <button class="change-password-btn" id="changePasswordBtn">Change Password</button>
+            <form action="/controllers/rider-logout.php" method="POST" id="logout-form">
                 <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
@@ -454,24 +468,24 @@ function getCSRFToken() {
                     <?php foreach ($orders as $order): ?>
                         <div class="order-card">
                             <span class="status-badge <?= $order['status'] === 'Assigned' ? 'status-assigned' : 'status-active' ?>">
-                                <?= htmlspecialchars($order['status']) ?>
+                                <?= htmlspecialchars($order['status'] ?? '') ?>
                             </span>
                             <div class="order-header">
-                                <div class="order-id">Order #<?= htmlspecialchars($order['id']) ?></div>
+                                <div class="order-id">Order #<?= htmlspecialchars($order['id'] ?? '') ?></div>
                                 <div class="order-date"><?= date('M d, g:i A', strtotime($order['created_at'])) ?></div>
                             </div>
                             <div class="order-details">
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Customer:</span> 
-                                    <?= htmlspecialchars($order['customer_name']) ?>
+                                    <?= htmlspecialchars($order['customer_name'] ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Contact:</span> 
-                                    <?= htmlspecialchars($order['customer_contact']) ?>
+                                    <?= htmlspecialchars(($order['contact_number'] ? $order['contact_number'] : $order['customer_contact']) ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Address:</span> 
-                                    <?= htmlspecialchars($order['delivery_address']) ?>
+                                    <?= htmlspecialchars($order['delivery_address'] ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Amount:</span> 
@@ -479,7 +493,7 @@ function getCSRFToken() {
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Payment:</span> 
-                                    <?= htmlspecialchars($order['payment_method']) ?>
+                                    <?= htmlspecialchars($order['payment_method'] ?? 'N/A') ?>
                                 </div>
                             </div>
                             <div class="order-actions">
@@ -515,17 +529,21 @@ function getCSRFToken() {
                         <div class="order-card">
                             <span class="status-badge status-active">Delivered</span>
                             <div class="order-header">
-                                <div class="order-id">Order #<?= htmlspecialchars($order['id']) ?></div>
+                                <div class="order-id">Order #<?= htmlspecialchars($order['id'] ?? '') ?></div>
                                 <div class="order-date"><?= date('M d, g:i A', strtotime($order['created_at'])) ?></div>
                             </div>
                             <div class="order-details">
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Customer:</span> 
-                                    <?= htmlspecialchars($order['customer_name']) ?>
+                                    <?= htmlspecialchars($order['customer_name'] ?? 'N/A') ?>
+                                </div>
+                                <div class="order-detail-item">
+                                    <span class="order-detail-label">Contact:</span> 
+                                    <?= htmlspecialchars(($order['contact_number'] ? $order['contact_number'] : $order['customer_contact']) ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Address:</span> 
-                                    <?= htmlspecialchars($order['delivery_address']) ?>
+                                    <?= htmlspecialchars($order['delivery_address'] ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Amount:</span> 
@@ -703,5 +721,44 @@ function getCSRFToken() {
             }
         }
     </script>
+    
+    <!-- Password Change Modal -->
+    <div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 1.5rem; color: #2C6E8A;">Change Password</h2>
+            
+            <form id="changePasswordForm">
+                <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
+                <div style="margin-bottom: 1rem;">
+                    <label for="currentPassword" style="display: block; margin-bottom: 0.5rem;">Current Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="currentPassword" name="currentPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px;" required>
+                        <i class="fas fa-eye password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6B7280;" onclick="togglePasswordVisibility('currentPassword', this)"></i>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label for="newPassword" style="display: block; margin-bottom: 0.5rem;">New Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="newPassword" name="newPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px;" required>
+                        <i class="fas fa-eye password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6B7280;" onclick="togglePasswordVisibility('newPassword', this)"></i>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="confirmPassword" style="display: block; margin-bottom: 0.5rem;">Confirm New Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" name="confirmPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px;" required>
+                        <i class="fas fa-eye password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6B7280;" onclick="togglePasswordVisibility('confirmPassword', this)"></i>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between;">
+                    <button type="button" id="cancelPasswordChange" style="padding: 0.75rem 1rem; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 0.75rem 1rem; background: #2C6E8A; color: white; border: none; border-radius: 6px; cursor: pointer;">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html> 
