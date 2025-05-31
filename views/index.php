@@ -620,7 +620,11 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
             <p>Embark on a coffee adventure with us! Enjoy handcrafted beverages and delightful treats in a cozy atmosphere. Sign in to start your journey or explore our menu as a guest.</p>
             <div class="hero-buttons">
                 <?php if (isset($_SESSION['user_id']) && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
-                    <button class="hero-button" onclick="window.location.href = '/views/users/User-Menu.php'">Explore Menu</button>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                        <button class="hero-button" onclick="window.location.href = '/views/admin/Admin-Menu.php'">Admin Dashboard</button>
+                    <?php else: ?>
+                        <button class="hero-button" onclick="window.location.href = '/views/users/User-Menu.php'">Explore Menu</button>
+                    <?php endif; ?>
                 <?php else: ?>
                     <button class="hero-button" onclick="window.location.href = '/views/auth/login.php'">Login</button>
                     <button class="hero-button secondary" onclick="window.location.href = '/views/auth/register.php'">Register</button>

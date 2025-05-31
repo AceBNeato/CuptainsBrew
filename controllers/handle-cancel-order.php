@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
     $reason = isset($_POST['reason']) ? trim($_POST['reason']) : '';
     $custom_reason = isset($_POST['custom_reason']) ? trim($_POST['custom_reason']) : '';
 } else {
-    $data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true);
     $order_id = isset($data['order_id']) ? (int)$data['order_id'] : 0;
-    $reason = isset($data['reason']) ? trim($data['reason']) : '';
+$reason = isset($data['reason']) ? trim($data['reason']) : '';
     $custom_reason = isset($data['custom_reason']) ? trim($data['custom_reason']) : '';
 }
 
@@ -56,7 +56,7 @@ try {
     $check_stmt->execute();
     $result = $check_stmt->get_result();
 
-    if ($result->num_rows === 0) {
+if ($result->num_rows === 0) {
         throw new Exception('Order not found');
     }
     

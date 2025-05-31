@@ -270,76 +270,151 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
 
         /* Menu Cards */
         .menu-card {
-            display: grid;
-            margin: 2vw;
-            grid-template-columns: 150px 1fr auto;
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            overflow: hidden;
             transition: var(--transition);
-            align-items: center;
-            gap: 1.5rem;
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            margin: 0 1.5rem 1.5rem 1.5rem;
+            align-items: stretch;
+            min-height: 180px;
         }
 
         .menu-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
             box-shadow: var(--shadow-medium);
         }
 
+        .menu-image-container {
+            flex-shrink: 0;
+            width: 180px;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
         .menu-image {
-            width: 150px;
-            height: 150px;
-            border-radius: var(--border-radius);
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .menu-card:hover .menu-image {
+            transform: scale(1.05);
         }
 
         .menu-content {
+            padding: 1.5rem;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            justify-content: space-between;
+        }
+
+        .menu-content-top {
+            flex-grow: 1;
         }
 
         .menu-title {
             font-size: 1.5rem;
-            color: var(--primary-dark);
             font-weight: 600;
-            margin: 0;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
         }
 
         .menu-price {
             font-size: 1.25rem;
-            color: var(--secondary);
             font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
         }
 
         .menu-desc {
             font-size: 0.95rem;
             color: var(--secondary);
+            opacity: 0.8;
+            margin-bottom: 1rem;
             line-height: 1.5;
-            opacity: 0.9;
         }
 
         .menu-manage {
             background: var(--primary);
             color: var(--white);
             border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
             transition: var(--transition);
         }
 
         .menu-manage:hover {
             background: var(--primary-dark);
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(44, 110, 138, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .menu-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .review-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .review-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .menu-card-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .menu-card-stars {
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .menu-card-review-count {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .hot-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #f44336;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .no-items {
@@ -622,18 +697,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'add_to_cart') {
             }
 
             .menu-card {
-                display: flex;
                 flex-direction: column;
-                align-items: center;
-                text-align: center;
-                padding: 1rem;
             }
 
             .menu-image {
                 width: 100%;
-                height: auto;
-                max-height: 200px;
-                margin-top: -1rem;
+                height: 200px;
             }
 
             .menu-content {
@@ -830,11 +899,45 @@ try {
                 $desc = htmlspecialchars($row['item_description'], ENT_QUOTES);
                 $image = htmlspecialchars($row['item_image'], ENT_QUOTES);
                 $isLoggedIn = isset($_SESSION['user_id']);
-                $buttonAttributes = $isLoggedIn ? '' : 'disabled style="opacity: 0.5; cursor: not-allowed;" title="Please log in to add to cart"';
-
-                // Handle price display based on variations
-                $priceDisplay = "₱ {$row['item_price']}"; // Default price display
-                if ($row['has_variation'] && $row['variation_count'] > 0) {
+                $buttonAttributes = $isLoggedIn ? "" : "disabled title='Please log in to add items to cart'";
+                
+                // Get order count and determine if item is "hot"
+                $orderCountQuery = "SELECT COUNT(*) as order_count FROM order_items WHERE product_id = ?";
+                $orderStmt = $conn->prepare($orderCountQuery);
+                $orderStmt->bind_param("i", $row['id']);
+                $orderStmt->execute();
+                $orderResult = $orderStmt->get_result();
+                $orderData = $orderResult->fetch_assoc();
+                $orderCount = $orderData['order_count'];
+                $isHot = $orderCount >= 10; // Item is "hot" if ordered 10+ times
+                $orderStmt->close();
+                
+                // Get average rating and review count
+                $ratingQuery = "SELECT AVG(rating) as avg_rating, COUNT(*) as review_count FROM reviews WHERE item_id = ?";
+                $ratingStmt = $conn->prepare($ratingQuery);
+                $ratingStmt->bind_param("i", $row['id']);
+                $ratingStmt->execute();
+                $ratingResult = $ratingStmt->get_result();
+                $ratingData = $ratingResult->fetch_assoc();
+                $avgRating = $ratingData['avg_rating'] ? round($ratingData['avg_rating'], 1) : 0;
+                $reviewCount = $ratingData['review_count'];
+                $ratingStmt->close();
+                
+                // Generate stars HTML
+                $starsHtml = '';
+                for ($i = 1; $i <= 5; $i++) {
+                    if ($i <= $avgRating) {
+                        $starsHtml .= '<i class="fas fa-star"></i>';
+                    } else if ($i - 0.5 <= $avgRating) {
+                        $starsHtml .= '<i class="fas fa-star-half-alt"></i>';
+                    } else {
+                        $starsHtml .= '<i class="far fa-star"></i>';
+                    }
+                }
+                
+                // Determine price display
+                $priceDisplay = "₱ {$row['item_price']}";
+                if ($row['has_variation']) {
                     if ($row['min_variation_price'] == $row['max_variation_price']) {
                         $priceDisplay = "₱ {$row['min_variation_price']}";
                     } else {
@@ -842,21 +945,35 @@ try {
                     }
                 }
 
-                echo "<div class='menu-card' id='menuCard-{$row['id']}'>
-                        <img src='/public/{$image}' alt='$name' class='menu-image'>
-                        <div class='menu-content'>
-                            <h2 class='menu-title'>$name</h2>
-                            <p class='menu-price'>{$priceDisplay}</p>
-                            <p class='menu-desc'>$desc</p>
+                echo "<div class='menu-card' data-item-id='{$row['id']}' id='menuCard-{$row['id']}'>
+                        " . ($isHot ? "<div class='hot-label'>HOT</div>" : "") . "
+                        <div class='menu-image-container'>
+                            <img src='/public/{$image}' alt='$name' class='menu-image'>
                         </div>
-                        <button class='menu-manage' $buttonAttributes onclick='showProductModal({
-                            id: {$row['id']},
-                            name: \"$name\",
-                            price: {$row['item_price']},
-                            desc: \"$desc\",
-                            image: \"$image\",
-                            hasVariation: " . ($row['has_variation'] ? 'true' : 'false') . "
-                        })'>+</button>
+                        <div class='menu-content'>
+                            <div class='menu-content-top'>
+                                <h2 class='menu-title'>$name</h2>
+                                <p class='menu-price'>{$priceDisplay}</p>
+                                <div class='menu-card-rating'>
+                                    <div class='menu-card-stars'>$starsHtml</div>
+                                    <div class='menu-card-review-count'>($reviewCount)</div>
+                                </div>
+                                <p class='menu-desc'>$desc</p>
+                            </div>
+                            <div class='menu-card-actions'>
+                                <button class='menu-manage' $buttonAttributes onclick='showProductModal({
+                                    id: {$row['id']},
+                                    name: \"$name\",
+                                    price: {$row['item_price']},
+                                    desc: \"$desc\",
+                                    image: \"$image\",
+                                    hasVariation: " . ($row['has_variation'] ? 'true' : 'false') . "
+                                })'>Add to Cart</button>
+                                <button class='review-btn open-review-modal' data-item-id='{$row['id']}' data-item-name='$name'>
+                                    <i class='far fa-star'></i> Review
+                                </button>
+                            </div>
+                        </div>
                       </div>";
             }
         } else {
@@ -903,6 +1020,47 @@ try {
             </div>
         </div>
     </div>
+
+    <!-- Cart Notification -->
+    <div id="cartNotification" class="cart-notification">Item added to cart!</div>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="review-modal">
+        <div class="review-modal-content">
+            <span class="close-review-modal">&times;</span>
+            <h3 class="review-modal-title">Write a Review</h3>
+            <p class="review-item-name" id="review-item-name"></p>
+            
+            <form id="review-form">
+                <input type="hidden" id="review-item-id" name="item_id">
+                <input type="hidden" id="rating" name="rating">
+                
+                <div class="rating-container">
+                    <label class="rating-label">Your Rating:</label>
+                    <div class="rating-stars">
+                        <i class="fas fa-star rating-star" data-rating="1"></i>
+                        <i class="fas fa-star rating-star" data-rating="2"></i>
+                        <i class="fas fa-star rating-star" data-rating="3"></i>
+                        <i class="fas fa-star rating-star" data-rating="4"></i>
+                        <i class="fas fa-star rating-star" data-rating="5"></i>
+                    </div>
+                </div>
+                
+                <div class="review-form-group">
+                    <label class="review-form-label" for="comment">Your Review (optional):</label>
+                    <textarea id="comment" name="comment" class="review-form-textarea" placeholder="Share your experience with this item..."></textarea>
+                </div>
+                
+                <button type="submit" class="review-submit-btn">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Reviews CSS -->
+    <link rel="stylesheet" href="/public/css/reviews.css">
 
     <!-- JavaScript -->
     <script>
@@ -1130,5 +1288,6 @@ try {
     </script>
 
     <script src="/public/js/auth.js"></script>
+    <script src="/public/js/reviews.js"></script>
 </body>
 </html>

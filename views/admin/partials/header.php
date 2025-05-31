@@ -20,6 +20,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
         <button class="nav-button <?= $current_page === 'Admin-Reports.php' ? 'active' : '' ?>" onclick="gotoReports()">Reports</button>
         <button class="nav-button <?= $current_page === 'Admin-Accounts.php' ? 'active' : '' ?>" onclick="gotoAccounts()">Accounts</button>
+        <button class="nav-button <?= $current_page === 'Admin-Career.php' ? 'active' : '' ?>" onclick="gotoCareer()">Career</button>
         
         <!-- Notification Bell -->
         <div class="notification-container">
@@ -165,6 +166,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     function gotoAccounts() {
         window.location.href = '/views/admin/Admin-Accounts.php';
+    }
+
+    function gotoCareer() {
+        window.location.href = '/views/admin/Admin-Career.php';
     }
 
     function showLogoutOverlay() {

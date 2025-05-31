@@ -271,9 +271,43 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
             padding: 0.5vw 0;
         }
 
-        /* Carousel */
-        .carousel-container {
+        /* Carousel Section */
+        .carousel-section {
+            padding: 4rem 2rem;
             background-color: var(--secondary-light);
+        }
+
+        .carousel-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .carousel-title {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .carousel-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .carousel-subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .carousel-container {
             width: 100%;
             overflow: hidden;
             position: relative;
@@ -283,30 +317,36 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
         .carousel-track {
             display: flex;
             width: max-content;
-            animation: scrollCarousel 20s linear infinite;
+            animation: scrollCarousel 30s linear infinite;
+        }
+
+        .carousel-track:hover {
+            animation-play-state: paused;
         }
 
         .carousel-item {
-            width: 30vw;
-            margin: 0 30px;
+            width: 300px;
+            margin: 0 20px;
             flex-shrink: 0;
         }
 
         .carousel-item img {
             width: 100%;
+            height: 200px;
+            object-fit: cover;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
             transition: var(--transition);
         }
 
         .carousel-item:hover img {
-            transform: scale(1.02);
+            transform: scale(1.05);
             box-shadow: var(--shadow-medium);
         }
 
         @keyframes scrollCarousel {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            100% { transform: translateX(calc(-320px * 4)); } /* Width + margin of items * number of unique items */
         }
 
         /* Back to Top Button */
@@ -511,6 +551,231 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
                 margin: 0 10px;
             }
         }
+
+        /* Popular Picks Section */
+        .popular-picks {
+            padding: 4rem 2rem;
+            background-color: var(--secondary-light);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .popular-picks-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .popular-picks-title {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .popular-picks-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .popular-picks-subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .popular-picks-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* Menu Card Styles for Popular Picks */
+        .menu-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            margin: 0 1.5rem 1.5rem 1.5rem;
+            align-items: stretch;
+            min-height: 180px;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .menu-card-image {
+            flex-shrink: 0;
+            width: 180px;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .menu-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .menu-card:hover .menu-card-image img {
+            transform: scale(1.05);
+        }
+        
+        .menu-card-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .menu-card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .menu-card-description {
+            font-size: 0.95rem;
+            color: var(--secondary);
+            opacity: 0.8;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .menu-card-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0 1rem;
+        }
+        
+        .menu-card-stars {
+            color: #ffb74a;
+            font-size: 0.9rem;
+        }
+        
+        .menu-card-review-count {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .menu-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .menu-card-price {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .menu-card-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .menu-card-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+        
+        .hot-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #f44336;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .loading-spinner i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .no-items {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: var(--white);
+            border-radius: var(--border-radius);
+        }
+        
+        .error-message {
+            background: #FFEBEE;
+            color: #D32F2F;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .menu-card {
+                flex-direction: column;
+                margin: 0 0 1.5rem 0;
+            }
+            
+            .menu-card-image {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .popular-picks {
+                padding: 3rem 1rem;
+            }
+            
+            .popular-picks-title {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -532,54 +797,74 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
     <section class="featured-section">
         <div class="featured-container">
             <div class="featured-title">
-                <h2>We've got your brew covered.</h2>
-                <p>Experience the difference in every cup</p>
+                <h2>What Makes Us Special</h2>
+                <p>Experience the Captain's Brew difference</p>
             </div>
             <div class="featured-grid">
                 <div class="featured-item">
-                    <div class="featured-icon">
-                        <img src="/public/images/icons/coffee-bean.png" alt="Premium Coffee">
-                    </div>
+                    <i class="fas fa-coffee"></i>
                     <h3>Premium Coffee</h3>
-                    <p>Carefully selected beans from the finest coffee regions, roasted to perfection for exceptional flavor.</p>
+                    <p>We source the finest beans from around the world, roasted to perfection for a rich, aromatic experience.</p>
                 </div>
                 <div class="featured-item">
-                    <div class="featured-icon">
-                        <img src="/public/images/icons/chef.png" alt="Expert Baristas">
-                    </div>
-                    <h3>Expert Baristas</h3>
-                    <p>Our skilled baristas craft each beverage with precision and passion, ensuring quality in every cup.</p>
-                </div>
-                <div class="featured-item">
-                    <div class="featured-icon">
-                        <img src="/public/images/icons/ambiance.png" alt="Cozy Ambiance">
-                    </div>
-                    <h3>Cozy Ambiance</h3>
-                    <p>A warm and inviting atmosphere perfect for work, meetings, or relaxing with friends.</p>
-                </div>
-                <div class="featured-item">
-                    <div class="featured-icon">
-                        <img src="/public/images/icons/food.png" alt="Fresh Food">
-                    </div>
+                    <i class="fas fa-utensils"></i>
                     <h3>Fresh Food</h3>
-                    <p>Delicious pastries and meals made fresh daily to complement your coffee experience.</p>
+                    <p>Our menu features locally-sourced ingredients, prepared fresh daily for maximum flavor and quality.</p>
+                </div>
+                <div class="featured-item">
+                    <i class="fas fa-heart"></i>
+                    <h3>Cozy Atmosphere</h3>
+                    <p>Relax in our warm, inviting space designed for comfort, conversation, and connection.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Carousel -->
-    <div class="carousel-container">
-        <div class="carousel-track">
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
-            <!-- Duplicate items for seamless scrolling -->
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
-            <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
+    <!-- Popular Picks Section -->
+    <div class="popular-picks">
+        <div class="container">
+            <div class="popular-picks-header">
+                <h2 class="popular-picks-title">Popular Picks</h2>
+                <p class="popular-picks-subtitle">Our most ordered and highest-rated items</p>
+            </div>
+            <div class="popular-picks-grid" id="popular-items-container">
+                <!-- Popular items will be loaded here via JavaScript -->
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading popular items...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Section -->
+    <div class="carousel-section">
+        <div class="container">
+            <div class="carousel-header">
+                <h2 class="carousel-title">Our Coffee Gallery</h2>
+                <p class="carousel-subtitle">Take a visual tour of our delightful offerings</p>
+            </div>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-track">
+                <!-- First set of images -->
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
+                
+                <!-- Duplicate set for seamless loop -->
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
+                
+                <!-- Third set for extra smoothness -->
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-1.png" alt="Slide 1"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-2.png" alt="Slide 2"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-3.png" alt="Slide 3"></div>
+                <div class="carousel-item"><img src="/public/images/carousel-img/img-4.png" alt="Slide 4"></div>
+            </div>
         </div>
     </div>
 
@@ -591,8 +876,58 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
     <!-- Back to Top Button -->
     <div class="back-to-top" id="backToTop">↑</div>
 
+    <!-- Review Modal -->
+    <div id="review-modal" class="review-modal">
+        <div class="review-modal-content">
+            <span class="close-review-modal">&times;</span>
+            <h3 class="review-modal-title">Write a Review</h3>
+            <p class="review-item-name" id="review-item-name"></p>
+            
+            <form id="review-form">
+                <input type="hidden" id="review-item-id" name="item_id">
+                <input type="hidden" id="rating" name="rating">
+                
+                <div class="rating-container">
+                    <label class="rating-label">Your Rating:</label>
+                    <div class="rating-stars">
+                        <i class="fas fa-star rating-star" data-rating="1"></i>
+                        <i class="fas fa-star rating-star" data-rating="2"></i>
+                        <i class="fas fa-star rating-star" data-rating="3"></i>
+                        <i class="fas fa-star rating-star" data-rating="4"></i>
+                        <i class="fas fa-star rating-star" data-rating="5"></i>
+                    </div>
+                </div>
+                
+                <div class="review-form-group">
+                    <label class="review-form-label" for="comment">Your Review (optional):</label>
+                    <textarea id="comment" name="comment" class="review-form-textarea" placeholder="Share your experience with this item..."></textarea>
+                </div>
+                
+                <button type="submit" class="review-submit-btn">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Reviews CSS -->
+    <link rel="stylesheet" href="/public/css/reviews.css">
+
     <!-- JavaScript -->
     <script>
+        // Hamburger menu toggle
+        document.getElementById('hamburger-menu').addEventListener('click', function() {
+            document.getElementById('nav-menu').classList.toggle('active');
+        });
+
+        // Profile dropdown toggle for mobile
+        document.querySelector('.profile').addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                this.classList.toggle('active');
+            }
+        });
+
         // Back to top button
         const backToTop = document.getElementById('backToTop');
         window.addEventListener('scroll', () => {
@@ -609,7 +944,76 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
                 behavior: 'smooth'
             });
         });
+
+        // Load popular items
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPopularItems();
+        });
+
+        function loadPopularItems() {
+            const container = document.getElementById('popular-items-container');
+            
+            fetch('/controllers/get-popular-items.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        container.innerHTML = '';
+                        
+                        data.data.forEach(item => {
+                            // Create stars HTML
+                            let starsHtml = '';
+                            const rating = parseFloat(item.avg_rating);
+                            for (let i = 1; i <= 5; i++) {
+                                if (i <= rating) {
+                                    starsHtml += '<i class="fas fa-star"></i>';
+                                } else if (i - 0.5 <= rating) {
+                                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                                } else {
+                                    starsHtml += '<i class="far fa-star"></i>';
+                                }
+                            }
+                            
+                            const itemCard = document.createElement('div');
+                            itemCard.className = 'menu-card';
+                            itemCard.setAttribute('data-item-id', item.id);
+                            
+                            itemCard.innerHTML = `
+                                ${item.is_hot ? '<div class="hot-label">HOT</div>' : ''}
+                                <div class="menu-card-image">
+                                    <img src="${item.image_path}" alt="${item.name}">
+                                </div>
+                                <div class="menu-card-content">
+                                    <div class="menu-content-top">
+                                        <h3 class="menu-card-title">${item.name}</h3>
+                                        <div class="menu-card-rating">
+                                            <div class="menu-card-stars">${starsHtml}</div>
+                                            <div class="menu-card-review-count">(${item.review_count})</div>
+                                        </div>
+                                        <p class="menu-card-description">${item.description}</p>
+                                    </div>
+                                    <div class="menu-card-footer">
+                                        <span class="menu-card-price">₱${item.price}</span>
+                                        <button class="menu-card-btn open-review-modal" data-item-id="${item.id}" data-item-name="${item.name}">
+                                            <i class="far fa-star"></i> Review
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            container.appendChild(itemCard);
+                        });
+                    } else {
+                        container.innerHTML = '<div class="no-items">No popular items found.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading popular items:', error);
+                    container.innerHTML = '<div class="error-message">Failed to load popular items.</div>';
+                });
+        }
     </script>
+
+    <script src="/public/js/reviews.js"></script>
     <script src="/public/js/auth.js"></script>
 </body>
 </html>

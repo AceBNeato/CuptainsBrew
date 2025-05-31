@@ -15,6 +15,24 @@ require_once __DIR__ . '/../../includes/auth_check.php';
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+        :root {
+            --primary: #2C6E8A;
+            --primary-dark: #235A73;
+            --primary-light: #A9D6E5;
+            --secondary: #4A3B2B;
+            --secondary-light: #FFFAEE;
+            --secondary-lighter: #FFDBB5;
+            --accent: #ffb74a;
+            --white: #fff;
+            --dark: #1a1310;
+            --text: #333333;
+            --shadow-light: 0 2px 5px rgba(74, 59, 43, 0.2);
+            --shadow-medium: 0 4px 8px rgba(44, 110, 138, 0.2);
+            --shadow-dark: 0 5px 15px rgba(74, 59, 43, 0.5);
+            --border-radius: 10px;
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -80,6 +98,7 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
+            margin-bottom: 3rem;
         }
 
         .position-card {
@@ -125,23 +144,6 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             left: 0;
         }
 
-        .apply-btn {
-            background-color: #2C6E8A;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .apply-btn:hover {
-            background-color: #235A73;
-        }
-
         .benefits-section {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
@@ -178,9 +180,125 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             font-size: 1.5rem;
         }
 
+        /* Application Form */
+        .application-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-        /* Footer */
-        .footer {
+        .application-section h2 {
+            color: #2C6E8A;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .application-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a3b2b;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #2C6E8A;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 110, 138, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            position: relative;
+        }
+
+        .file-upload label {
+            display: block;
+            padding: 0.8rem;
+            background: #f5f5f5;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload label:hover {
+            background: #eee;
+            border-color: #2C6E8A;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .submit-btn {
+            background-color: #2C6E8A;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: #235A73;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .checkbox-group input {
+            margin-right: 10px;
+        }
+
+       /* Footer */
+       .footer {
             background-color: var(--dark);
             color: var(--white);
             padding: 5vw 0;
@@ -248,6 +366,7 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             font-style: normal;
         }
 
+        
         .social-links {
             display: flex;
             gap: 15px;
@@ -284,6 +403,7 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             padding: 20px;
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -300,6 +420,10 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             .positions-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .application-form {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -312,127 +436,143 @@ require_once __DIR__ . '/../../includes/auth_check.php';
             <p>Be part of something special at Captain's Brew Cafe. We're looking for passionate individuals who share our commitment to excellence in coffee and customer service.</p>
         </div>
 
-        <div class="positions-grid">
-            <div class="position-card">
-                <h3>Barista</h3>
-                <p class="salary">₱18,000 - ₱22,000 / month</p>
-                <p>Create exceptional coffee experiences for our customers.</p>
-                <ul>
-                    <li>Craft high-quality coffee beverages</li>
-                    <li>Maintain cleanliness standards</li>
-                    <li>Provide excellent customer service</li>
-                    <li>Work flexible hours</li>
-                </ul>
-                <button class="apply-btn" onclick="applyPosition('Barista')">Apply Now</button>
-            </div>
+    
 
-            <div class="position-card">
-                <h3>Shift Supervisor</h3>
-                <p class="salary">₱25,000 - ₱30,000 / month</p>
-                <p>Lead and inspire our cafe team during your shift.</p>
-                <ul>
-                    <li>Manage daily operations</li>
-                    <li>Train and supervise staff</li>
-                    <li>Ensure quality standards</li>
-                    <li>Handle customer concerns</li>
-                </ul>
-                <button class="apply-btn" onclick="applyPosition('Shift Supervisor')">Apply Now</button>
-            </div>
-
-            <div class="position-card">
-                <h3>Kitchen Staff</h3>
-                <p class="salary">₱16,000 - ₱20,000 / month</p>
-                <p>Prepare delicious food items for our menu.</p>
-                <ul>
-                    <li>Follow recipes and procedures</li>
-                    <li>Maintain kitchen cleanliness</li>
-                    <li>Work in a fast-paced environment</li>
-                    <li>Handle food safely</li>
-                </ul>
-                <button class="apply-btn" onclick="applyPosition('Kitchen Staff')">Apply Now</button>
-            </div>
+        <div class="application-section">
+            <h2>Apply Now</h2>
+            <form id="jobApplicationForm" class="application-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="firstName">First Name*</label>
+                    <input type="text" id="firstName" name="firstName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name*</label>
+                    <input type="text" id="lastName" name="lastName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number*</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-Mail Address*</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="position">Position Applying For*</label>
+                    <select id="position" name="position" class="form-control" required>
+                        <option value="">Select a position</option>
+                        <option value="Barista">Barista</option>
+                        <option value="Kitchen Staff">Kitchen Staff</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="resume">Resume / CV*</label>
+                    <div class="file-upload">
+                        <label for="resume">Choose File</label>
+                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                        <div class="file-name" id="fileName">No file chosen</div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="experience">Experience & Skills</label>
+                    <textarea id="experience" name="experience" class="form-control" placeholder="Tell us about your relevant experience and skills..."></textarea>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the Terms and Conditions</label>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <button type="submit" class="submit-btn">Submit Application</button>
+                </div>
+            </form>
         </div>
 
-        <div class="benefits-section">
-            <h2>Benefits & Perks</h2>
-            <div class="benefits-grid">
-                <div class="benefit-item">
-                    <i class="fas fa-coffee"></i>
-                    <span>Free Coffee & Meals</span>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-heart"></i>
-                    <span>Health Insurance</span>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Training & Development</span>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-clock"></i>
-                    <span>Flexible Schedules</span>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-percentage"></i>
-                    <span>Employee Discounts</span>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Career Growth</span>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <?php include '../partials/footer.php'; ?>
-  </footer>
+    <!-- Footer -->
+    <footer class="footer">
+        <?php include '../partials/footer.php'; ?>
+    </footer>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script>
-        function applyPosition(position) {
+        // Display file name when selected
+        document.getElementById('resume').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+            document.getElementById('fileName').textContent = fileName;
+        });
+
+        // Form submission
+        document.getElementById('jobApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Create FormData object
+            const formData = new FormData(this);
+            
+            // Show loading state
             Swal.fire({
-                title: 'Apply for ' + position,
-                html: `
-                    <form id="applicationForm">
-                        <input type="text" id="name" class="swal2-input" placeholder="Full Name">
-                        <input type="email" id="email" class="swal2-input" placeholder="Email Address">
-                        <input type="tel" id="phone" class="swal2-input" placeholder="Phone Number">
-                        <textarea id="experience" class="swal2-textarea" placeholder="Brief description of your experience"></textarea>
-                    </form>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Submit Application',
-                confirmButtonColor: '#2C6E8A',
-                cancelButtonColor: '#6c757d',
-                preConfirm: () => {
-                    const name = document.getElementById('name').value;
-                    const email = document.getElementById('email').value;
-                    const phone = document.getElementById('phone').value;
-                    const experience = document.getElementById('experience').value;
-
-                    if (!name || !email || !phone || !experience) {
-                        Swal.showValidationMessage('Please fill in all fields');
-                        return false;
-                    }
-
-                    return { name, email, phone, experience };
+                title: 'Submitting...',
+                text: 'Please wait while we submit your application.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Here you would typically send the application data to your server
+            });
+            
+            // Submit form via AJAX
+            fetch('/controllers/handle-job-application.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Application Submitted!',
-                        text: 'Thank you for your interest. We will contact you soon!',
+                        text: data.message || 'Thank you for your interest in joining Captain\'s Brew Cafe. We will review your application and contact you soon!',
+                        confirmButtonColor: '#2C6E8A'
+                    });
+                    
+                    // Reset the form
+                    this.reset();
+                    document.getElementById('fileName').textContent = 'No file chosen';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Submission Failed',
+                        text: data.message || 'There was an error submitting your application. Please try again.',
                         confirmButtonColor: '#2C6E8A'
                     });
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Failed',
+                    text: 'There was an error submitting your application. Please try again.',
+                    confirmButtonColor: '#2C6E8A'
+                });
             });
-        }
+        });
     </script>
+    
+    <!-- Add auth.js for logout functionality -->
+    <script src="/public/js/auth.js"></script>
 </body>
 </html> 

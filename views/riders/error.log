@@ -95,3 +95,5 @@ Rider error log file created on <?= date('Y-m-d H:i:s') ?> [2025-05-28 16:18:30]
 [2025-05-31 15:08:28] Order ID: 22 status updated to Delivered by rider ID: 1
 [2025-05-31 15:08:31] Order ID: 21 status updated to Delivered by rider ID: 1
 [2025-05-31 15:08:33] Order ID: 20 status updated to Delivered by rider ID: 1
+[2025-05-31 18:00:06] Order ID: 1 status updated to Delivered by rider ID: 1
+[2025-05-31 18:00:10] Rider ID: 1 accessed items for Order ID: 1

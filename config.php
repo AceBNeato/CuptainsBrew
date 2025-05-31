@@ -193,16 +193,17 @@ try {
         ) ENGINE=InnoDB",
 
         // Reviews (depends on orders and users)
-        "CREATE TABLE IF NOT EXISTS reviews (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            order_id INT NOT NULL,
-            user_id INT,
-            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-            comment TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-        ) ENGINE=InnoDB",
+        "CREATE TABLE IF NOT EXISTS `reviews` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `user_id` int(11) NOT NULL,
+            `item_id` int(11) NOT NULL,
+            `rating` int(1) NOT NULL CHECK (rating BETWEEN 1 AND 5),
+            `comment` text,
+            `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            KEY `user_id` (`user_id`),
+            KEY `item_id` (`item_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; ",
 
         
         // Create login attempts table
@@ -216,36 +217,54 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
 
 
-    "CREATE TABLE IF NOT EXISTS rider_activity_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        rider_id VARCHAR(50) NOT NULL, -- Can be rider ID or 'unknown'
-        activity VARCHAR(255) NOT NULL,
-        ip_address VARCHAR(45) NOT NULL,
-        user_agent TEXT,
-        log_time DATETIME NOT NULL,
-        INDEX (rider_id),
-        INDEX (log_time)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+        "CREATE TABLE IF NOT EXISTS rider_activity_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            rider_id VARCHAR(50) NOT NULL, -- Can be rider ID or 'unknown'
+            activity VARCHAR(255) NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            log_time DATETIME NOT NULL,
+            INDEX (rider_id),
+            INDEX (log_time)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
 
 
 
 
         // Create notifications table
         "CREATE TABLE IF NOT EXISTS notifications (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
-            `user_id` int(11) NOT NULL,
-            `title` varchar(255) DEFAULT NULL,
-            `order_id` int(11) DEFAULT NULL,
-            `message` text NOT NULL,
-            `is_read` tinyint(1) NOT NULL DEFAULT 0,
-            `status` varchar(50) DEFAULT NULL,
-            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            id int(11) NOT NULL AUTO_INCREMENT,
+            user_id int(11) NOT NULL,
+            title varchar(255) DEFAULT NULL,
+            order_id int(11) DEFAULT NULL,
+            message text NOT NULL,
+            is_read tinyint(1) NOT NULL DEFAULT 0,
+            status varchar(50) DEFAULT NULL,
+            created_at timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             KEY `user_id` (`user_id`),
             KEY `order_id` (`order_id`),
             CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
             CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+
+
+
+        "CREATE TABLE IF NOT EXISTS job_applications (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            first_name varchar(50) NOT NULL,
+            last_name varchar(50) NOT NULL,
+            mobile_number varchar(20) NOT NULL,
+            email varchar(100) NOT NULL,
+            position varchar(50) NOT NULL,
+            resume_path varchar(255) NOT NULL,
+            experience text,
+            status enum('Pending', 'Reviewed', 'Shortlisted', 'Rejected', 'Hired') NOT NULL DEFAULT 'Pending',
+            created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 
     ];
 

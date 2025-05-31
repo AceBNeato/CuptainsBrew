@@ -458,9 +458,9 @@ require_once __DIR__ . '/../../config.php';
             </a>
             <div class="about-content">
                 <h1>About <span>Cuptain's Brew Cafe</span></h1>
-                <p>Welcome to Cuptain’s Brew Cafe, your cozy retreat for artisanal coffee and handcrafted delights. Nestled in the heart of the city, we are passionate about bringing people together over a cup of perfectly brewed coffee.</p>
+                <p>Welcome to Cuptain's Brew Cafe, your cozy retreat for artisanal coffee and handcrafted delights. Nestled in the heart of the city, we are passionate about bringing people together over a cup of perfectly brewed coffee.</p>
                 <h1 class="divider">══════════════════════</h1>
-                <p>Our journey began with a love for rich flavors and warm conversations. Every cup we serve is made with freshly roasted beans and a touch of love. Whether you’re here for a quiet reading session, a casual meet-up, or to savor our signature blends, Cuptain’s Brew is your home away from home.</p>
+                <p>Our journey began with a love for rich flavors and warm conversations. Every cup we serve is made with freshly roasted beans and a touch of love. Whether you're here for a quiet reading session, a casual meet-up, or to savor our signature blends, Cuptain's Brew is your home away from home.</p>
                 <p>Join us and experience the magic in every sip.</p>
             </div>
             <div class="about-image">
@@ -472,7 +472,7 @@ require_once __DIR__ . '/../../config.php';
         </div>
     </section>
 
-    <button id="back-to-top" class="back-to-top"><img src="/public/images/icons/top-icon.png" alt="Go to Top"></button>
+    <button id="backToTop" class="back-to-top"><img src="/public/images/icons/top-icon.png" alt="Go to Top"></button>
 
     <!-- Footer -->
     <footer class="footer">

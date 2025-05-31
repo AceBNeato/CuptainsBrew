@@ -115,10 +115,10 @@ $sql = "SELECT
     o.status,
     o.total_amount,
     o.delivery_address,
-    o.payment_method,
+        o.payment_method,
     o.cancellation_reason,
     o.updated_at,
-    r.name AS rider_name
+        r.name AS rider_name
 FROM orders o
     LEFT JOIN riders r ON o.rider_id = r.id
 WHERE o.user_id = ?";
@@ -147,7 +147,7 @@ if ($result && $result->num_rows > 0) {
             'total_amount' => $row['total_amount'],
             'delivery_address' => $row['delivery_address'],
             'payment_method' => $row['payment_method'],
-            'rider_name' => $row['rider_name'],
+                    'rider_name' => $row['rider_name'],
             'cancellation_reason' => $row['cancellation_reason'],
             'updated_at' => $row['updated_at'],
             'items' => []
