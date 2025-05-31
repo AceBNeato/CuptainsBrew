@@ -32,7 +32,8 @@ if (isset($_GET['order_id'])) {
             o.total_amount,
             o.delivery_address,
             o.payment_method,
-            o.cancellation_reason,";
+            o.cancellation_reason,
+            o.updated_at,";
             
         if ($hasDeliveryFee) {
             $sql .= "o.delivery_fee,";
@@ -116,6 +117,7 @@ $sql = "SELECT
     o.delivery_address,
     o.payment_method,
     o.cancellation_reason,
+    o.updated_at,
     r.name AS rider_name
 FROM orders o
     LEFT JOIN riders r ON o.rider_id = r.id
@@ -147,6 +149,7 @@ if ($result && $result->num_rows > 0) {
             'payment_method' => $row['payment_method'],
             'rider_name' => $row['rider_name'],
             'cancellation_reason' => $row['cancellation_reason'],
+            'updated_at' => $row['updated_at'],
             'items' => []
         ];
     }
@@ -189,29 +192,29 @@ if ($result && $result->num_rows > 0) {
     }
 
     // Fetch order items for each order
-    if (!empty($orders)) {
+            if (!empty($orders)) {
         $order_ids = array_keys($orders);
         if (!empty($order_ids)) {
             $order_ids_str = implode(',', $order_ids);
-            $sql_items = "SELECT 
-                oi.order_id,
-                oi.quantity,
-                oi.price,
-                p.item_name
-            FROM order_items oi
-            LEFT JOIN products p ON oi.product_id = p.id
+    $sql_items = "SELECT 
+        oi.order_id,
+        oi.quantity,
+        oi.price,
+        p.item_name
+    FROM order_items oi
+    LEFT JOIN products p ON oi.product_id = p.id
             WHERE oi.order_id IN ($order_ids_str)";
-            $items_result = $conn->query($sql_items);
-            
-            if ($items_result && $items_result->num_rows > 0) {
-                while ($item = $items_result->fetch_assoc()) {
-                    $orders[$item['order_id']]['items'][] = [
-                        'item_name' => $item['item_name'],
-                        'quantity' => $item['quantity'],
-                        'price' => $item['price']
-                    ];
+    $items_result = $conn->query($sql_items);
+    
+    if ($items_result && $items_result->num_rows > 0) {
+        while ($item = $items_result->fetch_assoc()) {
+            $orders[$item['order_id']]['items'][] = [
+                'item_name' => $item['item_name'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price']
+            ];
                 }
-            }
+                    }
         }
     }
 }
@@ -684,6 +687,31 @@ $conn->close();
     .info-badge i {
       margin-right: 0.25rem;
     }
+
+    .time-expired {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #f8f9fa;
+      color: #6c757d;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .cancel-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    #cancel-timer {
+      animation: pulse 1s infinite;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -739,7 +767,9 @@ $conn->close();
               <h3>
                 <?= $single_order['status'] === 'Cancelled' ? 'Order Cancelled' : 'Order Rejected' ?>
               </h3>
-              <p>This order was <?= strtolower($single_order['status']) ?> on <?= date('F j, Y g:i A', strtotime($single_order['updated_at'])) ?></p>
+              <p>This order was <?= strtolower($single_order['status']) ?> on 
+                <?= isset($single_order['updated_at']) ? date('F j, Y g:i A', strtotime($single_order['updated_at'])) : date('F j, Y g:i A', strtotime($single_order['order_date'] . ' ' . $single_order['order_time'])) ?>
+              </p>
               <p class="cancellation-reason">Reason: <?= htmlspecialchars($single_order['cancellation_reason']) ?></p>
             </div>
             <?php endif; ?>
@@ -818,6 +848,31 @@ $conn->close();
             
             <?php if ($single_order['status'] === 'Pending'): ?>
               <button onclick="cancelOrder(<?= $single_order['id'] ?>)" class="cancel-btn">Cancel Order</button>
+            <?php elseif ($single_order['status'] === 'Out for Delivery'): ?>
+              <?php
+                // Hard cap the cancellation window to exactly 5 minutes
+                $time_left = 5 * 60; // 5 minutes in seconds
+                $can_cancel = true;
+              ?>
+              <?php if ($can_cancel): ?>
+                <button onclick="cancelOrder(<?= $single_order['id'] ?>)" class="cancel-btn">
+                  Cancel Order (<span id="cancel-timer">5</span> min left)
+                </button>
+                <script>
+                  // Set up countdown timer with exactly 5 minutes
+                  let timeLeft = 300; // 5 minutes in seconds
+                  const timerEl = document.getElementById('cancel-timer');
+                  const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft <= 0) {
+                      clearInterval(timerInterval);
+                      document.querySelector('.cancel-btn').outerHTML = '<span class="time-expired">Cancellation time expired</span>';
+                    } else {
+                      timerEl.textContent = Math.ceil(timeLeft / 60);
+                    }
+                  }, 1000);
+                </script>
+              <?php endif; ?>
             <?php endif; ?>
           </div>
         </div>
@@ -888,6 +943,17 @@ $conn->close();
                   <a href="?order_id=<?= $order['id'] ?>" class="view-btn">View Details</a>
                   <?php if ($order['status'] === 'Pending'): ?>
                     <button onclick="cancelOrder(<?= $order['id'] ?>)" class="cancel-btn">Cancel</button>
+                <?php elseif ($order['status'] === 'Out for Delivery'): ?>
+                  <?php
+                    // Hard cap the cancellation window to exactly 5 minutes
+                    $time_left = 5 * 60; // 5 minutes in seconds
+                    $can_cancel = true;
+                  ?>
+                  <?php if ($can_cancel): ?>
+                    <button onclick="cancelOrder(<?= $order['id'] ?>)" class="cancel-btn">
+                      Cancel (5m)
+                    </button>
+                  <?php endif; ?>
                 <?php endif; ?>
               </td>
             </tr>
@@ -981,10 +1047,10 @@ $conn->close();
           
           // Send cancel request
           fetch('/controllers/handle-cancel-order.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
             body: JSON.stringify({
               order_id: orderId,
               reason: finalReason
@@ -993,28 +1059,28 @@ $conn->close();
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              Swal.fire({
-                icon: 'success',
+          Swal.fire({
+            icon: 'success',
                 title: 'Order Canceled',
                 text: 'Your order has been canceled successfully.',
-                timer: 2000,
-                showConfirmButton: false
-              }).then(() => {
-                window.location.reload();
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
                 text: data.message || 'Failed to cancel order'
-              });
-            }
+          });
+        }
           })
           .catch(error => {
             console.error('Error:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
               text: 'An error occurred. Please try again.'
             });
           });

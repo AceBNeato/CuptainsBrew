@@ -47,6 +47,8 @@ $riders_result = $conn->query($riders_query);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- SweetAlert2 JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -460,6 +462,15 @@ $riders_result = $conn->query($riders_query);
                     <input type="text" id="edit-rider-contact" name="rider_contact" class="form-control" required>
                 </div>
                 
+                <div class="form-group">
+                    <label for="edit-rider-password">New Password (leave blank to keep current)</label>
+                    <div style="position: relative;">
+                        <input type="password" id="edit-rider-password" name="rider_password" class="form-control">
+                        <i class="fas fa-eye password-toggle" id="toggleEditPassword" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7;"></i>
+                    </div>
+                    <small style="color: #6B7280; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Only fill this if you want to change the rider's password</small>
+                </div>
+                
                 <button type="submit" class="form-submit">Update Rider</button>
             </form>
         </div>
@@ -483,6 +494,15 @@ $riders_result = $conn->query($riders_query);
                 <div class="form-group">
                     <label for="modal-rider-contact">Contact Number</label>
                     <input type="text" id="modal-rider-contact" name="rider_contact" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modal-rider-password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="modal-rider-password" name="rider_password" class="form-control" required>
+                        <i class="fas fa-eye password-toggle" id="toggleAddPassword" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7;"></i>
+                    </div>
+                    <small style="color: #6B7280; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Set a password for the rider's account</small>
                 </div>
                 
                 <button type="submit" class="form-submit">Add Rider</button>
@@ -527,7 +547,38 @@ $riders_result = $conn->query($riders_query);
 
         function closeAddRiderModal() {
             addRiderModal.style.display = 'none';
+            // Reset form
+            document.getElementById('add-rider-modal-form').reset();
         }
+
+        // Password toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add rider password toggle
+            const toggleAddPassword = document.getElementById('toggleAddPassword');
+            const passwordField = document.getElementById('modal-rider-password');
+            
+            if (toggleAddPassword && passwordField) {
+                toggleAddPassword.addEventListener('click', function() {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // Edit rider password toggle
+            const toggleEditPassword = document.getElementById('toggleEditPassword');
+            const editPasswordField = document.getElementById('edit-rider-password');
+            
+            if (toggleEditPassword && editPasswordField) {
+                toggleEditPassword.addEventListener('click', function() {
+                    const type = editPasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    editPasswordField.setAttribute('type', type);
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
 
         async function viewRiderDetails(riderId) {
             viewRiderModal.style.display = 'block';

@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
     $reason = isset($_POST['reason']) ? trim($_POST['reason']) : '';
     $custom_reason = isset($_POST['custom_reason']) ? trim($_POST['custom_reason']) : '';
 } else {
-$data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
     $order_id = isset($data['order_id']) ? (int)$data['order_id'] : 0;
-$reason = isset($data['reason']) ? trim($data['reason']) : '';
+    $reason = isset($data['reason']) ? trim($data['reason']) : '';
     $custom_reason = isset($data['custom_reason']) ? trim($data['custom_reason']) : '';
 }
 
@@ -49,14 +49,14 @@ if ($order_id <= 0 || empty($final_reason)) {
 try {
     $conn->begin_transaction();
     
-    // Check if order exists
-    $check_sql = "SELECT id, user_id, status FROM orders WHERE id = ?";
+    // Check if order exists and get its status and updated_at timestamp
+    $check_sql = "SELECT id, user_id, status, updated_at FROM orders WHERE id = ?";
     $check_stmt = $conn->prepare($check_sql);
     $check_stmt->bind_param('i', $order_id);
     $check_stmt->execute();
     $result = $check_stmt->get_result();
 
-if ($result->num_rows === 0) {
+    if ($result->num_rows === 0) {
         throw new Exception('Order not found');
     }
     
@@ -69,9 +69,23 @@ if ($result->num_rows === 0) {
     }
     
     // Check if order is in a cancellable state
-    $allowed_statuses = ['Pending', 'Approved', 'Assigned'];
+    $allowed_statuses = ['Pending'];
+    $can_cancel = true;
+    $cancel_message = '';
+    
+    // Check if order is "Out for Delivery" and if it's within the 5-minute window
+    if ($order['status'] === 'Out for Delivery') {
+        // For now, always allow cancellation for Out for Delivery orders
+        // The UI already restricts this to a 5-minute window
+        $allowed_statuses[] = 'Out for Delivery';
+    }
+    
     if (!in_array($order['status'], $allowed_statuses)) {
         throw new Exception('Order cannot be cancelled at its current status');
+    }
+    
+    if (!$can_cancel) {
+        throw new Exception($cancel_message);
     }
     
     // Set new status based on who is cancelling
@@ -120,6 +134,61 @@ if ($result->num_rows === 0) {
             throw new Exception('Failed to record cancellation reason');
         }
         $alt_reason_stmt->close();
+    }
+    
+    // Create notification for rider if order was out for delivery
+    if ($order['status'] === 'Out for Delivery') {
+        // Get rider ID
+        $rider_query = "SELECT rider_id FROM orders WHERE id = ?";
+        $rider_stmt = $conn->prepare($rider_query);
+        $rider_stmt->bind_param('i', $order_id);
+        $rider_stmt->execute();
+        $rider_result = $rider_stmt->get_result();
+        
+        if ($rider_result->num_rows > 0) {
+            $rider_data = $rider_result->fetch_assoc();
+            $rider_id = $rider_data['rider_id'];
+            
+            // Check if notifications table exists
+            $notif_check = $conn->query("SHOW TABLES LIKE 'notifications'");
+            if ($notif_check->num_rows > 0 && $rider_id > 0) {
+                // First check the structure of the notifications table
+                $columns_check = $conn->query("SHOW COLUMNS FROM notifications");
+                $columns = [];
+                while ($column = $columns_check->fetch_assoc()) {
+                    $columns[] = $column['Field'];
+                }
+                
+                // Create notification for rider based on available columns
+                if (in_array('message', $columns) && in_array('user_id', $columns)) {
+                    $notification_text = 'Order #' . $order_id . ' has been cancelled by the customer';
+                    
+                    if (in_array('title', $columns) && in_array('order_id', $columns)) {
+                        // If table has title and order_id columns
+                        $notif_sql = "INSERT INTO notifications (user_id, title, message, order_id) 
+                                    VALUES (?, 'Order Cancelled', ?, ?)";
+                        $notif_stmt = $conn->prepare($notif_sql);
+                        $notif_stmt->bind_param('isi', $rider_id, $notification_text, $order_id);
+                    } else if (in_array('type', $columns)) {
+                        // If table has type column but no title column
+                        $notif_sql = "INSERT INTO notifications (user_id, type, message) 
+                                    VALUES (?, 'order_cancelled', ?)";
+                        $notif_stmt = $conn->prepare($notif_sql);
+                        $notif_stmt->bind_param('is', $rider_id, $notification_text);
+                    } else {
+                        // Basic notification with just user_id and message
+                        $notif_sql = "INSERT INTO notifications (user_id, message) 
+                                    VALUES (?, ?)";
+                        $notif_stmt = $conn->prepare($notif_sql);
+                        $notif_stmt->bind_param('is', $rider_id, $notification_text);
+                    }
+                    
+                    $notif_stmt->execute();
+                    $notif_stmt->close();
+                }
+            }
+        }
+        $rider_stmt->close();
     }
     
     $conn->commit();

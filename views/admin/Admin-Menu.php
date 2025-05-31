@@ -1081,9 +1081,9 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
         });
 
         // Image preview for new items
-        function previewImage(input) {
-            const preview = document.getElementById('imagePreview');
-            const placeholder = document.getElementById('imagePlaceholder');
+        function previewAddImage(input) {
+            const preview = document.getElementById('add-image-preview');
+            const placeholder = document.getElementById('add-image-placeholder');
             
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -1094,6 +1094,11 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
                     placeholder.style.display = 'none';
                 }
                 
+                preview.onerror = function() {
+                    this.src = '/public/images/placeholder.jpg'; // Default placeholder
+                    console.warn('Failed to load image preview, using placeholder');
+                };
+
                 reader.readAsDataURL(input.files[0]);
             }
         }
@@ -1108,6 +1113,11 @@ $currentCategoryId = $_GET['category_id'] ?? $defaultCategoryId;
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                 }
+                
+                preview.onerror = function() {
+                    this.src = '/public/images/placeholder.jpg'; // Default placeholder
+                    console.warn('Failed to load image preview, using placeholder');
+                };
                 
                 reader.readAsDataURL(input.files[0]);
             }

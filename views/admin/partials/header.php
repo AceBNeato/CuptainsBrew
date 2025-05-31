@@ -14,9 +14,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
     <nav class="nav-menu" id="nav-menu">
         <button class="nav-button <?= $current_page === 'Admin-Menu.php' ? 'active' : '' ?>" onclick="gotoMenu()">Menu</button>
-        <button class="nav-button <?= $current_page === 'Admin-Orders.php' ? 'active' : '' ?>" onclick="gotoOrders()">Orders</button>
+        <div class="nav-button-with-notification">
+            <button class="nav-button <?= $current_page === 'Admin-Orders.php' ? 'active' : '' ?>" onclick="gotoOrders()">Orders</button>
+            <span class="order-notification-badge" id="order-notification-badge"></span>
+        </div>
         <button class="nav-button <?= $current_page === 'Admin-Reports.php' ? 'active' : '' ?>" onclick="gotoReports()">Reports</button>
         <button class="nav-button <?= $current_page === 'Admin-Accounts.php' ? 'active' : '' ?>" onclick="gotoAccounts()">Accounts</button>
+        
+        <!-- Notification Bell -->
+        <div class="notification-container">
+            <div class="notification-bell" id="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-counter" id="notification-counter"></span>
+            </div>
+            <div class="notification-dropdown" id="notification-dropdown">
+                <div class="notification-header">
+                    <h3>Notifications</h3>
+                </div>
+                <ul class="notification-list" id="notification-list">
+                    <li class="no-notifications">No notifications</li>
+                </ul>
+            </div>
+        </div>
+        
         <button class="nav-button" onclick="showLogoutOverlay()">Logout</button>
     </nav>
 </header>
@@ -47,6 +67,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     .nav-menu {
         display: flex;
         gap: 3rem;
+        align-items: center;
     }
 
     .nav-button {
@@ -63,6 +84,34 @@ $current_page = basename($_SERVER['PHP_SELF']);
     .nav-button:hover, .nav-button.active {
         background-color: #2C6E8A;
         color: #fff;
+    }
+    
+    /* Notification Badge for Orders Button */
+    .nav-button-with-notification {
+        position: relative;
+    }
+    
+    .order-notification-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #ef4444;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.7rem;
+        font-weight: 600;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        transform: scale(0);
+        transition: transform 0.2s ease;
+    }
+    
+    .order-notification-badge.active {
+        transform: scale(1);
     }
 
     /* Mobile Responsiveness */
@@ -89,8 +138,17 @@ $current_page = basename($_SERVER['PHP_SELF']);
             width: 100%;
             font-size: 3vw;
         }
+        
+        .notification-container {
+            margin: 1vw 0;
+        }
     }
 </style>
+
+<!-- Link to Font Awesome for bell icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Link to notification CSS -->
+<link rel="stylesheet" href="/public/css/notifications.css">
 
 <script>
     function gotoMenu() {
@@ -124,4 +182,38 @@ $current_page = basename($_SERVER['PHP_SELF']);
             }
         });
     }
+    
+    // Update the order notification badge with the same count as notifications
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if notifications.js is loaded
+        if (typeof window.NotificationSystem !== 'undefined') {
+            // Override the updateNotificationCounter function to also update the order badge
+            const originalUpdateCounter = window.NotificationSystem.updateNotificationCounter;
+            
+            if (originalUpdateCounter) {
+                window.NotificationSystem.updateNotificationCounter = function(unreadCount) {
+                    // Call the original function if it exists
+                    if (typeof originalUpdateCounter === 'function') {
+                        originalUpdateCounter(unreadCount);
+                    }
+                    
+                    // Update the order badge
+                    const orderBadge = document.getElementById('order-notification-badge');
+                    if (orderBadge && unreadCount > 0) {
+                        orderBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                        orderBadge.classList.add('active');
+                    } else if (orderBadge) {
+                        orderBadge.textContent = '';
+                        orderBadge.classList.remove('active');
+                    }
+                };
+            }
+        }
+    });
 </script>
+
+<!-- Include the notifications.js script -->
+<script src="/public/js/notifications.js"></script>
+
+<!-- Include performance controls at the end of the header -->
+<?php include_once __DIR__ . '/../../partials/performance-controls.php'; ?>

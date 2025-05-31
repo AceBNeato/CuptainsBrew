@@ -43,11 +43,11 @@ function initAddressAutocomplete(inputId, suggestionsId, mapId) {
     
     // Initialize map with Tagum City cafe location
     let map = L.map(mapElement).setView([CAFE_LOCATION.lat, CAFE_LOCATION.lon], 14);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    
+        
     // Add marker for cafe location
     const cafeMarker = L.marker([CAFE_LOCATION.lat, CAFE_LOCATION.lon], {
         icon: L.divIcon({

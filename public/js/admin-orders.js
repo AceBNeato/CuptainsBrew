@@ -24,7 +24,10 @@ function updateOrder(orderId, isAccepted) {
     let orderTime = row.querySelector(".order-time").innerText;
     let buttons = row.querySelectorAll("button");
 
-    let status = isAccepted ? "Pending" : "Declined"; // Accepted → Delivered, Declined → Declined
+    let status = isAccepted ? "processing" : "cancelled"; // Accept → processing, Decline → cancelled
+    let statusMessage = isAccepted ? 
+        "Your order has been accepted and is being prepared." : 
+        "Your order has been declined. Please contact support for assistance.";
 
     row.classList.add(isAccepted ? "accepted" : "declined");
 
@@ -32,6 +35,57 @@ function updateOrder(orderId, isAccepted) {
     buttons.forEach(button => {
         button.disabled = true;
         button.style.opacity = "0.5"; // Visually indicate it's disabled
+    });
+
+    // Send status update to server and create notification
+    const formData = new FormData();
+    formData.append('order_id', orderId);
+    formData.append('status', status);
+    formData.append('message', statusMessage);
+    
+    fetch('/controllers/create-notification.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Order status updated and notification created');
+            
+            // If notifications system is available, refresh notifications
+            if (window.NotificationSystem && typeof window.NotificationSystem.checkForNotifications === 'function') {
+                window.NotificationSystem.checkForNotifications();
+            }
+            
+            // Show success message
+            Swal.fire({
+                title: 'Success!',
+                text: `Order has been ${isAccepted ? 'accepted' : 'declined'}.`,
+                icon: 'success',
+                confirmButtonColor: '#2C6E8A'
+            });
+        } else {
+            console.error('Error updating order status:', data.error);
+            
+            // Show error message
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to update order status. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#2C6E8A'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        
+        // Show error message
+        Swal.fire({
+            title: 'Error!',
+            text: 'An unexpected error occurred. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#2C6E8A'
+        });
     });
 
     // Get stored orders from localStorage

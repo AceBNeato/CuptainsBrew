@@ -481,7 +481,7 @@ function getCSRFToken() {
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Contact:</span> 
-                                    <?= htmlspecialchars(($order['contact_number'] ? $order['contact_number'] : $order['customer_contact']) ?? 'N/A') ?>
+                                    <?= htmlspecialchars($order['customer_contact'] ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Address:</span> 
@@ -539,7 +539,7 @@ function getCSRFToken() {
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Contact:</span> 
-                                    <?= htmlspecialchars(($order['contact_number'] ? $order['contact_number'] : $order['customer_contact']) ?? 'N/A') ?>
+                                    <?= htmlspecialchars($order['customer_contact'] ?? 'N/A') ?>
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Address:</span> 

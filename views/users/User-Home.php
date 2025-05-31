@@ -312,7 +312,7 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
         /* Back to Top Button */
         .back-to-top {
             position: fixed;
-            bottom: 30px;
+            bottom: 90px;
             right: 30px;
             width: 50px;
             height: 50px;

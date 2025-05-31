@@ -137,7 +137,8 @@ try {
             lon VARCHAR(20) NULL,
             rider_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+            is_viewed TINYINT(1) NOT NULL DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
             FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE SET NULL,
             cancellation_reason VARCHAR(255) DEFAULT NULL
@@ -224,7 +225,25 @@ try {
         log_time DATETIME NOT NULL,
         INDEX (rider_id),
         INDEX (log_time)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+
+
+
+        // Create notifications table
+        "CREATE TABLE IF NOT EXISTS `notifications` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `user_id` int(11) NOT NULL,
+        `order_id` int(11) DEFAULT NULL,
+        `message` text NOT NULL,
+        `is_read` tinyint(1) NOT NULL DEFAULT 0,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`id`),
+        KEY `user_id` (`user_id`),
+        KEY `order_id` (`order_id`),
+        CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 
     ];
 

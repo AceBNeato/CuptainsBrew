@@ -19,7 +19,7 @@ $allOrders = [];
 try {
     $sql = "SELECT o.id AS order_id, o.user_id, u.username, u.email, u.contact,
                    o.status, o.created_at, o.updated_at, o.cancellation_reason,
-                   o.total_amount, o.payment_method, o.delivery_address, o.rider_id, o.contact_number,
+                   o.total_amount, o.payment_method, o.delivery_address, o.rider_id, o.customer_contact,
                    r.name as rider_name, r.contact as rider_contact,
                    oi.product_id, p.item_name, p.item_image, oi.quantity, oi.price, oi.variation
             FROM orders o
@@ -42,8 +42,8 @@ try {
                     'user_id' => $row['user_id'],
                     'username' => $row['username'] ?? 'Guest',
                     'email' => $row['email'] ?? 'N/A',
-                    'contact' => $row['contact_number'] ? $row['contact_number'] : ($row['contact'] ?? 'N/A'),
-                    'contact_number' => $row['contact_number'],
+                    'contact' => $row['customer_contact'] ? $row['customer_contact'] : ($row['contact'] ?? 'N/A'),
+                    'contact_number' => $row['customer_contact'],
                     'status' => $row['status'],
                     'created_at' => $row['created_at'],
                     'updated_at' => $row['updated_at'],
@@ -618,7 +618,7 @@ $conn->close();
       </div>
       
       <div class="report-header">
-        <h2 class="report-title">Order Reports</h2>
+      <h2 class="report-title">Order Reports</h2>
         <button class="export-btn" onclick="exportToCSV()">
           <i class="fas fa-download"></i> Export Report
         </button>

@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../config/mail.php';
 // PHPMailer imports (will be used for password reset)
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use PHPMailer\PHPMailer\SMTP;
+
 
 $db_host = 'localhost';
 $db_user = 'root'; 
@@ -104,46 +104,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Instead of redirecting to verify.php, store user ID and show SweetAlert
                             $_SESSION['unverified_user_id'] = $user['id'];
                             $_SESSION['unverified_email'] = $email;
-                            
+
                             // Set a flag to show SweetAlert for unverified account
                             $show_verification_alert = true;
                             $unverified_email = $email;
                         } else {
-                            // Password is correct, start session
-                            $_SESSION['user_id'] = $user['id'];
-                            $_SESSION['username'] = $user['username'];
-                            $_SESSION['role'] = $user['role'];
-                            $_SESSION['loggedin'] = true;
+                        // Password is correct, start session
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['role'] = $user['role'];
+                        $_SESSION['user_type'] = $user['role'];
+                        $_SESSION['loggedin'] = true;
+                        
+                        // Handle remember me
+                        if ($remember) {
+                            $token = bin2hex(random_bytes(64));
+                            $expires = time() + 60 * 60 * 24 * 30; // 30 days
                             
-                            // Handle remember me
-                            if ($remember) {
-                                $token = bin2hex(random_bytes(64));
-                                $expires = time() + 60 * 60 * 24 * 30; // 30 days
-                                
-                                // Store token using prepared statement
-                                $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
-                                prepareAndExecute($insertToken, [$user['id'], $token], 'is');
-                                
-                                // Set secure cookie
-                                setcookie('remember_token', $token, [
-                                    'expires' => $expires,
-                                    'path' => '/',
-                                    'secure' => true,
-                                    'httponly' => true,
-                                    'samesite' => 'Strict'
-                                ]);
-                            }
+                            // Store token using prepared statement
+                            $insertToken = "INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))";
+                            prepareAndExecute($insertToken, [$user['id'], $token], 'is');
                             
-                            // Regenerate session ID for security
-                            session_regenerate_id(true);
-                            
-                            // Redirect based on role
-                            if ($user['role'] === 'admin') {
-                                header("Location: /views/admin/Admin-Menu.php");
-                            } else {
-                                header("Location: /views/users/User-Home.php");
-                            }
-                            exit();
+                            // Set secure cookie
+                            setcookie('remember_token', $token, [
+                                'expires' => $expires,
+                                'path' => '/',
+                                'secure' => true,
+                                'httponly' => true,
+                                'samesite' => 'Strict'
+                            ]);
+                        }
+                        
+                        // Regenerate session ID for security
+                        session_regenerate_id(true);
+                        
+                        // Redirect based on role
+                        if ($user['role'] === 'admin') {
+                            header("Location: /views/admin/Admin-Menu.php");
+                        } else {
+                            header("Location: /views/users/User-Home.php");
+                        }
+                        exit();
                         }
                     } else {
                         $errors[] = "Invalid credentials";
@@ -179,17 +180,17 @@ if (isset($_GET['forgot'])) {
             if ($user['role'] === 'admin') {
                 $errors[] = "Password reset is not available for admin accounts. Please contact system support.";
             } else {
-                // Generate reset token
-                $token = bin2hex(random_bytes(32));
-                $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
-                
-                // Store token in database
-                $updateSql = "UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?";
-                $updateStmt = $conn->prepare($updateSql);
-                $updateStmt->bind_param("ssi", $token, $expires, $user['id']);
-                $updateStmt->execute();
-                $updateStmt->close();
-                
+            // Generate reset token
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', time() + 3600); // 1 hour expiration
+            
+            // Store token in database
+            $updateSql = "UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?";
+            $updateStmt = $conn->prepare($updateSql);
+            $updateStmt->bind_param("ssi", $token, $expires, $user['id']);
+            $updateStmt->execute();
+            $updateStmt->close();
+            
                 // Create reset link
                 $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/views/auth/reset-password.php?token=" . $token;
                 
@@ -268,18 +269,18 @@ if (isset($_GET['forgot'])) {
                     
                 } catch (Exception $e) {
                     // For development purposes, show the link in SweetAlert if email sending fails
-                    echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'info',
+            echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'info',
                                 title: 'Reset Link Generated',
                                 
-                                customClass: {
-                                    confirmButton: 'swal2-confirm'
-                                }
-                            });
-                        });
-                    </script>";
+                        customClass: {
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                });
+            </script>";
                     
                     error_log("Failed to send password reset email to $email: " . $e->getMessage());
                 }
