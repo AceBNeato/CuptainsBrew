@@ -1,7 +1,4 @@
-ALTER TABLE users
-ADD COLUMN reset_token VARCHAR(255) NULL,
-ADD COLUMN reset_expires DATETIME NULL; 
-//////////////////////////////////////////////////////////////
+
 -- First ensure categories exist
 INSERT IGNORE INTO categories (id, name) VALUES
 (1, 'Coffee'),

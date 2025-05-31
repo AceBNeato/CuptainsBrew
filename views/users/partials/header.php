@@ -24,6 +24,24 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
                 <a href="/views/users/cart.php" id="cart-icon" class="nav-icon">
                     <img src="/public/images/icons/cart-icon.png" alt="Cart">
                 </a>
+                
+                <?php if (isset($_SESSION['user_id']) && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
+                <!-- Notification Bell -->
+                <div class="notification-container">
+                    <div class="notification-bell" id="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-counter" id="notification-counter"></span>
+                    </div>
+                    <div class="notification-dropdown" id="notification-dropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                        </div>
+                        <ul class="notification-list" id="notification-list">
+                            <li class="no-notifications">No notifications</li>
+                        </ul>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
             <div class="profile">
                 <img src="/public/images/icons/profile-icon.png" alt="Profile">
@@ -360,6 +378,19 @@ if (!isset($_SESSION['user_id']) && isset($_SESSION['loggedin'])) {
         }
     }
 </style>
+
+<!-- Link to Font Awesome for bell icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Link to notification CSS -->
+<link rel="stylesheet" href="/public/css/notifications.css">
+
+<!-- Include the notifications.js script for logged-in users -->
+<?php if (isset($_SESSION['user_id']) && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
+<script src="/public/js/notifications.js"></script>
+<?php endif; ?>
+
+<!-- Include performance controls at the end of the header -->
+<?php include_once __DIR__ . '/../../partials/performance-controls.php'; ?>
 
 <script>
     // Hamburger menu toggle

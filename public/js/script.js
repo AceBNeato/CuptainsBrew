@@ -1,18 +1,144 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const hamburgerMenu = document.getElementById("hamburger-menu");
-    const navMenu = document.getElementById("nav-menu");
+/**
+ * Main script file for Captain's Brew Cafe
+ * Contains global utility functions and performance optimizations
+ */
 
-    hamburgerMenu.addEventListener("click", function () {
-        navMenu.classList.toggle("active");
+// Performance optimization functions
+const PerformanceOptimizer = {
+    // Check if performance mode is enabled
+    isPerformanceModeEnabled: function() {
+        return localStorage.getItem('performance_mode') === 'true';
+    },
+    
+    // Check if animations are disabled
+    areAnimationsDisabled: function() {
+        return localStorage.getItem('disable_animations') === 'true';
+    },
+    
+    // Check if image quality is reduced
+    isImageQualityReduced: function() {
+        return localStorage.getItem('reduce_image_quality') === 'true';
+    },
+    
+    // Apply all performance settings
+    applyAllSettings: function() {
+        // Apply animation settings
+        if (this.areAnimationsDisabled()) {
+            document.body.classList.add('disable-animations');
+        } else {
+            document.body.classList.remove('disable-animations');
+        }
+        
+        // Apply image quality settings
+        if (this.isImageQualityReduced()) {
+            document.body.classList.add('reduce-image-quality');
+            this.optimizeImages();
+        } else {
+            document.body.classList.remove('reduce-image-quality');
+        }
+        
+        // Apply notification settings is handled by notifications.js
+    },
+    
+    // Optimize images based on settings
+    optimizeImages: function() {
+        if (!this.isImageQualityReduced()) return;
+        
+        // Find all images not marked as critical
+        const images = document.querySelectorAll('img:not(.critical-image)');
+        
+        // Add loading="lazy" attribute to all images
+        images.forEach(img => {
+            if (!img.hasAttribute('loading')) {
+                img.setAttribute('loading', 'lazy');
+            }
+            
+            // For non-critical images, use lower resolution if available
+            if (img.hasAttribute('data-low-res')) {
+                const lowResSrc = img.getAttribute('data-low-res');
+                img.setAttribute('src', lowResSrc);
+            }
+        });
+    },
+    
+    // Lazy load scripts
+    lazyLoadScripts: function() {
+        const scripts = document.querySelectorAll('script[data-lazy]');
+        
+        scripts.forEach(script => {
+            const src = script.getAttribute('data-src');
+            if (src) {
+                setTimeout(() => {
+                    script.setAttribute('src', src);
+                    script.removeAttribute('data-lazy');
+                    script.removeAttribute('data-src');
+                }, 1000); // 1 second delay
+            }
+        });
+    }
+};
+
+// Document ready function
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply performance settings
+    PerformanceOptimizer.applyAllSettings();
+    
+    // Lazy load non-critical scripts
+    PerformanceOptimizer.lazyLoadScripts();
+    
+    // Add event listeners for dynamic content loading
+    document.addEventListener('contentLoaded', function() {
+        PerformanceOptimizer.optimizeImages();
     });
+    
+    // Initialize existing functionality
+    initializeExistingFunctionality();
 });
 
+// Function to initialize existing functionality
+function initializeExistingFunctionality() {
+    // Back to top button
+    const backToTop = document.getElementById('backToTop');
+    if (backToTop) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('active');
+            } else {
+                backToTop.classList.remove('active');
+            }
+        });
 
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: PerformanceOptimizer.areAnimationsDisabled() ? 'auto' : 'smooth'
+            });
+        });
+    }
+    
+    // Mobile menu toggle
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const navMenu = document.getElementById('nav-menu');
+    
+    if (hamburgerMenu && navMenu) {
+        hamburgerMenu.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+        });
+    }
+    
+    // Profile dropdown toggle for mobile
+    const profileElement = document.querySelector('.profile');
+    if (profileElement) {
+        profileElement.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                this.classList.toggle('active');
+            }
+        });
+    }
+}
 
-
-
-
-
+// Export the PerformanceOptimizer for use in other scripts
+window.PerformanceOptimizer = PerformanceOptimizer;
 
 document.addEventListener("DOMContentLoaded", function () {
     const navbutton = document.querySelectorAll(".nav-button");
@@ -27,8 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const menuItems = document.querySelectorAll(".menu-item");
@@ -108,10 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-
 // CAROUSEL SCRIPT
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const track = document.querySelector(".carousel-track");
@@ -123,9 +244,6 @@ document.addEventListener("DOMContentLoaded", function () {
         track.appendChild(clone);
     });
 });
-
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const backToTop = document.getElementById("back-to-top");
@@ -149,8 +267,6 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
 });
-
-
 
 //SHOW PASSWORD//
 document.getElementById("showPassword").addEventListener("change", function() {

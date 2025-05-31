@@ -111,6 +111,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $paymentStmt->close();
                 }
 
+                // Create notification in the notifications table
+                try {
+                    // Get user ID for this order
+                    $user_query = "SELECT user_id FROM orders WHERE id = ?";
+                    $user_stmt = $conn->prepare($user_query);
+                    $user_stmt->bind_param("i", $orderId);
+                    $user_stmt->execute();
+                    $user_result = $user_stmt->get_result();
+                    
+                    if ($user_row = $user_result->fetch_assoc()) {
+                        $user_id = $user_row['user_id'];
+                        
+                        // Generate notification message based on status
+                        $notification_message = '';
+                        $notification_title = 'Order #' . $orderId . ' Update';
+                        
+                        switch ($status) {
+                            case 'Processing':
+                                $notification_message = 'Your order is now being prepared.';
+                                $notification_title = 'Order #' . $orderId . ' is Being Prepared';
+                                break;
+                            case 'Assigned':
+                                $notification_message = 'A rider has been assigned to your order.';
+                                $notification_title = 'Order #' . $orderId . ' - Rider Assigned';
+                                break;
+                            case 'Out for Delivery':
+                                $notification_message = 'Your order is out for delivery. You have 5 minutes to cancel if needed.';
+                                $notification_title = 'Order #' . $orderId . ' Out for Delivery';
+                                break;
+                            case 'Delivered':
+                                $notification_message = 'Your order has been delivered. Enjoy!';
+                                $notification_title = 'Order #' . $orderId . ' Delivered';
+                                break;
+                            case 'Rejected':
+                            case 'Cancelled':
+                                $notification_message = 'Your order has been ' . strtolower($status) . '.';
+                                $notification_title = 'Order #' . $orderId . ' ' . $status;
+                                break;
+                            default:
+                                $notification_message = 'Your order status has been updated to: ' . $status;
+                                $notification_title = 'Order #' . $orderId . ' Status Updated';
+                        }
+                        
+                        // Create notification for the user
+                        $notification_query = "INSERT INTO notifications (user_id, order_id, title, message, created_at) VALUES (?, ?, ?, ?, NOW())";
+                        $notification_stmt = $conn->prepare($notification_query);
+                        $notification_stmt->bind_param("iiss", $user_id, $orderId, $notification_title, $notification_message);
+                        $notification_stmt->execute();
+                        $notification_stmt->close();
+                        
+                        $response['message'] .= ' and notification created';
+                    }
+                    $user_stmt->close();
+                } catch (Exception $notif_e) {
+                    error_log("Notification creation error: " . $notif_e->getMessage(), 3, __DIR__ . '/error.log');
+                    $response['message'] .= ' but notification creation failed';
+                }
+
                 if ($notify) {
                     // Fetch user email for notification
                     $sql_user = "SELECT u.email FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?";

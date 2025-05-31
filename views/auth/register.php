@@ -81,21 +81,47 @@ function sendVerificationEmail($email, $verification_code) {
         <head>
             <title>Email Verification</title>
             <style>
-                body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #4a3b2b; }
+                body { font-family: 'Poppins', Arial, sans-serif; line-height: 1.6; color: #4a3b2b; margin: 0; padding: 0; background-color: #f9f9f9; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #2C6E8A; color: white; padding: 10px; text-align: center; }
-                .content { padding: 20px; background-color: #FFFAEE; }
-                .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #4a3b2b; }
+                .header { background-color: #2C6E8A; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { padding: 30px; background-color: #FFFAEE; border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; }
+                .footer { margin-top: 0; text-align: center; font-size: 0.8em; color: #777; background-color: #f5f5f5; padding: 15px; border-radius: 0 0 10px 10px; }
+                .verification-code-container { 
+                    text-align: center;
+                    margin: 25px 0;
+                    padding: 0;
+                }
                 .verification-code { 
-                    font-size: 24px; 
+                    font-size: 32px; 
                     font-weight: bold; 
-                    letter-spacing: 3px; 
+                    letter-spacing: 5px; 
                     color: #2C6E8A;
                     text-align: center;
-                    margin: 20px 0;
-                    padding: 10px;
+                    margin: 0;
+                    padding: 15px;
                     background-color: #A9D6E5;
+                    border-radius: 10px;
+                    border: 2px dashed #2C6E8A;
+                    display: inline-block;
+                }
+                .important-note {
+                    background-color: #FFECB3;
+                    border-left: 4px solid #FFC107;
+                    padding: 10px 15px;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }
+                h3 { color: #2C6E8A; }
+                p { margin-bottom: 15px; }
+                .btn {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #2C6E8A;
+                    color: white;
+                    text-decoration: none;
                     border-radius: 5px;
+                    font-weight: bold;
+                    margin-top: 10px;
                 }
             </style>
         </head>
@@ -106,12 +132,23 @@ function sendVerificationEmail($email, $verification_code) {
                 </div>
                 <div class='content'>
                     <h3>Email Verification</h3>
-                    <p>Thank you for registering with Cuptain's Brew. Please use the following verification code to complete your registration:</p>
+                    <p>Thank you for registering with Cuptain's Brew. To ensure the security of your account, please use the verification code below to complete your registration:</p>
+                    
+                    <div class='verification-code-container'>
                     <div class='verification-code'>$verification_code</div>
-                    <p>This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+                    </div>
+                    
+                    <div class='important-note'>
+                        <strong>IMPORTANT:</strong> This code will expire in 30 minutes. If you didn't request this verification, please ignore this email.
+                    </div>
+                    
+                    <p>After verifying your email, you'll be able to enjoy our full menu of delicious coffee beverages and food items.</p>
+                    
+                    <p>Thank you for choosing Cuptain's Brew!</p>
                 </div>
                 <div class='footer'>
                     <p>© " . date('Y') . " Cuptain's Brew. All rights reserved.</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
                 </div>
             </div>
         </body>
@@ -640,6 +677,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
 
         .verification-instructions p {
             font-size: 0.9rem;
+            margin-bottom: 0.5rem;
         }
 
         .verification-inputs {
@@ -647,17 +685,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             justify-content: center;
             gap: 0.5rem;
             margin: 1.5rem 0;
+            flex-wrap: wrap;
         }
 
         .verification-inputs input {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             text-align: center;
             font-size: 1.2rem;
             border: 1px solid var(--gray-300);
             border-radius: 0.5rem;
             background: rgba(255, 255, 255, 0.9);
             transition: all 0.3s ease;
+            padding: 0;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .verification-inputs input::-webkit-outer-spin-button,
+        .verification-inputs input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .verification-inputs input:focus {
@@ -684,6 +732,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
+            width: 100%;
+            max-width: 250px;
         }
 
         #verify-button:hover {
@@ -693,22 +743,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
         }
 
         .resend-code {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             font-size: 0.95rem;
             color: var(--gray-600);
+            padding: 1rem;
+            background-color: rgba(44, 110, 138, 0.1);
+            border-radius: 0.5rem;
+            text-align: center;
         }
 
         .resend-code a {
             color: var(--primary);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(44, 110, 138, 0.2);
+            border-radius: 0.25rem;
         }
 
         .resend-code a:hover {
             color: var(--primary-dark);
-            text-decoration: underline;
+            background-color: rgba(44, 110, 138, 0.3);
+            transform: translateY(-1px);
         }
 
         @keyframes fadeIn {
@@ -743,10 +803,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                 font-size: 0.95rem;
             }
 
+            .verification-inputs {
+                gap: 0.35rem;
+            }
+
             .verification-inputs input {
                 width: 40px;
                 height: 40px;
                 font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .register-card {
+                padding: 1.5rem;
+            }
+
+            .verification-inputs input {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .verification-instructions h3 {
+                font-size: 1.1rem;
+            }
+
+            .verification-instructions p {
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -798,17 +882,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                 <div class="verification-instructions">
                     <h3>Verify Your Email</h3>
                     <p>We've sent a 6-digit verification code to <strong><?php echo htmlspecialchars($_SESSION['register_email'] ?? ''); ?></strong></p>
-                    <p>Please enter the code below to complete your registration.</p>
+                    <p>Please check your email inbox (including spam/junk folder) for an email with <strong>IMPORTANT</strong> verification code and enter it below.</p>
                 </div>
                 
                 <form action="register.php" method="POST" onsubmit="return combineVerificationCode()">
                     <div class="verification-inputs">
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
-                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+                        <input type="number" min="0" max="9" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
                     </div>
                     
                     <input type="hidden" id="verification_code" name="verification_code">
@@ -820,7 +904,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                 </form>
                 
                 <div class="resend-code">
-                    Didn't receive the code? <a href="#" onclick="resendVerificationCode()">Resend Code</a>
+                    No verification code in your inbox or spam folder? <a href="#" onclick="resendVerificationCode()">Resend Verification Code</a>
                 </div>
             </div>
         </div>
@@ -850,11 +934,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
             const inputs = document.querySelectorAll('.verification-inputs input');
             
             inputs.forEach((input, index) => {
+                // Focus first input on load
                 if (index === 0) {
                     input.focus();
                 }
                 
-                input.addEventListener('input', function() {
+                // Handle input event
+                input.addEventListener('input', function(e) {
+                    // Ensure only one digit
+                    if (this.value.length > 1) {
+                        this.value = this.value.slice(0, 1);
+                    }
+                    
+                    // Move to next input when filled
                     if (this.value.length === 1) {
                         if (index < inputs.length - 1) {
                             inputs[index + 1].focus();
@@ -865,14 +957,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['verify_code'])) {
                     }
                 });
                 
+                // Handle paste event for pasting the whole code at once
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    if (/^\d{6}$/.test(pastedText)) {
+                        // If we have a 6-digit number, fill all inputs
+                        for (let i = 0; i < 6; i++) {
+                            inputs[i].value = pastedText.charAt(i);
+                        }
+                        // Focus the submit button
+                        document.getElementById('verify-button').focus();
+                    }
+                });
+                
+                // Handle keyboard navigation
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value.length === 0) {
                         if (index > 0) {
                             inputs[index - 1].focus();
                         }
+                    } else if (e.key === 'ArrowLeft') {
+                        if (index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    } else if (e.key === 'ArrowRight') {
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
                     }
                 });
                 
+                // Allow only digits
                 input.addEventListener('keypress', function(e) {
                     if (e.key < '0' || e.key > '9') {
                         e.preventDefault();

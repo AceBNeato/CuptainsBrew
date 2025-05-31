@@ -63,8 +63,15 @@ try {
                     }
                 }
                 
+                // Check if image exists or use placeholder
+                $imagePath = '/public/' . $image;
+                $placeholderImg = '/public/images/placeholder.jpg'; // Default placeholder image
+                
+                // Use onerror to handle missing images
+                $imgTag = "<img src='{$imagePath}' alt='{$name}' class='menu-image' style='width: 150px; height: 150px; margin: 0px 40px 0px 0px; object-fit: cover; border-radius: 8px;' onerror=\"this.onerror=null; this.src='{$placeholderImg}'\">";
+                
                 echo "<div class='menu-card' id='menuCard-{$row['id']}'>
-                        <img src='/public/{$row['item_image']}' alt='$name' class='menu-image' style='width: 150px; height: 150px; margin: 0px 40px 0px 0px; object-fit: cover; border-radius: 8px;'>
+                        {$imgTag}
                         <div class='menu-content'>
                             <h2 class='menu-title'>$name</h2>
                             <p class='menu-price'>₱ {$row['item_price']}</p>

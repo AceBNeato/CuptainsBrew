@@ -1,0 +1,247 @@
+/* Notifications CSS for CuptainsBrew */
+
+/* Notification Bell Container */
+.notification-container {
+    position: relative;
+    margin-left: 1rem;
+}
+
+/* Notification Bell Icon */
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.notification-bell:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.notification-bell i {
+    font-size: 1.2rem;
+    color: #4a3b2b;
+}
+
+/* Notification Counter Badge */
+.notification-counter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+}
+
+.notification-counter.active {
+    transform: scale(1);
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 320px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Notification Header */
+.notification-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #4a3b2b;
+}
+
+/* Notification List */
+.notification-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Notification Item */
+.notification-item {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #f9f9f9;
+}
+
+.notification-item.unread {
+    background-color: #f0f7ff;
+}
+
+.notification-link {
+    display: block;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Notification Content */
+.notification-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-title {
+    margin: 0 0 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.notification-message {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+/* Status Indicators */
+.notification-item.status-pending {
+    border-left: 3px solid #f59e0b;
+}
+
+.notification-item.status-processing {
+    border-left: 3px solid #3b82f6;
+}
+
+.notification-item.status-out_for_delivery {
+    border-left: 3px solid #8b5cf6;
+}
+
+.notification-item.status-delivered {
+    border-left: 3px solid #10b981;
+}
+
+.notification-item.status-cancelled {
+    border-left: 3px solid #ef4444;
+}
+
+/* No Notifications */
+.no-notifications {
+    padding: 16px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Mark All as Read Button */
+.mark-all-read {
+    padding: 8px 16px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+.mark-all-read button {
+    background: none;
+    border: none;
+    color: #2C6E8A;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.mark-all-read button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Notification Animation */
+@keyframes bellRing {
+    0% { transform: rotate(0); }
+    10% { transform: rotate(10deg); }
+    20% { transform: rotate(-10deg); }
+    30% { transform: rotate(6deg); }
+    40% { transform: rotate(-6deg); }
+    50% { transform: rotate(3deg); }
+    60% { transform: rotate(-3deg); }
+    70% { transform: rotate(1deg); }
+    80% { transform: rotate(-1deg); }
+    90% { transform: rotate(0); }
+    100% { transform: rotate(0); }
+}
+
+.notification-bell.ringing {
+    animation: bellRing 1s ease;
+}
+
+/* Performance mode styles */
+.notification-bell.disabled {
+    opacity: 0.5;
+    position: relative;
+}
+
+.notification-bell.disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #ef4444;
+    transform: rotate(45deg);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .notification-dropdown {
+        width: 100%;
+        max-width: 100%;
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 12px 12px 0 0;
+        transform: translateY(100%);
+    }
+    
+    .notification-dropdown.active {
+        transform: translateY(0);
+    }
+} 

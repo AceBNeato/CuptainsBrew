@@ -82,7 +82,7 @@ function simple_checkout($conn, $user_id, $subtotal, $delivery_address, $payment
     $total = $subtotal + $delivery_fee;
         $status = 'Pending';
         
-        $order_sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, payment_method, delivery_fee, lat, lon, contact_number) 
+        $order_sql = "INSERT INTO orders (user_id, total_amount, status, delivery_address, payment_method, delivery_fee, lat, lon, customer_contact) 
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $order_stmt = $conn->prepare($order_sql);
         
@@ -107,7 +107,7 @@ function simple_checkout($conn, $user_id, $subtotal, $delivery_address, $payment
         } else {
             // Get only selected cart items
             $ids_string = implode(',', array_map('intval', $selected_cart_ids));
-            
+        
             $sql = "SELECT c.id, c.product_id, c.quantity, c.variation, p.item_name, p.item_price, p.item_image,
                     pv.price as variation_price
                     FROM cart c 
@@ -605,7 +605,7 @@ $conn->close();
                     updateCheckoutInfo();
                 });
             });
-            
+                
             // Update checkout form before submission
             if (checkoutForm) {
                 checkoutForm.addEventListener('submit', function(e) {
@@ -614,7 +614,7 @@ $conn->close();
                     // If no items are selected, show an error
                     if (selectedIds.length === 0) {
                         e.preventDefault();
-                        Swal.fire({
+                    Swal.fire({
                             icon: 'warning',
                             title: 'No Items Selected',
                             text: 'Please select at least one item to checkout.',
@@ -747,8 +747,8 @@ $conn->close();
                         const price = parseFloat(checkbox.dataset.price);
                         const quantity = parseInt(checkbox.dataset.quantity);
                         selectedSubtotal += price * quantity;
-                    }
-                });
+                }
+            });
                 
                 // Update the displays
                 subtotalDisplay.textContent = '₱' + selectedSubtotal.toFixed(2);

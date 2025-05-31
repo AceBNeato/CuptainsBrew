@@ -264,15 +264,64 @@ function previewAddImage(input) {
 function previewEditImage(input) {
     const preview = document.getElementById('edit-image-preview');
     
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-        }
-        
-        reader.readAsDataURL(input.files[0]);
+    if (!preview) {
+        console.error('Preview element not found');
+        return;
     }
+    
+    // Clear previous preview if no file selected
+    if (!input.files || input.files.length === 0) {
+        preview.src = preview.getAttribute('data-original') || '';
+        return;
+    }
+    
+    const file = input.files[0];
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid File Type',
+            text: 'Please select a valid image file (JPEG, PNG, GIF, or WebP)',
+            confirmButtonColor: '#2C6E8A'
+        });
+        input.value = ''; // Clear the file input
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+        Swal.fire({
+            icon: 'error',
+            title: 'File Too Large',
+            text: 'Image size must be less than 5MB',
+            confirmButtonColor: '#2C6E8A'
+        });
+        input.value = ''; // Clear the file input
+        return;
+    }
+    
+    // Create FileReader to load the image
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+    };
+    
+    reader.onerror = function() {
+        console.error('FileReader error:', reader.error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Preview Error',
+            text: 'Failed to preview the image',
+            confirmButtonColor: '#2C6E8A'
+        });
+    };
+    
+    // Read the image file
+    reader.readAsDataURL(file);
 }
 
 // Category and search functions
@@ -301,93 +350,166 @@ function handleSearch(event) {
 
 // Item management functions
 async function openManageModal(name, price, description, image, id, category) {
-    // Store the item ID globally for delete operation
-    window.currentItemIdToDelete = id;
-
-    // Update view mode
-    const viewMode = document.getElementById('view-mode');
-    const editFormContainer = document.getElementById('edit-form-container');
-    const addButton = document.getElementById('add-button');
-    const noItemSelected = document.getElementById('no-item-selected');
-
-    if (!viewMode || !editFormContainer || !addButton || !noItemSelected) {
-        console.error('Required elements not found');
-        return;
-    }
-
-    // Show view mode and hide other elements
-    viewMode.style.display = 'block';
-    editFormContainer.style.display = 'block';
-    addButton.style.display = 'none';
-    noItemSelected.style.display = 'none';
-
-    // Update view data
-  document.getElementById('view-image').src = '/public/' + image;
-  document.getElementById('view-name').textContent = name;
-  document.getElementById('view-price').textContent = '₱' + price;
-  document.getElementById('view-description').textContent = description;
-
-    // Update form data
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-price').value = price;
-  document.getElementById('edit-description').value = description;
-  document.getElementById('edit-image-preview').src = '/public/' + image;
-    document.getElementById('edit-category').value = category;
-
-    // Update active card
-document.querySelectorAll('.menu-card').forEach(card => {
-    card.classList.remove('active');
-});
-
-    const activeCard = document.getElementById(`menuCard-${id}`);
-    if (activeCard) {
-        activeCard.classList.add('active');
-}
-
-    // Fetch variations data
     try {
-        const response = await fetch(`/controllers/get-variations.php?product_id=${id}`);
-        const variations = await response.json();
+        // Store the item ID globally for delete operation
+        window.currentItemIdToDelete = id;
+
+        // Update view mode
+        const viewMode = document.getElementById('view-mode');
+        const editFormContainer = document.getElementById('edit-form-container');
+        const addButton = document.getElementById('add-button');
+        const noItemSelected = document.getElementById('no-item-selected');
+
+        if (!viewMode || !editFormContainer || !addButton || !noItemSelected) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        // Show view mode and hide other elements
+        viewMode.style.display = 'block';
+        editFormContainer.style.display = 'block';
+        addButton.style.display = 'none';
+        noItemSelected.style.display = 'none';
+
+        // Format price for display
+        const formattedPrice = parseFloat(price).toFixed(2);
+
+        // Update view data
+        const viewImage = document.getElementById('view-image');
+        viewImage.src = '/public/' + image;
+        viewImage.onerror = function() {
+            this.src = '/public/images/placeholder.jpg'; // Use the same placeholder as in menu-items.php
+            console.warn('Failed to load image, using placeholder');
+        };
         
-        // Update variations UI
-        const hasVariations = variations.length > 0;
-        document.getElementById('has-variations').checked = hasVariations;
-        document.getElementById('variation-prices').style.display = hasVariations ? 'block' : 'none';
+        document.getElementById('view-name').textContent = name;
+        document.getElementById('view-price').textContent = '₱' + formattedPrice;
+        document.getElementById('view-description').textContent = description;
+
+        // Update form data
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-price').value = price;
+        document.getElementById('edit-description').value = description;
         
-        // Update view mode with variations
-        const viewVariations = document.getElementById('view-variations');
-        if (viewVariations) {
+        const editImagePreview = document.getElementById('edit-image-preview');
+        editImagePreview.src = '/public/' + image;
+        editImagePreview.setAttribute('data-original', '/public/' + image);
+        editImagePreview.onerror = function() {
+            this.src = '/public/images/placeholder.jpg'; // Use the same placeholder as in menu-items.php
+            console.warn('Failed to load image for edit form, using placeholder');
+        };
+        
+        document.getElementById('edit-category').value = category;
+
+        // Update active card
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.classList.remove('active');
+        });
+
+        const activeCard = document.getElementById(`menuCard-${id}`);
+        if (activeCard) {
+            activeCard.classList.add('active');
+            // Scroll to the active card if needed
+            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Fetch variations data
+        try {
+            const response = await fetch(`/controllers/get-variations.php?product_id=${id}`);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch variations: ${response.status} ${response.statusText}`);
+            }
+            
+            const variations = await response.json();
+            
+            // Update variations UI
+            const hasVariations = variations && variations.length > 0;
+            const variationsCheckbox = document.getElementById('has-variations');
+            const variationPrices = document.getElementById('variation-prices');
+            
+            if (variationsCheckbox && variationPrices) {
+                variationsCheckbox.checked = hasVariations;
+                variationPrices.style.display = hasVariations ? 'block' : 'none';
+            }
+            
+            // Update view mode with variations
+            const viewVariations = document.getElementById('view-variations');
+            if (viewVariations) {
+                if (hasVariations) {
+                    const hotVariation = variations.find(v => v.variation_type === 'Hot');
+                    const icedVariation = variations.find(v => v.variation_type === 'Iced');
+                    
+                    const hotBadge = document.getElementById('hot-badge');
+                    const icedBadge = document.getElementById('iced-badge');
+                    const hotPriceDisplay = document.getElementById('hot-price-display');
+                    const icedPriceDisplay = document.getElementById('iced-price-display');
+                    
+                    if (hotBadge && hotPriceDisplay && hotVariation) {
+                        hotPriceDisplay.textContent = parseFloat(hotVariation.price).toFixed(2);
+                        hotBadge.style.display = 'inline-block';
+                    } else if (hotBadge) {
+                        hotBadge.style.display = 'none';
+                    }
+                    
+                    if (icedBadge && icedPriceDisplay && icedVariation) {
+                        icedPriceDisplay.textContent = parseFloat(icedVariation.price).toFixed(2);
+                        icedBadge.style.display = 'inline-block';
+                    } else if (icedBadge) {
+                        icedBadge.style.display = 'none';
+                    }
+                    
+                    viewVariations.style.display = 'block';
+                } else {
+                    viewVariations.style.display = 'none';
+                }
+            }
+            
+            // Update form with variation prices
+            const hotPriceInput = document.getElementById('hot-price');
+            const icedPriceInput = document.getElementById('iced-price');
+            
             if (hasVariations) {
                 const hotVariation = variations.find(v => v.variation_type === 'Hot');
                 const icedVariation = variations.find(v => v.variation_type === 'Iced');
                 
-                if (hotVariation) {
-                    document.getElementById('hot-price-display').textContent = parseFloat(hotVariation.price).toFixed(2);
+                if (hotPriceInput) {
+                    hotPriceInput.value = hotVariation ? hotVariation.price : '';
+                    hotPriceInput.required = hasVariations;
                 }
                 
-                if (icedVariation) {
-                    document.getElementById('iced-price-display').textContent = parseFloat(icedVariation.price).toFixed(2);
+                if (icedPriceInput) {
+                    icedPriceInput.value = icedVariation ? icedVariation.price : '';
+                    icedPriceInput.required = hasVariations;
                 }
-                
-                viewVariations.style.display = 'block';
             } else {
+                if (hotPriceInput) {
+                    hotPriceInput.value = '';
+                    hotPriceInput.required = false;
+                }
+                
+                if (icedPriceInput) {
+                    icedPriceInput.value = '';
+                    icedPriceInput.required = false;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching variations:', error);
+            // Show a small notification about the error
+            const viewVariations = document.getElementById('view-variations');
+            if (viewVariations) {
                 viewVariations.style.display = 'none';
             }
         }
-        
-        if (hasVariations) {
-            const hotVariation = variations.find(v => v.variation_type === 'Hot');
-            const icedVariation = variations.find(v => v.variation_type === 'Iced');
-            
-            document.getElementById('hot-price').value = hotVariation ? hotVariation.price : '';
-            document.getElementById('iced-price').value = icedVariation ? icedVariation.price : '';
-        } else {
-            document.getElementById('hot-price').value = '';
-            document.getElementById('iced-price').value = '';
-        }
     } catch (error) {
-        console.error('Error fetching variations:', error);
+        console.error('Error in openManageModal:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load item details',
+            confirmButtonColor: '#2C6E8A'
+        });
     }
 }
 
@@ -428,33 +550,60 @@ async function handleEditSubmit(e) {
   e.preventDefault();
   
   try {
-    const formData = new FormData(e.target);
+    // Get form and formData
+    const form = e.target;
+    const formData = new FormData(form);
     
-    // Add variations data
+    // Get form fields for validation
+    const itemId = formData.get('id');
+    const itemName = formData.get('item_name').trim();
+    const itemPrice = parseFloat(formData.get('item_price'));
+    const itemDescription = formData.get('item_description').trim();
     const hasVariations = formData.get('has_variations') === 'on';
+    
+    // Validate required fields
+    const errors = [];
+    
+    if (!itemId) errors.push('Item ID is missing');
+    if (!itemName) errors.push('Please enter an item name');
+    if (!itemPrice || isNaN(itemPrice) || itemPrice <= 0) errors.push('Please enter a valid price');
+    if (!itemDescription) errors.push('Please enter a description');
+    
+    // Validate variations if enabled
     if (hasVariations) {
-      formData.append('variations', JSON.stringify([
-        { type: 'Hot', price: formData.get('hot_price') },
-        { type: 'Iced', price: formData.get('iced_price') }
-      ]));
+      const hotPrice = parseFloat(formData.get('hot_price'));
+      const icedPrice = parseFloat(formData.get('iced_price'));
+      
+      if (!hotPrice || isNaN(hotPrice) || hotPrice <= 0) {
+        errors.push('Please enter a valid price for Hot variation');
+      }
+      
+      if (!icedPrice || isNaN(icedPrice) || icedPrice <= 0) {
+        errors.push('Please enter a valid price for Iced variation');
+      }
     }
     
-    // Validate form data
-    const itemName = formData.get('item_name').trim();
-    const itemPrice = formData.get('item_price');
-    const itemDescription = formData.get('item_description').trim();
-    
-    if (!itemName || !itemPrice || !itemDescription) {
-      throw new Error('Please fill in all required fields');
+    // Show errors if any
+    if (errors.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        html: errors.map(error => `• ${error}`).join('<br>'),
+        confirmButtonColor: '#2C6E8A'
+      });
+      return;
     }
 
+    // Close modal before showing loading state
+    cancelEditMode();
+    
     // Show loading state
     Swal.fire({
       title: 'Updating item...',
       text: 'Please wait while we process your request',
       allowOutsideClick: false,
       showConfirmButton: false,
-      willOpen: () => {
+      didOpen: () => {
         Swal.showLoading();
       }
     });
@@ -465,26 +614,40 @@ async function handleEditSubmit(e) {
       body: formData
     });
 
+    // Handle response
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status} ${response.statusText}`);
+    }
+
     const result = await response.json();
 
     if (result.success) {
-      Swal.fire({
+      // Show success message
+      await Swal.fire({
         icon: 'success',
-        title: 'Success!',
-        text: result.message,
-        confirmButtonColor: '#2C6E8A'
-      }).then(() => {
-        window.location.reload();
+        title: 'Item Updated!',
+        text: result.message || 'The item has been updated successfully',
+        confirmButtonColor: '#2C6E8A',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false
       });
+      
+      // Reload the page to show updated item
+      window.location.reload();
     } else {
       throw new Error(result.message || 'Failed to update item');
     }
   } catch (error) {
+    console.error('Update error:', error);
+    
+    // Show error message
     Swal.fire({
       icon: 'error',
-      title: 'Error',
-      text: error.message,
-      confirmButtonColor: '#2C6E8A'
+      title: 'Update Failed',
+      text: error.message || 'An error occurred while updating the item',
+      confirmButtonColor: '#2C6E8A',
+      confirmButtonText: 'Try Again'
     });
   }
 }

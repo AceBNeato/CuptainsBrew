@@ -88,6 +88,49 @@ try {
         throw new Exception('Failed to update order status: ' . $conn->error);
     }
     
+    // Create notification for the user when order is out for delivery
+    if ($status === 'Out for Delivery') {
+        // Get the user ID from the order
+        $user_query = "SELECT user_id FROM orders WHERE id = $order_id";
+        $user_result = $conn->query($user_query);
+        
+        if ($user_result && $user_result->num_rows > 0) {
+            $user_data = $user_result->fetch_assoc();
+            $user_id = $user_data['user_id'];
+            
+            // Check if notifications table exists
+            $notif_check = $conn->query("SHOW TABLES LIKE 'notifications'");
+            if ($notif_check->num_rows > 0) {
+                // Create notification for user
+                $title = 'Order Out for Delivery';
+                $message = "Your order #$order_id is now out for delivery. You can cancel this order within 5 minutes if needed.";
+                
+                // Check the structure of the notifications table
+                $columns_check = $conn->query("SHOW COLUMNS FROM notifications");
+                $columns = [];
+                while ($column = $columns_check->fetch_assoc()) {
+                    $columns[] = $column['Field'];
+                }
+                
+                // Insert notification based on available columns
+                if (in_array('status', $columns)) {
+                    $notif_sql = "INSERT INTO notifications (user_id, title, message, order_id, status) 
+                                 VALUES (?, ?, ?, ?, ?)";
+                    $notif_stmt = $conn->prepare($notif_sql);
+                    $notif_stmt->bind_param('issis', $user_id, $title, $message, $order_id, $status);
+                } else {
+                    $notif_sql = "INSERT INTO notifications (user_id, title, message, order_id) 
+                                 VALUES (?, ?, ?, ?)";
+                    $notif_stmt = $conn->prepare($notif_sql);
+                    $notif_stmt->bind_param('issi', $user_id, $title, $message, $order_id);
+                }
+                
+                $notif_stmt->execute();
+                $notif_stmt->close();
+            }
+        }
+    }
+    
     // Check if order_status_logs table exists
     $table_check = $conn->query("SHOW TABLES LIKE 'order_status_logs'");
     

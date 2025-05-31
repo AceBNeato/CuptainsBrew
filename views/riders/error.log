@@ -77,3 +77,21 @@ Rider error log file created on <?= date('Y-m-d H:i:s') ?> [2025-05-28 16:18:30]
 [2025-05-30 07:04:39] Failed password change attempt - incorrect current password for rider ID: 3
 [2025-05-30 07:04:56] Failed password change attempt - incorrect current password for rider ID: 3
 [2025-05-30 07:04:56] Failed password change attempt - incorrect current password for rider ID: 3
+[2025-05-30 18:52:15] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-30 18:52:20] Order ID: 1 status updated to Delivered by rider ID: 1
+[2025-05-30 20:41:42] Rider ID: 1 accessed items for Order ID: 1
+[2025-05-30 21:33:27] Rider ID: 1 accessed items for Order ID: 2
+[2025-05-30 21:33:43] Order ID: 2 status updated to Out for Delivery by rider ID: 1
+[2025-05-31 11:12:36] Order ID: 9 status updated to Out for Delivery by rider ID: 1
+[2025-05-31 11:12:38] Rider ID: 1 accessed items for Order ID: 9
+[2025-05-31 12:20:32] Order ID: 15 status updated to Delivered by rider ID: 1
+[2025-05-31 12:20:34] Order ID: 7 status updated to Delivered by rider ID: 1
+[2025-05-31 12:20:35] Order ID: 6 status updated to Delivered by rider ID: 1
+[2025-05-31 12:20:37] Order ID: 4 status updated to Delivered by rider ID: 1
+[2025-05-31 12:20:39] Order ID: 3 status updated to Delivered by rider ID: 1
+[2025-05-31 12:20:42] Order ID: 1 status updated to Delivered by rider ID: 1
+[2025-05-31 12:34:41] Order ID: 18 status updated to Delivered by rider ID: 1
+[2025-05-31 15:08:26] Order ID: 23 status updated to Delivered by rider ID: 1
+[2025-05-31 15:08:28] Order ID: 22 status updated to Delivered by rider ID: 1
+[2025-05-31 15:08:31] Order ID: 21 status updated to Delivered by rider ID: 1
+[2025-05-31 15:08:33] Order ID: 20 status updated to Delivered by rider ID: 1
