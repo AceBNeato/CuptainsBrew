@@ -231,18 +231,20 @@ try {
 
 
         // Create notifications table
-        "CREATE TABLE IF NOT EXISTS `notifications` (
-        `id` int(11) NOT NULL AUTO_INCREMENT,
-        `user_id` int(11) NOT NULL,
-        `order_id` int(11) DEFAULT NULL,
-        `message` text NOT NULL,
-        `is_read` tinyint(1) NOT NULL DEFAULT 0,
-        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-        PRIMARY KEY (`id`),
-        KEY `user_id` (`user_id`),
-        KEY `order_id` (`order_id`),
-        CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-        CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+        "CREATE TABLE IF NOT EXISTS notifications (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `user_id` int(11) NOT NULL,
+            `title` varchar(255) DEFAULT NULL,
+            `order_id` int(11) DEFAULT NULL,
+            `message` text NOT NULL,
+            `is_read` tinyint(1) NOT NULL DEFAULT 0,
+            `status` varchar(50) DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `user_id` (`user_id`),
+            KEY `order_id` (`order_id`),
+            CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+            CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 
     ];
